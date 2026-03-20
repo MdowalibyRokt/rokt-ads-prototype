@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rokt Ads — Media Buying Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="6" fill="var(--wine)"/>
+            <path d="M7 9h6l4 5-4 5H7l4-5L7 9z" fill="white"/>
+            <path d="M15 9h6l-4 5 4 5h-6l-4-5 4-5z" fill="white" opacity="0.6"/>
+          </svg>
+          <span class="sidebar-logo-text">Rokt Ads</span>
+        </div>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M10.3 12.3a1 1 0 01-1.4 0l-4-4a1 1 0 010-1.4l4-4a1 1 0 011.4 1.4L7 8l3.3 3.3a1 1 0 010 1.4z"/></svg>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="7" height="7" rx="1.5"/><rect x="10" y="1" width="7" height="4" rx="1.5"/><rect x="10" y="7" width="7" height="10" rx="1.5"/><rect x="1" y="10" width="7" height="7" rx="1.5"/></svg>
+          <span class="nav-label">Command Center</span>
+        </a>
+        <a href="#campaigns" class="nav-item" data-view="campaigns">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h14M2 9h14M2 14h10"/><circle cx="15" cy="14" r="2"/></svg>
+          <span class="nav-label">Campaigns</span>
+        </a>
+        <a href="#audiences" class="nav-item" data-view="audiences">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="15" cy="5" r="2" opacity=".5"/></svg>
+          <span class="nav-label">Audiences</span>
+        </a>
+        <a href="#creatives" class="nav-item" data-view="creatives">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="14" height="14" rx="2"/><circle cx="6.5" cy="6.5" r="1.5"/><path d="M2 12l4-4 3 3 2-2 5 5H2z"/></svg>
+          <span class="nav-label">Creative Studio</span>
+        </a>
+        <a href="#intelligence" class="nav-item" data-view="intelligence">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 14V8M6 14V4M10 14V10M14 14V6"/><path d="M1 16h16"/></svg>
+          <span class="nav-label">Intelligence</span>
+        </a>
+        <a href="#catalog" class="nav-item" data-view="catalog">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h14v3H2zM2 8h6v7H2zM10 8h6v7h-6z"/></svg>
+          <span class="nav-label">Catalog</span>
+        </a>
+        <a href="#measurement" class="nav-item" data-view="measurement">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 5v4l3 2"/></svg>
+          <span class="nav-label">Measurement</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="#account" class="nav-item" data-view="account">
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 6v0M9 9v4"/></svg>
+          <span class="nav-label">Account</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"/></svg>
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none"><path d="M13.4 10.3A6 6 0 015.7 2.6 7 7 0 1013.4 10.3z"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========== TOPBAR ========== -->
+    <header class="topbar" id="topbar">
+      <div class="topbar-left">
+        <div class="account-switcher">
+          <button class="account-switcher-btn">
+            <span class="account-avatar">RA</span>
+            <span class="account-name">Rokt Ads Demo</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3 5l3 3 3-3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="topbar-center">
+        <button class="search-trigger" id="searchTrigger" title="Search (Cmd+K)">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M10 10l3.5 3.5"/></svg>
+          <span class="search-trigger-text" id="searchPlaceholder">Search campaigns...</span>
+          <kbd class="search-kbd">&#8984;K</kbd>
+        </button>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrap" style="position:relative">
+          <button class="topbar-icon-btn" id="notificationBtn" title="Notifications">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6a4 4 0 018 0c0 4 2 5 2 5H2s2-1 2-5M6.5 13.5a1.5 1.5 0 003 0"/></svg>
+            <span class="notification-badge">3</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown" style="display:none">
+            <div class="notif-dropdown-header">
+              <strong>Notifications</strong>
+              <button class="btn btn-sm btn-ghost" onclick="document.getElementById('notifDropdown').style.display='none'">Mark all read</button>
+            </div>
+            <div class="notif-item notif-unread">
+              <span class="notif-dot critical"></span>
+              <div class="notif-body">
+                <div class="notif-text"><strong>True Classic DPA</strong> — EMQ dropped below 5.0</div>
+                <div class="notif-time">12 min ago</div>
+              </div>
+            </div>
+            <div class="notif-item notif-unread">
+              <span class="notif-dot warning"></span>
+              <div class="notif-body">
+                <div class="notif-text"><strong>Hulu CPA</strong> is 22% above target</div>
+                <div class="notif-time">1 hour ago</div>
+              </div>
+            </div>
+            <div class="notif-item notif-unread">
+              <span class="notif-dot info"></span>
+              <div class="notif-body">
+                <div class="notif-text">Experiment #1 reached <strong>97% significance</strong> — ready to apply</div>
+                <div class="notif-time">3 hours ago</div>
+              </div>
+            </div>
+            <div class="notif-item">
+              <span class="notif-dot info"></span>
+              <div class="notif-body">
+                <div class="notif-text">Weekly report generated for all campaigns</div>
+                <div class="notif-time">Yesterday</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="topbar-icon-btn" id="shortcutsBtn" title="Keyboard shortcuts (?)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="9" rx="2"/><path d="M4 7h1M7 7h2M11 7h1M4 10h8"/></svg>
+        </button>
+        <div class="user-avatar" title="Max Dowaliby">
+          <span>MD</span>
+          <span class="status-dot status-online" style="width:8px;height:8px;position:absolute;bottom:-1px;right:-1px;border:2px solid var(--surface-dark)"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== CONTEXT ALERT BAR ========== -->
+    <div class="context-alert" id="contextAlert" style="display:none">
+      <div class="context-alert-inner">
+        <span class="context-alert-icon">⚠</span>
+        <span class="context-alert-text" id="contextAlertText"></span>
+        <button class="btn btn-xs" id="contextAlertAction" style="background:rgba(245,158,11,0.15);color:var(--warning);border:1px solid rgba(245,158,11,0.3);font-weight:600;padding:2px 10px;border-radius:var(--radius-pill)">Fix Now</button>
+        <button class="context-alert-dismiss" id="contextAlertDismiss" style="font-size:18px;padding:0 4px">&times;</button>
+      </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="content" id="content"></main>
+
+    <!-- ========== STATUS BAR ========== -->
+    <footer class="statusbar" id="statusbar">
+      <div class="statusbar-left">
+        <span class="statusbar-item"><span class="statusbar-dot"></span><span id="activeCampaignCount">5</span> Active Campaigns</span>
+        <span class="statusbar-divider">|</span>
+        <span class="statusbar-item">Today: $<span class="mono" id="todaySpend">42,187</span> <span style="color:var(--positive)">↑3.2%</span></span>
+      </div>
+      <div class="statusbar-right">
+        <span class="statusbar-item">System: <span class="statusbar-dot"></span> Healthy</span>
+        <span class="statusbar-divider">|</span>
+        <span class="statusbar-item">Smart Bidding: <span class="statusbar-dot" style="background:var(--positive)"></span> Optimizing</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========== OVERLAYS ========== -->
+
+  <!-- Command Palette -->
+  <div class="command-palette-overlay" id="commandPalette">
+    <div class="command-palette">
+      <div class="command-palette-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="5.5"/><path d="M12 12l4.5 4.5"/></svg>
+        <input type="text" class="command-palette-input" id="commandInput" placeholder="Type a command or search..." autocomplete="off">
+        <kbd class="search-kbd">ESC</kbd>
+      </div>
+      <div class="command-palette-results" id="commandResults"></div>
+      <div class="command-palette-footer">
+        <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+        <span><kbd>↵</kbd> Select</span>
+        <span><kbd>ESC</kbd> Close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Overlay -->
+  <div class="shortcuts-overlay" id="shortcutsOverlay">
+    <div class="shortcuts-panel">
+      <div class="shortcuts-header">
+        <h2>Keyboard Shortcuts</h2>
+        <button class="shortcuts-close" id="shortcutsClose"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l10 10M14 4L4 14"/></svg></button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcuts-section">
+          <h3>Navigation</h3>
+          <div class="shortcut-row"><span>Command palette</span><div class="shortcut-keys"><kbd>⌘K</kbd></div></div>
+          <div class="shortcut-row"><span>Go to Dashboard</span><div class="shortcut-keys"><kbd>G</kbd><kbd>D</kbd></div></div>
+          <div class="shortcut-row"><span>Go to Campaigns</span><div class="shortcut-keys"><kbd>G</kbd><kbd>C</kbd></div></div>
+          <div class="shortcut-row"><span>Go to Audiences</span><div class="shortcut-keys"><kbd>G</kbd><kbd>A</kbd></div></div>
+          <div class="shortcut-row"><span>Go to Intelligence</span><div class="shortcut-keys"><kbd>G</kbd><kbd>R</kbd></div></div>
+          <div class="shortcut-row"><span>Focus search</span><div class="shortcut-keys"><kbd>/</kbd></div></div>
+        </div>
+        <div class="shortcuts-section">
+          <h3>Actions</h3>
+          <div class="shortcut-row"><span>New Campaign</span><div class="shortcut-keys"><kbd>N</kbd><kbd>C</kbd></div></div>
+          <div class="shortcut-row"><span>New Audience</span><div class="shortcut-keys"><kbd>N</kbd><kbd>A</kbd></div></div>
+          <div class="shortcut-row"><span>Show shortcuts</span><div class="shortcut-keys"><kbd>?</kbd></div></div>
+          <div class="shortcut-row"><span>Toggle dark mode</span><div class="shortcut-keys"><kbd>⌘D</kbd></div></div>
+        </div>
+        <div class="shortcuts-section">
+          <h3>Lists & Tables</h3>
+          <div class="shortcut-row"><span>Navigate down</span><div class="shortcut-keys"><kbd>J</kbd></div></div>
+          <div class="shortcut-row"><span>Navigate up</span><div class="shortcut-keys"><kbd>K</kbd></div></div>
+          <div class="shortcut-row"><span>Open selected</span><div class="shortcut-keys"><kbd>↵</kbd></div></div>
+          <div class="shortcut-row"><span>Close panel</span><div class="shortcut-keys"><kbd>ESC</kbd></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- AI Copilot FAB -->
+  <button class="ai-fab" id="aiFab" title="AI Copilot">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/>
+    </svg>
+  </button>
+
+  <!-- AI Drawer -->
+  <div class="ai-drawer" id="aiDrawer">
+    <div class="ai-drawer-header">
+      <h3><svg width="18" height="18" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> AI Copilot</h3>
+      <button class="ai-drawer-close" id="aiDrawerClose"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-message assistant">
+        <p>Hi! I'm your Rokt Ads copilot. I can help you:</p>
+        <ul><li>Create and optimize campaigns</li><li>Analyze performance trends</li><li>Build audiences and creatives</li><li>Diagnose issues and suggest fixes</li></ul>
+      </div>
+      <div class="ai-message assistant">
+        <p class="text-secondary">💡 I noticed <strong>3 campaigns</strong> are below target CPA. Want me to analyze them?</p>
+        <div class="ai-actions">
+          <button class="btn btn-xs btn-primary" onclick="RoktAds.toast('Analyzing campaigns...','info')">Analyze</button>
+          <button class="btn btn-xs btn-ghost">Dismiss</button>
+        </div>
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <input type="text" class="ai-input" placeholder="Ask anything..." id="aiInput" autocomplete="off">
+      <button class="ai-send-btn" id="aiSendBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 1.5l11 6.5-11 6.5V9l7-1-7-1V1.5z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL SYSTEM ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <!-- ========== VIEW TEMPLATES ========== -->
+
+  <!-- DASHBOARD -->
+  <template id="tmpl-dashboard">
+    <div class="view view-dashboard animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">TOTAL SPEND</div>
+          <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="123350">0</span></div>
+          <div class="kpi-meta">
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,14 6,10 12,12 18,8 24,6 30,9 36,4 42,3 48,2" fill="none" stroke="var(--positive)" stroke-width="1.5"/></svg>
+            <span class="trend-up">↑ 8.4%</span>
+            <span class="kpi-period">vs last 7d</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">CONVERSIONS</div>
+          <div class="kpi-value"><span class="kpi-number" data-target="16235">0</span></div>
+          <div class="kpi-meta">
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,12 6,10 12,8 18,11 24,7 30,5 36,6 42,3 48,4" fill="none" stroke="var(--positive)" stroke-width="1.5"/></svg>
+            <span class="trend-up">↑ 12.1%</span>
+            <span class="kpi-period">vs last 7d</span>
+          </div>
+        </div>
+        <div class="kpi-card kpi-card--hero">
+          <div class="kpi-label">AVG CoPI <span class="kpi-badge">North Star</span></div>
+          <div class="kpi-value"><span class="kpi-number" data-target="3.25">0</span><span class="kpi-suffix">%</span></div>
+          <div class="kpi-meta">
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,10 6,9 12,11 18,8 24,7 30,6 36,5 42,5 48,4" fill="none" stroke="var(--wine)" stroke-width="1.5"/></svg>
+            <span class="trend-up">↑ 0.18pp</span>
+            <span class="kpi-period">vs last 7d</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">AVG CPA</div>
+          <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="8.38">0</span></div>
+          <div class="kpi-meta">
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,4 6,5 12,3 18,6 24,7 30,5 36,8 42,7 48,6" fill="none" stroke="var(--warning)" stroke-width="1.5"/></svg>
+            <span class="kpi-target mono">Target: $7.50</span>
+            <span style="color:var(--warning)">↑ Above target</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">AVG ROAS</div>
+          <div class="kpi-value"><span class="kpi-number" data-target="4.2">0</span><span class="kpi-suffix">x</span></div>
+          <div class="kpi-meta">
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,10 6,8 12,9 18,6 24,5 30,7 36,4 42,3 48,3" fill="none" stroke="var(--positive)" stroke-width="1.5"/></svg>
+            <span class="trend-up">↑ 0.3x</span>
+            <span class="kpi-period">vs last 7d</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-main">
+          <!-- Spend Pacing -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Spend Pacing</h3>
+              <div class="filter-pills">
+                <button class="filter-pill active">7D</button>
+                <button class="filter-pill">30D</button>
+                <button class="filter-pill">MTD</button>
+                <button class="filter-pill">QTD</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="pacing-chart">
+                <svg width="100%" height="200" viewBox="0 0 700 200" preserveAspectRatio="none" id="pacingChartSvg">
+                  <line x1="0" y1="20" x2="700" y2="20" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
+                  <text x="705" y="24" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">$25K</text>
+                  <polyline points="0,180 100,155 200,130 300,108 400,85 500,62 600,40 700,18" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
+                  <defs><linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--wine)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--wine)" stop-opacity="0.02"/></linearGradient></defs>
+                  <polygon points="0,180 100,160 200,138 300,118 400,90 400,200 0,200" fill="url(#spendGrad)"/>
+                  <polyline points="0,180 100,160 200,138 300,118 400,90" fill="none" stroke="var(--wine)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+                  <circle cx="100" cy="160" r="3" fill="var(--wine)"/><circle cx="200" cy="138" r="3" fill="var(--wine)"/><circle cx="300" cy="118" r="3" fill="var(--wine)"/><circle cx="400" cy="90" r="4" fill="var(--wine)" stroke="var(--surface-white)" stroke-width="2"/>
+                  <text x="0" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Mon</text>
+                  <text x="100" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Tue</text>
+                  <text x="200" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Wed</text>
+                  <text x="300" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Thu</text>
+                  <text x="400" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Today</text>
+                  <text x="500" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Sat</text>
+                  <text x="600" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Sun</text>
+                </svg>
+                <div class="pacing-legend">
+                  <span class="legend-item"><span class="legend-dot" style="background:var(--wine)"></span>Actual Spend</span>
+                  <span class="legend-item"><span class="legend-dot" style="background:var(--text-tertiary);opacity:0.5"></span>Projected</span>
+                  <span class="legend-item"><span class="legend-dot" style="background:var(--border)"></span>Budget Ceiling</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Campaign Health -->
+          <div class="card" style="margin-top:var(--space-4)">
+            <div class="card-header">
+              <h3 class="card-title">Campaign Health</h3>
+              <button class="btn btn-sm btn-ghost" onclick="location.hash='campaigns'">View All →</button>
+            </div>
+            <div class="card-body">
+              <div class="campaign-health-grid" id="campaignHealthGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-aside">
+          <!-- AI Insights -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5" style="margin-right:6px;vertical-align:-2px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>AI Insights</h3>
+            </div>
+            <div class="card-body" style="padding:0" id="insightList"></div>
+          </div>
+          <!-- Recent Activity -->
+          <div class="card" style="margin-top:var(--space-4)">
+            <div class="card-header"><h3 class="card-title">Recent Activity</h3></div>
+            <div class="card-body" style="padding:0" id="activityTimeline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- CAMPAIGNS -->
+  <template id="tmpl-campaigns">
+    <div class="view view-campaigns animate-in">
+      <div class="campaigns-layout">
+        <div class="campaigns-list-panel">
+          <div class="campaigns-toolbar">
+            <div class="campaigns-toolbar-left">
+              <h2 class="view-title">Campaigns</h2>
+              <span class="count-badge" id="campaignCount">6</span>
+            </div>
+            <div class="campaigns-toolbar-right">
+              <div class="search-input-wrap">
+                <svg class="search-input-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M10 10l3 3"/></svg>
+                <input type="text" class="search-input" id="campaignSearch" placeholder="Search campaigns...">
+              </div>
+              <button class="btn btn-primary btn-pill" onclick="location.hash='builder'">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v10M2 7h10"/></svg>
+                New Campaign
+              </button>
+            </div>
+          </div>
+          <div class="campaigns-filters" id="campaignFilters">
+            <button class="filter-pill active" data-filter="all">All</button>
+            <button class="filter-pill" data-filter="active">Active <span class="filter-count">4</span></button>
+            <button class="filter-pill" data-filter="attention">Needs Attention <span class="filter-count">2</span></button>
+            <button class="filter-pill" data-filter="paused">Paused <span class="filter-count">1</span></button>
+            <button class="filter-pill" data-filter="draft">Draft <span class="filter-count">1</span></button>
+          </div>
+          <div class="campaigns-table-wrap">
+            <table class="data-table" id="campaignsTable">
+              <thead><tr>
+                <th style="width:32px"><input type="checkbox" class="table-checkbox"></th>
+                <th style="width:28px"></th>
+                <th>CAMPAIGN</th>
+                <th>OBJECTIVE</th>
+                <th>SPEND / BUDGET</th>
+                <th>CPA</th>
+                <th>CoPI</th>
+                <th>ROAS</th>
+                <th>TREND</th>
+                <th>BIDDING</th>
+              </tr></thead>
+              <tbody id="campaignsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Campaign Detail Panel -->
+        <div class="campaign-detail-panel" id="campaignDetailPanel">
+          <div class="detail-panel-header">
+            <button class="detail-panel-back" id="detailPanelBack"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg></button>
+            <div class="detail-panel-title-wrap">
+              <div class="detail-panel-title" id="detailTitle"></div>
+              <div class="detail-panel-badges" id="detailBadges"></div>
+            </div>
+          </div>
+          <div class="metric-ribbon" id="detailMetricRibbon"></div>
+          <div class="detail-tabs">
+            <button class="detail-tab active" data-tab="overview">Overview</button>
+            <button class="detail-tab" data-tab="adsets">Ad Sets</button>
+            <button class="detail-tab" data-tab="creatives">Creatives</button>
+            <button class="detail-tab" data-tab="analytics">Analytics</button>
+          </div>
+          <div class="detail-tab-content" id="detailTabContent"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- CAMPAIGN BUILDER -->
+  <template id="tmpl-builder">
+    <div class="view view-builder animate-in">
+      <div class="builder-header">
+        <button class="btn btn-ghost btn-sm" onclick="history.back()">← Back</button>
+        <h2>Create Campaign</h2>
+        <div class="builder-steps" id="builderSteps">
+          <div class="builder-step active" data-step="1"><span class="step-number">1</span><span class="step-label">Goal</span></div>
+          <div class="builder-step-line"></div>
+          <div class="builder-step" data-step="2"><span class="step-number">2</span><span class="step-label">Setup</span></div>
+          <div class="builder-step-line"></div>
+          <div class="builder-step" data-step="3"><span class="step-number">3</span><span class="step-label">Strategy</span></div>
+          <div class="builder-step-line"></div>
+          <div class="builder-step" data-step="4"><span class="step-number">4</span><span class="step-label">Creative</span></div>
+          <div class="builder-step-line"></div>
+          <div class="builder-step" data-step="5"><span class="step-number">5</span><span class="step-label">Review</span></div>
+        </div>
+      </div>
+      <div class="builder-content" id="builderContent"></div>
+      <div class="builder-footer">
+        <button class="btn btn-ghost" id="builderPrev" style="visibility:hidden">← Back</button>
+        <button class="btn btn-primary btn-lg btn-pill" id="builderNext">Next <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l4 4-4 4"/></svg></button>
+      </div>
+    </div>
+  </template>
+
+  <!-- AUDIENCES -->
+  <template id="tmpl-audiences">
+    <div class="view view-audiences animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="view-header">
+        <div class="view-header-left">
+          <h2 class="view-title">Audiences</h2>
+          <span class="count-badge" id="audienceCount">12</span>
+        </div>
+        <div class="view-header-right">
+          <div class="search-input-wrap">
+            <svg class="search-input-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="5"/><path d="M10 10l3 3"/></svg>
+            <input type="text" class="search-input" id="audienceSearch" placeholder="Search audiences...">
+          </div>
+          <button class="btn btn-ghost" onclick="RoktAds.openModal('uploadList')">Upload List</button>
+          <button class="btn btn-ghost" onclick="RoktAds.openModal('createLAL')">Create Lookalike</button>
+          <button class="btn btn-primary btn-pill" onclick="RoktAds.openModal('buildAudience')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v10M2 7h10"/></svg>
+            Build Audience
+          </button>
+        </div>
+      </div>
+      <div class="audience-type-filters" id="audienceTypeFilters">
+        <button class="filter-pill active" data-type="all">All <span class="filter-count">12</span></button>
+        <button class="filter-pill" data-type="Custom">Custom <span class="filter-count">3</span></button>
+        <button class="filter-pill" data-type="LAL">Lookalike <span class="filter-count">3</span></button>
+        <button class="filter-pill" data-type="Behavioral">Behavioral <span class="filter-count">3</span></button>
+        <button class="filter-pill" data-type="Demographic">Demographic <span class="filter-count">1</span></button>
+        <button class="filter-pill" data-type="Starter">Starter <span class="filter-count">1</span></button>
+        <button class="filter-pill" data-type="Experian">Experian <span class="filter-count">1</span></button>
+      </div>
+      <div class="audience-grid" id="audienceGrid"></div>
+    </div>
+  </template>
+
+  <!-- CREATIVE STUDIO -->
+  <template id="tmpl-creatives">
+    <div class="view view-creatives animate-in">
+      <div class="creative-studio-layout">
+        <!-- Library Panel -->
+        <div class="creative-library-panel">
+          <div class="creative-library-header">
+            <h3>Creative Studio</h3>
+            <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.openModal('newCreative')">+ New</button>
+          </div>
+          <input type="text" class="search-input" id="creativeSearch" placeholder="Search creatives..." style="margin:0 var(--space-3) var(--space-3)">
+          <div class="creative-library-list" id="creativeLibraryList"></div>
+        </div>
+        <!-- Editor Panel -->
+        <div class="creative-editor-panel">
+          <div class="creative-editor-toolbar">
+            <div class="creative-format-tabs" id="creativeFormatTabs">
+              <button class="filter-pill active" data-format="Text">Text</button>
+              <button class="filter-pill" data-format="Benefits">Benefits</button>
+              <button class="filter-pill" data-format="Savings">Savings</button>
+              <button class="filter-pill" data-format="Hero Image">Hero Image</button>
+              <button class="filter-pill" data-format="Carousel">Carousel</button>
+            </div>
+            <div class="creative-editor-actions">
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('aiGenerate')">✨ AI Generate</button>
+              <button class="btn btn-xs btn-ghost" id="policyCheckBtn">Policy Check</button>
+            </div>
+          </div>
+          <div class="creative-editor-form" id="creativeEditorForm">
+            <div class="form-group">
+              <div class="form-label-row"><label class="form-label">Title</label><span class="char-count" id="titleCharCount">24/40</span></div>
+              <input type="text" class="form-input" id="creativeTitle" value="Stream Disney+ for Less!" maxlength="40">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Body</label>
+              <textarea class="form-textarea" id="creativeBody" rows="3">Get 30% off your first month of Disney+. Stream thousands of movies, shows, and originals.</textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label-row"><label class="form-label">CTA (Positive)</label><span class="char-count" id="ctaCharCount">15/25</span></div>
+              <input type="text" class="form-input" id="creativeCta" value="Start Streaming" maxlength="25">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Linked Offer</label>
+              <select class="form-select" id="creativeOffer">
+                <option value="o1">30% off first month ($4.99)</option>
+                <option value="o2">7-day free trial</option>
+                <option value="o3">$50 statement credit</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dynamic Attributes</label>
+              <div class="dynamic-attr-chips">
+                <span class="attr-chip" onclick="RoktAds.insertAttr('{customer.firstname}')">{customer.firstname}</span>
+                <span class="attr-chip" onclick="RoktAds.insertAttr('{partner.name}')">{partner.name}</span>
+                <span class="attr-chip" onclick="RoktAds.insertAttr('{rokt.customeraction}')">{rokt.customeraction}</span>
+              </div>
+            </div>
+            <div class="policy-status" id="policyStatus">
+              <span style="color:var(--positive)">✓</span> Passes policy check
+            </div>
+          </div>
+        </div>
+        <!-- Preview Panel -->
+        <div class="creative-preview-panel">
+          <div class="creative-preview-header">
+            <h3>Preview</h3>
+            <div class="preview-device-toggle">
+              <button class="filter-pill active" data-device="desktop">Desktop</button>
+              <button class="filter-pill" data-device="mobile">Mobile</button>
+            </div>
+          </div>
+          <div class="creative-preview-container">
+            <div class="preview-partner-context">ticketmaster.com</div>
+            <div class="creative-preview-card" id="creativePreviewCard">
+              <div class="preview-label">SPONSORED</div>
+              <h4 class="preview-title" id="previewTitle">Stream Disney+ for Less!</h4>
+              <p class="preview-body" id="previewBody">Get 30% off your first month of Disney+. Stream thousands of movies, shows, and originals.</p>
+              <div class="preview-offer" id="previewOffer">30% off first month</div>
+              <button class="preview-cta" id="previewCta">Start Streaming</button>
+              <button class="preview-dismiss">No thanks</button>
+            </div>
+            <div class="preview-partner-contexts">
+              <h4>Partner Contexts</h4>
+              <div class="context-badges">
+                <span class="filter-pill active">Ticketmaster</span>
+                <span class="filter-pill">Fanatics</span>
+                <span class="filter-pill">Booking.com</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- INTELLIGENCE -->
+  <template id="tmpl-intelligence">
+    <div class="view view-intelligence animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="view-header">
+        <div class="view-header-left">
+          <h2 class="view-title">Intelligence</h2>
+        </div>
+        <div class="view-header-right">
+          <button class="filter-pill active" data-intel-tab="reports" onclick="RoktAds.switchIntelTab('reports')">Reports</button>
+          <button class="filter-pill" data-intel-tab="experiments" onclick="RoktAds.switchIntelTab('experiments')">Experiments</button>
+        </div>
+      </div>
+
+      <!-- Reports Tab -->
+      <div id="intelReports">
+        <div class="insight-strip" id="intelInsightStrip"></div>
+        <div class="card">
+          <div class="card-header">
+            <div class="report-controls-left">
+              <div class="filter-pills" id="reportDateRange">
+                <button class="filter-pill" data-range="today">Today</button>
+                <button class="filter-pill active" data-range="7d">7D</button>
+                <button class="filter-pill" data-range="30d">30D</button>
+                <button class="filter-pill" data-range="mtd">MTD</button>
+                <button class="filter-pill" data-range="custom">Custom</button>
+              </div>
+            </div>
+            <div class="report-controls-right">
+              <select class="form-select form-select-sm" id="reportAttribution" style="width:auto">
+                <option>Attribution: Default (7C+1V)</option>
+                <option>Social ROAS (7C1V)</option>
+                <option>Search ROAS (30C1V)</option>
+                <option>Click-only (30C)</option>
+              </select>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('addMetric')">+ Add Metric</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('exportReport')">Export</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <!-- Chart Area -->
+            <div class="report-chart" id="reportChart" style="padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--border-light)">
+              <div class="report-chart-legend" id="reportChartLegend"></div>
+              <svg width="100%" height="180" viewBox="0 0 700 180" preserveAspectRatio="none" id="reportChartSvg"></svg>
+            </div>
+            <!-- Filters -->
+            <div class="report-filters" id="reportFilters" style="padding:var(--space-3) var(--space-5);border-bottom:1px solid var(--border-light);display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap">
+              <span class="text-secondary" style="font-size:11px;margin-right:var(--space-1)">Filters:</span>
+              <button class="filter-pill" id="filterCampaign" onclick="RoktAds.toggleFilter('campaign')">Campaign <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 4l2 2 2-2"/></svg></button>
+              <button class="filter-pill" id="filterAdSet" onclick="RoktAds.toggleFilter('adset')">Ad Set <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 4l2 2 2-2"/></svg></button>
+              <button class="filter-pill" id="filterCreative" onclick="RoktAds.toggleFilter('creative')">Creative <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 4l2 2 2-2"/></svg></button>
+              <button class="filter-pill" id="filterStatus" onclick="RoktAds.toggleFilter('status')">Status <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M3 4l2 2 2-2"/></svg></button>
+              <div class="report-filter-dropdown" id="filterDropdown" style="display:none"></div>
+            </div>
+            <!-- Table -->
+            <div class="report-table-wrap">
+              <table class="data-table" id="reportTable">
+                <thead id="reportTableHead"></thead>
+                <tbody id="reportTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experiments Tab -->
+      <div id="intelExperiments" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)">
+          <div class="filter-pills">
+            <button class="filter-pill active">All</button>
+            <button class="filter-pill">Running</button>
+            <button class="filter-pill">Concluded</button>
+            <button class="filter-pill">Draft</button>
+          </div>
+          <button class="btn btn-primary btn-pill" onclick="RoktAds.openModal('newExperiment')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v10M2 7h10"/></svg>
+            New Experiment
+          </button>
+        </div>
+        <div class="experiments-grid" id="experimentsGrid"></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- CATALOG -->
+  <template id="tmpl-catalog">
+    <div class="view view-catalog animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="view-header">
+        <div class="view-header-left">
+          <h2 class="view-title">Catalog</h2>
+        </div>
+        <div class="view-header-right">
+          <button class="filter-pill active" data-catalog-tab="offers" onclick="RoktAds.switchCatalogTab('offers')">Offers</button>
+          <button class="filter-pill" data-catalog-tab="products" onclick="RoktAds.switchCatalogTab('products')">Products</button>
+        </div>
+      </div>
+      <div id="catalogOffers">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:var(--space-4)">
+          <button class="btn btn-primary btn-pill" onclick="RoktAds.openModal('newOffer')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2v10M2 7h10"/></svg>
+            Create Offer
+          </button>
+        </div>
+        <div class="offer-grid" id="offerGrid"></div>
+      </div>
+      <div id="catalogProducts" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)">
+          <div class="filter-pills">
+            <button class="filter-pill active">All Products</button>
+            <button class="filter-pill">In Stock</button>
+            <button class="filter-pill">Low Stock</button>
+          </div>
+          <button class="btn btn-primary btn-pill" onclick="RoktAds.openModal('newProductSet')">Create Product Set</button>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- MEASUREMENT -->
+  <template id="tmpl-measurement">
+    <div class="view view-measurement animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="view-header" style="margin-bottom:var(--space-5)">
+        <div class="view-header-left"><h2 class="view-title">Measurement</h2></div>
+      </div>
+      <div class="measurement-grid">
+        <!-- EMQ Dashboard -->
+        <div class="card emq-card">
+          <div class="card-header"><h3 class="card-title">Event Match Quality (EMQ)</h3></div>
+          <div class="card-body" style="text-align:center">
+            <div class="emq-gauge" id="emqGauge">
+              <svg width="160" height="100" viewBox="0 0 160 100">
+                <path d="M20 90 A60 60 0 0 1 140 90" fill="none" stroke="var(--border)" stroke-width="12" stroke-linecap="round"/>
+                <path d="M20 90 A60 60 0 0 1 140 90" fill="none" stroke="url(#emqGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="38" class="chart-line-animate"/>
+                <defs><linearGradient id="emqGrad"><stop offset="0%" stop-color="var(--negative)"/><stop offset="50%" stop-color="var(--warning)"/><stop offset="100%" stop-color="var(--positive)"/></linearGradient></defs>
+                <text x="80" y="78" text-anchor="middle" font-size="28" font-weight="800" font-family="var(--font-mono)" fill="var(--text-primary)">7.8</text>
+                <text x="80" y="94" text-anchor="middle" font-size="10" fill="var(--text-tertiary)">out of 10</text>
+              </svg>
+            </div>
+            <div style="margin-top:var(--space-2)">
+              <span class="badge badge-positive">Good</span>
+              <span class="text-secondary" style="font-size:11px;margin-left:var(--space-2)">+0.4 from last month</span>
+            </div>
+          </div>
+        </div>
+        <!-- Identifier Coverage -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Identifier Coverage</h3></div>
+          <div class="card-body" id="identifierCoverage"></div>
+        </div>
+        <!-- Improve EMQ -->
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Improve EMQ</h3></div>
+          <div class="card-body" id="emqRecommendations"></div>
+        </div>
+      </div>
+      <!-- Measurement Groups -->
+      <div class="card" style="margin-top:var(--space-5)">
+        <div class="card-header">
+          <h3 class="card-title">Measurement Groups</h3>
+          <button class="btn btn-sm btn-primary btn-pill" onclick="RoktAds.openModal('newMeasurementGroup')">Create Group</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table" id="measurementGroupsTable">
+            <thead><tr><th>NAME</th><th>LINKED CAMPAIGNS</th><th>STATUS</th><th>OPTIMIZATION EVENT</th><th>ATTRIBUTION WINDOW</th><th>EMQ</th></tr></thead>
+            <tbody id="measurementGroupsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ACCOUNT -->
+  <template id="tmpl-account">
+    <div class="view view-account animate-in" style="padding:var(--space-5) var(--space-6)">
+      <div class="view-header" style="margin-bottom:var(--space-5)">
+        <div class="view-header-left"><h2 class="view-title">Account</h2></div>
+      </div>
+      <div class="account-grid">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Overview</h3></div>
+          <div class="card-body">
+            <div class="account-detail-grid">
+              <div><span class="form-label">Account Name</span><div class="account-value">Rokt Ads Demo Account</div></div>
+              <div><span class="form-label">Account ID</span><div class="account-value mono">ACC-2847291</div></div>
+              <div><span class="form-label">Region</span><div class="account-value">North America</div></div>
+              <div><span class="form-label">Rokt Entity</span><div class="account-value">Rokt Inc.</div></div>
+              <div><span class="form-label">Account Type</span><div class="account-value">Self-serve</div></div>
+              <div><span class="form-label">Created</span><div class="account-value">Jan 15, 2025</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Billing</h3></div>
+          <div class="card-body">
+            <div class="billing-hero">
+              <span class="form-label">March 2026 Spend</span>
+              <div class="billing-amount mono">$89,421</div>
+              <div class="billing-bar"><div class="progress-bar" style="margin:var(--space-2) 0"><div class="progress-bar-fill" style="width:59%;background:var(--wine)"></div></div><span class="text-secondary" style="font-size:11px">$89K / $150K credit limit</span></div>
+              <span class="badge badge-positive" style="margin-top:var(--space-2)">Current</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Team</h3>
+            <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.openModal('inviteUser')">Invite User</button>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table" id="teamTable">
+              <thead><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>LAST ACTIVE</th></tr></thead>
+              <tbody id="teamTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Integrations</h3></div>
+          <div class="card-body" id="integrationsGrid"></div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js?v=5"></script>
+</body>
+</html>
