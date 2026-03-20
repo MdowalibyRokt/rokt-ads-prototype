@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <div class="app" id="app">
@@ -88,6 +88,10 @@
         </button>
       </div>
       <div class="topbar-right">
+        <div class="ai-monitor" id="aiMonitor" title="AI is monitoring your campaigns">
+          <span class="ai-pulse"></span>
+          <span class="ai-monitor-text">AI monitoring</span>
+        </div>
         <div class="notif-wrap" style="position:relative">
           <button class="topbar-icon-btn" id="notificationBtn" title="Notifications">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6a4 4 0 018 0c0 4 2 5 2 5H2s2-1 2-5M6.5 13.5a1.5 1.5 0 003 0"/></svg>
@@ -414,11 +418,13 @@
             </div>
           </div>
           <div class="campaigns-filters" id="campaignFilters">
-            <button class="filter-pill active" data-filter="all">All</button>
-            <button class="filter-pill" data-filter="active">Active <span class="filter-count">4</span></button>
-            <button class="filter-pill" data-filter="attention">Needs Attention <span class="filter-count">2</span></button>
+            <button class="filter-pill active" data-filter="all">All <span class="filter-count">6</span></button>
+            <button class="filter-pill" data-filter="active">Active <span class="filter-count">3</span></button>
+            <button class="filter-pill" data-filter="requires_action">Requires Action <span class="filter-count">1</span></button>
             <button class="filter-pill" data-filter="paused">Paused <span class="filter-count">1</span></button>
             <button class="filter-pill" data-filter="draft">Draft <span class="filter-count">1</span></button>
+            <button class="filter-pill" data-filter="pending_review">Pending Review <span class="filter-count">0</span></button>
+            <button class="filter-pill" data-filter="archived">Archived <span class="filter-count">0</span></button>
           </div>
           <div class="campaigns-table-wrap">
             <table class="data-table" id="campaignsTable">
@@ -454,6 +460,7 @@
             <button class="detail-tab" data-tab="adsets">Ad Sets</button>
             <button class="detail-tab" data-tab="creatives">Creatives</button>
             <button class="detail-tab" data-tab="analytics">Analytics</button>
+            <button class="detail-tab" data-tab="nurture" onclick="RoktAds.switchDetailTab('nurture')">Nurture</button>
           </div>
           <div class="detail-tab-content" id="detailTabContent"></div>
         </div>
@@ -838,6 +845,6 @@
     </div>
   </template>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

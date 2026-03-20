@@ -15,7 +15,8 @@ const RoktAds = (() => {
       conversions: 7241, impressions: 175800, clicks: 12460, ctr: 7.09, cvr: 58.1,
       emq: 8.4, biddingState: 'optimizing', adSets: 2, creatives: 4,
       trend: [10,9,8,7,6,5,5,4], trendDir: 'up',
-      dailySpend: [5200, 5800, 6100, 6400, 6850, 5600, 6200]
+      dailySpend: [5200, 5800, 6100, 6400, 6850, 5600, 6200],
+      publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 85
     },
     {
       id: 'c2', name: 'Capital One Card Acquisition', status: 'active', objective: 'CPA',
@@ -23,7 +24,8 @@ const RoktAds = (() => {
       conversions: 3692, impressions: 115000, clicks: 8970, ctr: 7.8, cvr: 41.2,
       emq: 7.9, biddingState: 'optimizing', adSets: 1, creatives: 3,
       trend: [8,7,7,6,5,6,5,5], trendDir: 'up',
-      dailySpend: [4200, 4500, 4400, 4700, 4600, 4300, 4500]
+      dailySpend: [4200, 4500, 4400, 4700, 4600, 4300, 4500],
+      publishState: 'published', objectiveType: 'email', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 72
     },
     {
       id: 'c3', name: 'Hulu Streaming Signup', status: 'active', objective: 'CPA',
@@ -31,15 +33,17 @@ const RoktAds = (() => {
       conversions: 2046, impressions: 72000, clicks: 5040, ctr: 7.0, cvr: 40.6,
       emq: 8.1, biddingState: 'learning', adSets: 1, creatives: 2,
       trend: [5,6,7,7,8,8,9,9], trendDir: 'down',
-      dailySpend: [2400, 2600, 2700, 2800, 2700, 2600, 2900]
+      dailySpend: [2400, 2600, 2700, 2800, 2700, 2600, 2900],
+      publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 91
     },
     {
-      id: 'c4', name: 'True Classic DPA', status: 'active', objective: 'ROAS',
+      id: 'c4', name: 'True Classic DPA', status: 'requires_action', statusDetail: 'hit_limit', objective: 'ROAS',
       spend: 22400, budget: 40000, cpa: 12.30, cpaTarget: null, copi: 2.15, roas: 4.8,
       conversions: 1821, impressions: 84700, clicks: 5930, ctr: 7.0, cvr: 30.7,
       emq: 4.8, biddingState: 'limited', adSets: 2, creatives: 5,
       trend: [4,5,5,6,6,7,7,8], trendDir: 'down',
-      dailySpend: [3000, 3200, 3100, 3300, 3400, 3200, 3200]
+      dailySpend: [3000, 3200, 3100, 3300, 3400, 3200, 3200],
+      publishState: 'published', objectiveType: 'product_sales', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 45
     },
     {
       id: 'c5', name: 'PayPal Pay+ Activation', status: 'paused', objective: 'CPA',
@@ -47,7 +51,8 @@ const RoktAds = (() => {
       conversions: 1435, impressions: 36300, clicks: 2540, ctr: 7.0, cvr: 56.5,
       emq: 7.2, biddingState: 'optimizing', adSets: 1, creatives: 3,
       trend: [6,5,5,4,4,4,4,4], trendDir: 'flat',
-      dailySpend: [1400, 1500, 1300, 1200, 1300, 1100, 1100]
+      dailySpend: [1400, 1500, 1300, 1200, 1300, 1100, 1100],
+      publishState: 'published', objectiveType: 'payment_trigger', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 78
     },
     {
       id: 'c6', name: 'Audible Free Trial', status: 'draft', objective: 'CPA',
@@ -55,7 +60,8 @@ const RoktAds = (() => {
       conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
       emq: 7.5, biddingState: 'draft', adSets: 0, creatives: 0,
       trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
-      dailySpend: [0,0,0,0,0,0,0]
+      dailySpend: [0,0,0,0,0,0,0],
+      publishState: 'draft', objectiveType: 'app_download', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 88
     }
   ];
 
@@ -176,6 +182,14 @@ const RoktAds = (() => {
     creativeCta: 'Start Streaming',
     calloutPromotion: '30% OFF', calloutSocial: '', calloutGuarantee: '',
     creativeDisclaimer: '',
+    // Workflow completeness fields
+    country: 'US',
+    language: 'en',
+    timezone: 'America/New_York',
+    bidStrategyDetail: '',
+    objectiveType: '',
+    industryVerticals: [],
+    placementType: '',
   };
   let builderData = { ...defaultBuilderData };
 
@@ -204,10 +218,29 @@ const RoktAds = (() => {
     const content = document.getElementById('content');
     if (!tmpl || !content) return;
 
-    content.innerHTML = '';
-    const clone = tmpl.content.cloneNode(true);
-    content.appendChild(clone);
+    // View exit animation
+    const currentContent = content.querySelector('.view');
+    if (currentContent) {
+      currentContent.classList.add('view-exit');
+      setTimeout(() => {
+        content.innerHTML = '';
+        const clone = tmpl.content.cloneNode(true);
+        content.appendChild(clone);
+        const newView = content.querySelector('.view');
+        if (newView) newView.classList.add('view-enter');
+        afterNavigate(view);
+      }, 150);
+    } else {
+      content.innerHTML = '';
+      const clone = tmpl.content.cloneNode(true);
+      content.appendChild(clone);
+      const newView = content.querySelector('.view');
+      if (newView) newView.classList.add('view-enter');
+      afterNavigate(view);
+    }
+  }
 
+  function afterNavigate(view) {
     // Initialize view
     requestAnimationFrame(() => {
       const initMap = {
@@ -225,6 +258,9 @@ const RoktAds = (() => {
 
       // Show context alert for certain views
       showContextAlert(view);
+
+      // Init AI sparkles on relevant views
+      initAISparkles();
     });
   }
 
@@ -462,15 +498,20 @@ const RoktAds = (() => {
     if (!tbody) return;
     let filtered = campaigns;
     if (filter === 'active') filtered = campaigns.filter(c => c.status === 'active');
+    else if (filter === 'requires_action') filtered = campaigns.filter(c => c.status === 'requires_action');
     else if (filter === 'paused') filtered = campaigns.filter(c => c.status === 'paused');
     else if (filter === 'draft') filtered = campaigns.filter(c => c.status === 'draft');
-    else if (filter === 'attention') filtered = campaigns.filter(c => c.biddingState === 'limited' || c.biddingState === 'learning' || (c.cpaTarget && c.cpa > c.cpaTarget));
+    else if (filter === 'pending_review') filtered = campaigns.filter(c => c.status === 'pending_review');
+    else if (filter === 'archived') filtered = campaigns.filter(c => c.status === 'archived');
+    else if (filter === 'ended') filtered = campaigns.filter(c => c.status === 'ended');
     if (search) filtered = filtered.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
-    tbody.innerHTML = filtered.map(c => `
+    tbody.innerHTML = filtered.map(c => {
+      const detailText = c.statusDetail ? c.statusDetail.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '';
+      return `
       <tr class="clickable ${selectedCampaign === c.id ? 'selected' : ''}" data-id="${c.id}" onclick="RoktAds.openCampaignDetail('${c.id}')">
         <td><input type="checkbox" class="table-checkbox" onclick="event.stopPropagation()"></td>
-        <td><span class="campaign-status-dot ${c.status}"></span></td>
+        <td><span class="campaign-status-dot ${c.status}" ${detailText ? 'title="' + detailText + '"' : ''}></span></td>
         <td class="campaign-name">${c.name}</td>
         <td><span class="badge badge-gray">${c.objective}</span></td>
         <td>
@@ -501,8 +542,8 @@ const RoktAds = (() => {
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toast('Duplicated as draft','success')" title="Duplicate">⧉</button>
           </div>
         </td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   function openCampaignDetail(id) {
@@ -519,22 +560,45 @@ const RoktAds = (() => {
     // Title & badges with edit/pause actions
     const title = document.getElementById('detailTitle');
     if (title) title.textContent = c.name;
+    const statusBadgeMap = {
+      active: 'positive', paused: 'warning', draft: 'gray',
+      requires_action: 'negative', pending_review: 'blue', archived: 'gray', ended: 'gray'
+    };
+    const statusLabelMap = {
+      active: 'Active', paused: 'Paused', draft: 'Draft',
+      requires_action: 'Requires Action', pending_review: 'Pending Review', archived: 'Archived', ended: 'Ended'
+    };
     const badges = document.getElementById('detailBadges');
     if (badges) badges.innerHTML = `
-      <span class="badge badge-${c.status === 'active' ? 'positive' : c.status === 'paused' ? 'warning' : 'gray'}">${capitalize(c.status)}</span>
+      <span class="badge badge-${statusBadgeMap[c.status] || 'gray'}">${statusLabelMap[c.status] || capitalize(c.status)}</span>
+      ${c.statusDetail ? '<span class="badge badge-warning" style="font-size:9px">' + c.statusDetail.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) + '</span>' : ''}
       <span class="badge badge-gray">${c.objective}</span>
     `;
 
-    // Add action buttons to header
+    // Add action buttons to header based on status
     const headerWrap = document.querySelector('.detail-panel-title-wrap');
-    if (headerWrap && !headerWrap.querySelector('.detail-actions')) {
+    // Remove existing actions first
+    const existingActions = headerWrap?.querySelector('.detail-actions');
+    if (existingActions) existingActions.remove();
+    if (headerWrap) {
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'detail-actions';
-      actionsDiv.innerHTML = `
-        <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">${c.status === 'active' ? '⏸ Pause' : c.status === 'paused' ? '▶ Resume' : '✏️ Edit'}</button>
-        <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign', '${c.id}')">✏️ Edit</button>
-        <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign duplicated as draft','success')">⧉ Duplicate</button>
-      `;
+      if (c.status === 'requires_action') {
+        actionsDiv.innerHTML = `
+          <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Opening resolution workflow...','info')">Resolve</button>
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">⏸ Pause</button>
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign archived','info')">Archive</button>`;
+      } else if (c.status === 'draft') {
+        actionsDiv.innerHTML = `
+          <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Campaign published!','success')">Publish</button>
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign', '${c.id}')">✏️ Edit</button>
+          <button class="btn btn-xs btn-ghost" style="color:var(--negative)" onclick="RoktAds.toast('Campaign deleted','info')">Delete</button>`;
+      } else {
+        actionsDiv.innerHTML = `
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">${c.status === 'active' ? '⏸ Pause' : c.status === 'paused' ? '▶ Resume' : '✏️ Edit'}</button>
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign', '${c.id}')">✏️ Edit</button>
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign archived','info')">Archive</button>`;
+      }
       headerWrap.appendChild(actionsDiv);
     }
 
@@ -569,12 +633,38 @@ const RoktAds = (() => {
     });
   }
 
+  function generateAIAnalysis(c) {
+    const insights = [];
+    if (c.cpaTarget && c.cpa > c.cpaTarget) insights.push(`CPA is ${Math.round((c.cpa/c.cpaTarget - 1) * 100)}% above target at $${c.cpa.toFixed(2)}.`);
+    else if (c.cpaTarget && c.cpa > 0) insights.push(`CPA is ${Math.round((1 - c.cpa/c.cpaTarget) * 100)}% below target — strong performance.`);
+    if (c.trendDir === 'down' && c.trend && c.trend[c.trend.length-1] > c.trend[0]) insights.push(`Spend trending up week-over-week.`);
+    if (c.emq && c.emq < 5) insights.push(`EMQ score of ${c.emq} is below recommended threshold of 5.0.`);
+    if (c.biddingState === 'learning') insights.push('Smart Bidding is still in learning phase — avoid major changes.');
+    if (c.biddingState === 'limited') insights.push('Smart Bidding is budget-limited — consider increasing budget or narrowing audience.');
+    if (c.aiHealthScore >= 80) insights.push(`AI Health Score: ${c.aiHealthScore}/100 — campaign is performing well.`);
+    else if (c.aiHealthScore >= 60) insights.push(`AI Health Score: ${c.aiHealthScore}/100 — some areas need attention.`);
+    else if (c.aiHealthScore) insights.push(`AI Health Score: ${c.aiHealthScore}/100 — critical issues detected.`);
+    return insights.join(' ');
+  }
+
   function renderCampaignTab(tab, c) {
     const container = document.getElementById('detailTabContent');
     if (!container) return;
 
     if (tab === 'overview') {
+      const aiAnalysis = generateAIAnalysis(c);
       container.innerHTML = `
+        <div class="ai-analysis-card">
+          <div class="ai-analysis-header">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+            AI Analysis
+          </div>
+          <div class="ai-analysis-body">${aiAnalysis}</div>
+          <div class="ai-analysis-actions">
+            <button onclick="RoktAds.toast('Optimization suggestions generated','info')">Get Suggestions</button>
+            <button onclick="RoktAds.toast('Opening detailed report...','info')">Deep Dive</button>
+          </div>
+        </div>
         <div class="detail-chart-area">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <span style="font-size:12px;font-weight:600">Daily Spend</span>
@@ -668,7 +758,52 @@ const RoktAds = (() => {
           </tbody>
         </table>
       `;
+    } else if (tab === 'nurture') {
+      container.innerHTML = `
+        <div style="text-align:center;padding:var(--space-6)">
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--radius-pill);background:rgba(194,0,117,0.08);color:var(--beetroot);font-size:11px;font-weight:500;margin-bottom:var(--space-4)">AI-Powered Nurture Journeys</div>
+          <div class="nurture-flow" style="display:flex;flex-direction:column;align-items:center;gap:0;margin:var(--space-4) auto;max-width:360px">
+            <div class="nurture-node" style="background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;width:100%;text-align:left">
+              <div style="font-weight:600;font-size:12px">Welcome Email</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Sent immediately after positive interaction</div>
+            </div>
+            <div style="width:2px;height:20px;background:var(--border)"></div>
+            <div style="width:8px;height:8px;border-left:2px solid var(--border);border-bottom:2px solid var(--border);transform:rotate(-45deg);margin-top:-6px"></div>
+            <div class="nurture-node" style="background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;width:100%;text-align:left;margin-top:4px">
+              <div style="font-weight:600;font-size:12px">Wait 3 Days</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Allow time for initial conversion</div>
+            </div>
+            <div style="width:2px;height:20px;background:var(--border)"></div>
+            <div style="width:8px;height:8px;border-left:2px solid var(--border);border-bottom:2px solid var(--border);transform:rotate(-45deg);margin-top:-6px"></div>
+            <div class="nurture-node" style="background:rgba(194,0,117,0.06);border:1px solid var(--beetroot);border-radius:var(--radius-lg);padding:12px 16px;width:100%;text-align:left;margin-top:4px">
+              <div style="font-weight:600;font-size:12px;color:var(--beetroot)">AI Follow-Up</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Personalized message based on engagement signals</div>
+            </div>
+            <div style="width:2px;height:20px;background:var(--border)"></div>
+            <div style="width:8px;height:8px;border-left:2px solid var(--border);border-bottom:2px solid var(--border);transform:rotate(-45deg);margin-top:-6px"></div>
+            <div class="nurture-node" style="background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;width:100%;text-align:left;margin-top:4px">
+              <div style="font-weight:600;font-size:12px">Wait 7 Days</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Final conversion window</div>
+            </div>
+            <div style="width:2px;height:20px;background:var(--border)"></div>
+            <div style="width:8px;height:8px;border-left:2px solid var(--border);border-bottom:2px solid var(--border);transform:rotate(-45deg);margin-top:-6px"></div>
+            <div class="nurture-node" style="background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;width:100%;text-align:left;margin-top:4px">
+              <div style="font-weight:600;font-size:12px">Final Offer</div>
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">Last-chance incentive with deadline</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" style="margin-top:var(--space-4)" onclick="RoktAds.toast('Nurture journey builder coming soon','info')">+ Add Step</button>
+        </div>`;
     }
+  }
+
+  function switchDetailTab(tab) {
+    const c = campaigns.find(x => x.id === selectedCampaign);
+    if (!c) return;
+    $$('.detail-tab').forEach(t => t.classList.remove('active'));
+    const tabBtn = document.querySelector(`.detail-tab[data-tab="${tab}"]`);
+    if (tabBtn) tabBtn.classList.add('active');
+    renderCampaignTab(tab, c);
   }
 
   function closeCampaignDetail() {
@@ -806,6 +941,20 @@ const RoktAds = (() => {
     dpa: 'Product Sales (DPA)',
     leads: 'Email Subscription',
     embed: 'Embedded Actions',
+    website_traffic: 'Website Traffic',
+    email: 'Email Subscription',
+    app_download: 'App Download',
+    product_sales: 'Product Sales',
+    brand_campaign: 'Brand Campaign',
+    add_to_cart: 'Add to Cart',
+    payment_trigger: 'Payment Trigger',
+    calendar: 'Calendar Subscription',
+    cross_sell: 'Cross-Sell',
+    promotion: 'Promotion',
+    customer_feedback: 'Customer Feedback',
+    integrated_app: 'Integrated Application',
+    shoppable_ad: 'Shoppable Ad',
+    phone: 'Phone Lead',
   };
 
   function updateBuilderStep() {
@@ -867,12 +1016,22 @@ const RoktAds = (() => {
 
   function renderBuilderStep1() {
     const objectives = [
-      { id: 'cpa', icon: '🎯', name: 'Customer Acquisition', desc: 'Get new customers at a target CPA' },
-      { id: 'roas', icon: '📈', name: 'Revenue Growth', desc: 'Maximize return on ad spend' },
-      { id: 'app', icon: '📱', name: 'App Installs', desc: 'Drive mobile app downloads' },
-      { id: 'dpa', icon: '🛍️', name: 'Product Sales (DPA)', desc: 'Dynamic product ads from your catalog' },
-      { id: 'leads', icon: '✉️', name: 'Email Subscription', desc: 'Capture email addresses and signups' },
-      { id: 'embed', icon: '⚡', name: 'Embedded Actions', desc: 'Drive in-page actions and engagement' },
+      { id: 'website_traffic', icon: '🌐', title: 'Website Traffic', desc: 'Drive visitors to your site' },
+      { id: 'email', icon: '✉️', title: 'Email Subscription', desc: 'Grow your email list' },
+      { id: 'app_download', icon: '📱', title: 'App Download', desc: 'Drive app installs (iOS & Android)' },
+      { id: 'product_sales', icon: '🛒', title: 'Product Sales', desc: 'Drive purchases with dynamic catalog ads' },
+      { id: 'brand_campaign', icon: '✨', title: 'Brand Campaign', desc: 'Build awareness and consideration' },
+      { id: 'add_to_cart', icon: '🛍️', title: 'Add to Cart', desc: 'Drive product additions and cross-sells' },
+    ];
+    const moreObjectives = [
+      { id: 'payment_trigger', icon: '💳', title: 'Payment Trigger', desc: 'Activate at payment moment' },
+      { id: 'calendar', icon: '📅', title: 'Calendar Subscription', desc: 'Drive calendar event sign-ups' },
+      { id: 'cross_sell', icon: '🔄', title: 'Cross-Sell', desc: 'Recommend complementary products' },
+      { id: 'promotion', icon: '🎁', title: 'Promotion', desc: 'Distribute promotions and offers' },
+      { id: 'customer_feedback', icon: '💬', title: 'Customer Feedback', desc: 'Collect reviews and feedback' },
+      { id: 'integrated_app', icon: '🔗', title: 'Integrated Application', desc: 'Custom app integration' },
+      { id: 'shoppable_ad', icon: '🏷️', title: 'Shoppable Ad', desc: 'Interactive product catalog ads' },
+      { id: 'phone', icon: '📞', title: 'Phone Lead', desc: 'Collect phone number leads' },
     ];
     return `<div class="builder-content-inner">
       <div class="ai-hero-section">
@@ -895,10 +1054,25 @@ const RoktAds = (() => {
         ${objectives.map(o => `
           <div class="objective-card ${builderData.objective === o.id ? 'selected' : ''}" data-objective-id="${o.id}" onclick="RoktAds.selectObjective('${o.id}')">
             <span class="objective-icon">${o.icon}</span>
-            <div class="objective-name">${o.name}</div>
+            <div class="objective-name">${o.title}</div>
             <div class="objective-desc">${o.desc}</div>
           </div>
         `).join('')}
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn btn-ghost" style="width:100%;font-size:12px" onclick="document.getElementById('moreObjectivesGrid').style.display = document.getElementById('moreObjectivesGrid').style.display === 'none' ? 'grid' : 'none'; this.querySelector('span').textContent = document.getElementById('moreObjectivesGrid').style.display === 'none' ? '▸ More objectives (${moreObjectives.length})' : '▾ More objectives (${moreObjectives.length})'">
+          <span>▸ More objectives (${moreObjectives.length})</span>
+        </button>
+        <div class="objective-grid" id="moreObjectivesGrid" style="display:none;margin-top:12px;grid-template-columns:repeat(4, 1fr)">
+          ${moreObjectives.map(o => `
+            <div class="objective-card ${builderData.objective === o.id ? 'selected' : ''}" data-objective-id="${o.id}" onclick="RoktAds.selectObjective('${o.id}')" style="padding:12px">
+              <span class="objective-icon" style="font-size:20px">${o.icon}</span>
+              <div class="objective-name" style="font-size:11px">${o.title}</div>
+              <div class="objective-desc" style="font-size:10px">${o.desc}</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
     </div>`;
   }
@@ -939,6 +1113,31 @@ const RoktAds = (() => {
                 ${['1', '7', '14', '30', '90'].map(d => `<option value="${d}" ${builderData.referralExclusion === d ? 'selected' : ''}>${d} day${d !== '1' ? 's' : ''}</option>`).join('')}
               </select>
               <div class="form-hint">Time before the same customer sees this offer again</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="builder-section">
+          <h3 class="builder-section-label">Region & Language</h3>
+          <p style="margin-bottom:12px;font-size:11px;color:var(--text-tertiary)">Set during account creation. Contact support to change.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Country <span style="color:var(--text-tertiary);font-size:10px">Locked</span></label>
+              <select class="form-select" disabled style="opacity:0.7">
+                <option selected>United States</option><option>United Kingdom</option><option>Australia</option><option>Canada</option><option>Germany</option><option>France</option><option>Japan</option><option>Singapore</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Language <span style="color:var(--text-tertiary);font-size:10px">Locked</span></label>
+              <select class="form-select" disabled style="opacity:0.7">
+                <option selected>English</option><option>Spanish</option><option>French</option><option>German</option><option>Japanese</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Timezone <span style="color:var(--text-tertiary);font-size:10px">Locked</span></label>
+              <select class="form-select" disabled style="opacity:0.7">
+                <option selected>America/New_York (EST)</option><option>America/Los_Angeles (PST)</option><option>Europe/London (GMT)</option><option>Asia/Tokyo (JST)</option><option>Australia/Sydney (AEST)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -1012,6 +1211,47 @@ const RoktAds = (() => {
     </div>`;
   }
 
+  function renderSmartBiddingStrategies() {
+    const strategies = [
+      { id: 'scale_at_cpa', title: 'Scale at CPA Target', desc: 'Optimize bids to hit your target CPA while maximizing volume', icon: '🎯', input: 'cpa' },
+      { id: 'maximize_conversions', title: 'Maximize Conversions', desc: 'Get the most conversions within your budget', icon: '📈', input: 'budget' },
+      { id: 'balance', title: 'Balance Scale & Efficiency', desc: 'Find the optimal trade-off between volume and CPA', icon: '⚖️', input: 'cpa' },
+      { id: 'scale_at_roas', title: 'Scale at ROAS Target', desc: 'Optimize for return on ad spend', icon: '💰', input: 'roas' },
+      { id: 'learning', title: 'Learning Phase', desc: 'Auto-detected while AI gathers enough conversion data (30+)', icon: '🧠', input: 'none', disabled: true },
+    ];
+    const sel = builderData.bidStrategyDetail;
+    let html = '<div style="margin-top:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px">Smart Bidding Strategy</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px">';
+    strategies.forEach(ss => {
+      const isSelected = sel === ss.id;
+      const border = isSelected ? 'var(--beetroot)' : 'var(--border)';
+      const bg = isSelected ? 'rgba(194,0,117,0.06)' : 'transparent';
+      const cursor = ss.disabled ? 'opacity:0.5;cursor:not-allowed' : 'cursor:pointer';
+      const onclick = ss.disabled ? '' : 'onclick="RoktAds.selectSmartStrategy(\'' + ss.id + '\')"';
+      html += '<div style="padding:10px 12px;border-radius:var(--radius-lg);border:1px solid ' + border + ';' + cursor + ';background:' + bg + ';transition:all 150ms" ' + onclick + '>';
+      html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:16px">' + ss.icon + '</span><span style="font-size:11px;font-weight:600">' + ss.title + '</span></div>';
+      html += '<div style="font-size:10px;color:var(--text-tertiary)">' + ss.desc + '</div>';
+      if (ss.disabled) html += '<div style="font-size:9px;color:var(--text-tertiary);margin-top:4px;font-style:italic">Read-only indicator</div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+
+    // Show appropriate input based on selected sub-strategy
+    if (sel === 'scale_at_cpa' || sel === 'balance' || !sel) {
+      html += '<div class="form-group" style="margin-top:12px;max-width:240px"><label class="form-label">Target CPA</label><div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="0.01" class="form-input mono" value="' + builderData.targetCpa + '" oninput="RoktAds.persistField(\'targetCpa\', this.value)"></div></div>';
+    } else if (sel === 'maximize_conversions') {
+      html += '<div class="form-group" style="margin-top:12px;max-width:240px"><label class="form-label">Budget Cap</label><div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="1" class="form-input mono" value="' + (builderData.lifetimeCap || '') + '" placeholder="Budget cap" oninput="RoktAds.persistField(\'lifetimeCap\', Number(this.value))"></div></div>';
+    } else if (sel === 'scale_at_roas') {
+      html += '<div class="form-group" style="margin-top:12px;max-width:240px"><label class="form-label">Target ROAS %</label><div class="input-prefix-wrap"><span class="input-prefix">%</span><input type="number" step="1" class="form-input mono" value="" placeholder="e.g. 400" oninput="RoktAds.persistField(\'targetRoas\', this.value)"></div></div>';
+    }
+    return html;
+  }
+
+  function selectSmartStrategy(id) {
+    builderData.bidStrategyDetail = id;
+    updateBuilderStep();
+  }
+
   function renderBuilderStep3() {
     return `<div class="builder-content-inner">
       <h3 style="margin-bottom:4px">Strategy & Targeting</h3>
@@ -1039,12 +1279,8 @@ const RoktAds = (() => {
             </div>
           `).join('')}
         </div>
-        ${builderData.bidStrategy === 'smart' ? `
-          <div class="form-group" style="margin-top:12px;max-width:240px">
-            <label class="form-label">Target CPA</label>
-            <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="0.01" class="form-input mono" value="${builderData.targetCpa}" oninput="RoktAds.persistField('targetCpa', this.value)"></div>
-          </div>
-        ` : ''}
+        ${builderData.bidStrategy === 'smart' ? renderSmartBiddingStrategies() : ''}
+
         ${builderData.bidStrategy === 'manual' ? `
           <div class="form-group" style="margin-top:12px;max-width:240px">
             <label class="form-label">Bid Price (per referral)</label>
@@ -1362,6 +1598,14 @@ const RoktAds = (() => {
               <div class="review-tree-node"><strong>🏷 Callouts:</strong> ${[builderData.calloutPromotion, builderData.calloutSocial, builderData.calloutGuarantee].filter(Boolean).join(' · ')}</div>
             ` : ''}
           </div>
+          <div class="review-tree-children">
+            <div class="review-tree-node"><strong>📜 Legal Terms</strong></div>
+            <div class="review-tree-children">
+              <div class="review-tree-node">🔗 Terms & Conditions: <a href="#" style="color:var(--beetroot)">https://brand.com/terms</a></div>
+              <div class="review-tree-node">🔗 Privacy Policy: <a href="#" style="color:var(--beetroot)">https://brand.com/privacy</a></div>
+              ${builderData.disclaimerEnabled ? '<div class="review-tree-node">📝 Disclaimer: Freeform text configured</div>' : ''}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1379,6 +1623,7 @@ const RoktAds = (() => {
 
   function selectObjective(id) {
     builderData.objective = id;
+    builderData.objectiveType = id;
     $$('.objective-card').forEach(c => {
       const isSelected = c.dataset.objectiveId === id;
       c.classList.toggle('selected', isSelected);
@@ -1927,6 +2172,22 @@ const RoktAds = (() => {
                 <div class="form-group">
                   <label class="form-label">Audience Name</label>
                   <input type="text" class="form-input" value="New Custom Audience" placeholder="Enter audience name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Industry Verticals <span class="badge badge-negative" style="font-size:9px">Required</span></label>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+                    ${['Entertainment','Finance','Retail','Travel','Health','Technology','Automotive','Food & Beverage','Sports','Education','Media','Telecom'].map(v =>
+                      '<label style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--radius-pill);border:1px solid var(--border);font-size:11px;cursor:pointer;transition:all 150ms"><input type="checkbox" style="margin:0"> ' + v + '</label>'
+                    ).join('')}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Placement Type <span class="badge badge-negative" style="font-size:9px">Required</span></label>
+                  <div style="display:flex;gap:8px;margin-top:4px">
+                    ${[{id:'coreg',label:'Inline',desc:'Standard co-registration'},{id:'engagement',label:'Engagement',desc:'Prime placement'},{id:'pretick',label:'Pre-ticked',desc:'Pre-selected inline'},{id:'survey',label:'Survey',desc:'Solus placement'}].map(p =>
+                      '<label style="display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:var(--radius-lg);border:1px solid var(--border);font-size:11px;cursor:pointer;text-align:center;flex:1;transition:all 150ms"><input type="radio" name="placementType" value="' + p.id + '" style="margin:0 0 4px"><strong>' + p.label + '</strong><span style="font-size:9px;color:var(--text-tertiary)">' + p.desc + '</span></label>'
+                    ).join('')}
+                  </div>
                 </div>
                 <div class="rule-group">
                   <div class="rule-group-header">
@@ -2984,6 +3245,31 @@ const RoktAds = (() => {
     });
   }
 
+  // ── AI Sparkle Effect ─────────────────────────────────────
+  let sparkleCount = 0;
+  function initAISparkles() {
+    document.querySelectorAll('.ai-badge, .ai-rec-card, .ai-hero-section, .ai-fab, .ai-monitor, .ai-analysis-card').forEach(el => {
+      if (el._sparkleInit) return;
+      el._sparkleInit = true;
+      el.addEventListener('mousemove', e => {
+        if (sparkleCount > 8) return;
+        sparkleCount++;
+        const s = document.createElement('div');
+        s.className = 'cursor-sparkle';
+        s.style.left = (e.clientX + (Math.random()-0.5)*12) + 'px';
+        s.style.top = (e.clientY + (Math.random()-0.5)*12) + 'px';
+        document.body.appendChild(s);
+        setTimeout(() => { s.remove(); sparkleCount--; }, 500);
+      });
+    });
+  }
+
+  // ── AI Drawer Toggle ────────────────────────────────────────
+  function toggleAIDrawer() {
+    const drawer = document.getElementById('aiDrawer');
+    if (drawer) drawer.classList.toggle('open');
+  }
+
   // ── AI Copilot ─────────────────────────────────────────────
   function initAICopilot() {
     const fab = document.getElementById('aiFab');
@@ -3194,6 +3480,9 @@ const RoktAds = (() => {
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 
+    // AI monitor indicator click handler
+    document.getElementById('aiMonitor')?.addEventListener('click', () => toggleAIDrawer());
+
     // Init subsystems
     initKeyboardShortcuts();
     initAICopilot();
@@ -3215,7 +3504,7 @@ const RoktAds = (() => {
   function toggleCampaignStatus(id) {
     const c = campaigns.find(x => x.id === id);
     if (!c) return;
-    if (c.status === 'active') {
+    if (c.status === 'active' || c.status === 'requires_action') {
       c.status = 'paused';
       toast(`${c.name} paused`, 'warning');
     } else if (c.status === 'paused') {
@@ -3279,5 +3568,12 @@ const RoktAds = (() => {
     editOffer,
     editExperiment,
     editMeasurementGroup,
+    // Phase 3: Visual UI upgrades
+    toggleAIDrawer,
+    generateAIAnalysis,
+    initAISparkles,
+    // Phase 4: Workflow completeness
+    switchDetailTab,
+    selectSmartStrategy,
   };
 })();

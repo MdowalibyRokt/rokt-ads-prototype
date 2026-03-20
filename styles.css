@@ -839,8 +839,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .form-input::placeholder { color: var(--text-tertiary); }
 .form-input:focus {
   border-color: var(--beetroot);
-  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
+  box-shadow: 0 0 0 3px rgba(194, 0, 117, 0.15), 0 0 0 1px var(--beetroot);
   background: var(--surface-white);
+  outline: none;
 }
 .form-textarea {
   width: 100%;
@@ -857,8 +858,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .form-textarea:focus {
   border-color: var(--beetroot);
-  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
+  box-shadow: 0 0 0 3px rgba(194, 0, 117, 0.15), 0 0 0 1px var(--beetroot);
   background: var(--surface-white);
+  outline: none;
 }
 .form-select {
   width: 100%;
@@ -878,7 +880,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .form-select:focus {
   border-color: var(--beetroot);
-  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
+  box-shadow: 0 0 0 3px rgba(194, 0, 117, 0.15), 0 0 0 1px var(--beetroot);
+  outline: none;
 }
 .form-select-sm {
   padding: 4px 28px 4px 10px;
@@ -4072,6 +4075,105 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   border-color: var(--beetroot);
   box-shadow: var(--shadow-glow-beetroot);
 }
+
+/* ============================================================
+   VISUAL UI UPGRADES — Premium Effects & AI Elements
+   ============================================================ */
+
+/* --- Skeleton Loading Shimmer --- */
+@keyframes shimmerLoad {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton { background: linear-gradient(90deg, var(--surface-dark) 25%, var(--surface-dark-hover) 50%, var(--surface-dark) 75%); background-size: 200% 100%; animation: shimmerLoad 1.5s ease-in-out infinite; border-radius: var(--radius-md); }
+.skeleton-text { height: 12px; margin-bottom: 8px; }
+.skeleton-heading { height: 20px; width: 60%; margin-bottom: 12px; }
+.skeleton-card { height: 100px; margin-bottom: 12px; border-radius: var(--radius-lg); }
+.skeleton-number { height: 32px; width: 80px; }
+.skeleton-row { height: 40px; margin-bottom: 4px; }
+
+/* --- Glassmorphism 2.0 Layers --- */
+.glass-panel { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(22,29,46,0.65); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05); }
+.glass-panel-deep { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); background: rgba(22,29,46,0.85); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); }
+
+/* --- Gradient Focus Borders --- */
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: var(--beetroot);
+  box-shadow: 0 0 0 3px rgba(194, 0, 117, 0.15), 0 0 0 1px var(--beetroot);
+  outline: none;
+}
+
+/* --- Micro-interactions --- */
+/* Button press feedback */
+.btn:active, .pill:active, .filter-pill:active { transform: scale(0.97); transition: transform 80ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.btn { transition: all 150ms var(--ease-out); }
+.btn:hover { transform: translateY(-1px); }
+
+/* Card hover lift */
+.kpi-card:hover, .health-card:hover, .audience-card:hover, .offer-card:hover, .experiment-card:hover, .creative-item:hover { transform: translateY(-2px); transition: all 200ms var(--ease-out); }
+
+/* Filter pill bounce on active */
+@keyframes pillBounce { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.filter-pill.active { animation: pillBounce 200ms var(--ease-spring); }
+
+/* Sidebar nav active indicator slide animation */
+.nav-item.active::before { animation: navIndicatorSlide 200ms var(--ease-out); }
+@keyframes navIndicatorSlide { from { height: 0; } to { height: 20px; } }
+
+/* --- View Transitions --- */
+@keyframes viewFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+@keyframes viewFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.view-exit { animation: viewFadeOut 150ms var(--ease-out) forwards; }
+.view-enter { animation: viewFadeIn 250ms var(--ease-out); }
+
+/* --- AI Monitor Indicator --- */
+.ai-monitor { display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-pill); background: rgba(194, 0, 117, 0.08); border: 1px solid rgba(194, 0, 117, 0.15); cursor: pointer; transition: all 150ms var(--ease-out); font-size: var(--font-size-xs); color: var(--beetroot); }
+.ai-monitor:hover { background: rgba(194, 0, 117, 0.15); }
+.ai-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--beetroot); animation: aiPulse 2s ease-in-out infinite; }
+@keyframes aiPulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(194,0,117,0.4); } 50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(194,0,117,0); } }
+.ai-monitor-text { font-weight: 500; letter-spacing: -0.01em; }
+
+/* --- AI Health Dots --- */
+.ai-health-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+.ai-health-dot.healthy { background: var(--positive); box-shadow: 0 0 4px rgba(52, 211, 153, 0.4); }
+.ai-health-dot.warning { background: var(--warning); box-shadow: 0 0 4px rgba(251, 191, 36, 0.4); }
+.ai-health-dot.critical { background: var(--negative); box-shadow: 0 0 4px rgba(248, 113, 113, 0.4); }
+
+/* --- AI Analysis Card --- */
+.ai-analysis-card { background: linear-gradient(135deg, rgba(194,0,117,0.06), rgba(72,0,41,0.06)); border: 1px solid rgba(194,0,117,0.15); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-4); }
+.ai-analysis-header { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--beetroot); margin-bottom: var(--space-3); font-size: var(--font-size-sm); }
+.ai-analysis-body { font-size: var(--font-size-sm); color: var(--text-secondary); line-height: 1.5; }
+.ai-analysis-actions { display: flex; gap: 8px; margin-top: var(--space-3); }
+.ai-analysis-actions button { font-size: var(--font-size-xs); padding: 4px 12px; border-radius: var(--radius-pill); border: 1px solid rgba(194,0,117,0.3); background: rgba(194,0,117,0.08); color: var(--beetroot); cursor: pointer; transition: all 150ms; }
+.ai-analysis-actions button:hover { background: rgba(194,0,117,0.15); }
+
+/* --- AI Ghost Text for Suggestions --- */
+.ai-ghost-text { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: inherit; font: inherit; color: var(--text-tertiary); opacity: 0.35; pointer-events: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.input-with-ghost { position: relative; }
+
+/* --- Cursor Sparkle Effect --- */
+.cursor-sparkle { position: fixed; width: 4px; height: 4px; border-radius: 50%; background: var(--beetroot); pointer-events: none; z-index: 10000; animation: sparkleOut 500ms var(--ease-out) forwards; }
+@keyframes sparkleOut { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(0) translateY(-10px); } }
+
+/* --- Floating Insight Bubbles --- */
+.floating-insight { position: absolute; top: -8px; right: -8px; background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px 8px; font-size: 10px; color: var(--positive); font-weight: 500; white-space: nowrap; animation: insightPop 300ms var(--ease-spring) 1s both; z-index: 2; }
+@keyframes insightPop { from { opacity: 0; transform: scale(0.8) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+/* --- Status Badge Variants --- */
+.badge-requires-action { background: rgba(251,191,36,0.12); color: #FBBF24; }
+.badge-pending-review { background: rgba(96,165,250,0.12); color: #60A5FA; }
+.badge-archived { background: rgba(107,114,128,0.12); color: #6B7280; }
+.badge-ended { background: rgba(156,163,175,0.12); color: #9CA3AF; }
+.badge-sub-reason { font-size: 9px; opacity: 0.7; margin-left: 4px; }
+
+/* --- Nurture Journey Flow --- */
+.nurture-flow { display: flex; flex-direction: column; align-items: center; gap: 0; padding: var(--space-4); }
+.nurture-node { background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); width: 280px; text-align: center; position: relative; }
+.nurture-node-title { font-weight: 500; font-size: var(--font-size-sm); margin-bottom: 4px; }
+.nurture-node-desc { font-size: var(--font-size-xs); color: var(--text-secondary); }
+.nurture-connector { width: 2px; height: 24px; background: var(--border); }
+.nurture-connector-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--border); }
+.nurture-node.ai-node { border-color: rgba(194,0,117,0.3); background: linear-gradient(135deg, rgba(194,0,117,0.04), transparent); }
 
 /* ============================================================
    RESPONSIVE
