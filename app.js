@@ -128,10 +128,56 @@ const RoktAds = (() => {
   let currentView = '';
   let selectedCampaign = null;
   let builderStep = 1;
-  let builderData = { objective: '', name: '', budget: 0 };
   let pendingKey = null;
   let pendingKeyTimer = null;
   let reportSort = { col: null, dir: 'desc' };
+  let placeholderInterval = null;
+
+  const defaultBuilderData = {
+    // Step 1
+    objective: '',
+    aiPrompt: '',
+    // Step 2
+    name: '',
+    companyName: '',
+    brandUrl: '',
+    measurementGroup: '',
+    startDate: '2026-03-20',
+    endDate: '',
+    dailyCap: 1667,
+    monthlyCap: 0,
+    lifetimeCap: 50000,
+    referralExclusion: '30',
+    termsEnabled: false, termsText: '',
+    privacyEnabled: false, privacyText: '',
+    disclaimerEnabled: false, disclaimerText: '',
+    // Step 3
+    bidStrategy: 'smart',
+    targetCpa: '7.50',
+    manualBid: '',
+    adSets: [{
+      audience: 'a1',
+      geoCountry: 'US', geoState: '', geoCity: '', geoZip: '',
+      deviceDesktop: true, deviceMobile: true, deviceTablet: true,
+      ageMin: 18, ageMax: 65, gender: 'all',
+      suppressExisting: false,
+      budgetOverride: '',
+      targetingExpanded: false,
+    }],
+    // Step 4
+    offerType: 'discount',
+    offerValue: '30% off first month',
+    offerCost: '$4.99',
+    landingPageUrl: 'https://www.example.com/offer',
+    couponCode: '',
+    offerStartDate: '2026-03-20', offerEndDate: '2026-06-30',
+    creativeTitle: 'Stream for Less!',
+    creativeBody: 'Get 30% off your first month. Stream thousands of movies and shows.',
+    creativeCta: 'Start Streaming',
+    calloutPromotion: '30% OFF', calloutSocial: '', calloutGuarantee: '',
+    creativeDisclaimer: '',
+  };
+  let builderData = { ...defaultBuilderData };
 
   // ── Utility Functions ──────────────────────────────────────
   function fmtNum(n) {
@@ -250,6 +296,9 @@ const RoktAds = (() => {
     renderDashboardHealth();
     renderDashboardInsights();
     renderDashboardActivity();
+    renderOptimizationScore();
+    renderAIRecommendations();
+    initCardGlow();
   }
 
   function renderDashboardHealth() {
@@ -327,6 +376,65 @@ const RoktAds = (() => {
     `).join('')}</div>`;
   }
 
+  // ── Dashboard AI Features (Phase 3) ─────────────────────────
+  function renderOptimizationScore() {
+    const container = document.getElementById('optScoreContainer');
+    if (!container) return;
+    const score = 78;
+    const color = score >= 80 ? 'var(--positive)' : score >= 60 ? 'var(--warning)' : 'var(--negative)';
+    container.innerHTML = `
+      <div class="opt-score-card">
+        <div class="opt-score-gauge">
+          <svg viewBox="0 0 120 60" width="120" height="60">
+            <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="${score * 1.57} 157" style="transition:stroke-dasharray 1.2s var(--ease-out)"/>
+          </svg>
+          <div class="opt-score-value" style="color:${color}">${score}</div>
+        </div>
+        <div class="opt-score-label">Optimization Score</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">+6 pts available from 3 recommendations</div>
+      </div>
+    `;
+  }
+
+  function renderAIRecommendations() {
+    const container = document.getElementById('aiRecsContainer');
+    if (!container) return;
+    const recs = [
+      { icon: '🎨', priority: 'high', text: 'Add <strong>2 more creatives</strong> to Disney+ campaign', impact: 'Est. +15% CoPI', action: 'Create Creative' },
+      { icon: '💰', priority: 'high', text: '<strong>Increase budget</strong> on Capital One by 20% — hitting daily cap before noon', impact: 'Est. +$2.4K conv.', action: 'Apply' },
+      { icon: '👥', priority: 'medium', text: '<strong>Refresh stale audiences</strong> on 3 campaigns — data is 14+ days old', impact: 'Est. +8% match rate', action: 'Refresh All' },
+      { icon: '⏸️', priority: 'low', text: 'Consider pausing <strong>True Classic DPA</strong> — EMQ below threshold', impact: 'Save $3.2K/wk', action: 'Review' },
+    ];
+    container.innerHTML = recs.map(r => `
+      <div class="ai-rec-card">
+        <div class="ai-rec-icon ${r.priority}">${r.icon}</div>
+        <div class="ai-rec-body">
+          <div class="ai-rec-text">${r.text}</div>
+          <div class="ai-rec-impact">${r.impact}</div>
+          <div class="ai-rec-actions">
+            <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('${r.action} applied','success')">${r.action}</button>
+            <button class="btn btn-xs btn-ghost" onclick="this.closest('.ai-rec-card').style.display='none';RoktAds.toast('Dismissed','info')">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Card Glow Effect (mouse tracking) ─────────────────────
+  function initCardGlow() {
+    document.querySelectorAll('.kpi-card, .health-card, .audience-card, .experiment-card, .offer-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width * 100) + '%';
+        const y = ((e.clientY - rect.top) / rect.height * 100) + '%';
+        card.style.setProperty('--mouse-x', x);
+        card.style.setProperty('--mouse-y', y);
+      });
+    });
+  }
+
   // ── Campaigns ──────────────────────────────────────────────
   function initCampaigns() {
     renderCampaignTable();
@@ -386,6 +494,13 @@ const RoktAds = (() => {
         <td>
           <span class="bidding-state state-${c.biddingState}"><span class="bidding-dot ${c.biddingState}"></span> ${capitalize(c.biddingState)}</span>
         </td>
+        <td>
+          <div class="row-actions">
+            <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toggleCampaignStatus('${c.id}')" title="${c.status === 'active' ? 'Pause' : 'Resume'}">${c.status === 'active' ? '⏸' : '▶'}</button>
+            <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.openModal('editCampaign','${c.id}')" title="Edit">✏️</button>
+            <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toast('Duplicated as draft','success')" title="Duplicate">⧉</button>
+          </div>
+        </td>
       </tr>
     `).join('');
   }
@@ -401,7 +516,7 @@ const RoktAds = (() => {
     // Mark selected row
     $$('.campaigns-table-wrap tr').forEach(r => r.classList.toggle('selected', r.dataset.id === id));
 
-    // Title & badges
+    // Title & badges with edit/pause actions
     const title = document.getElementById('detailTitle');
     if (title) title.textContent = c.name;
     const badges = document.getElementById('detailBadges');
@@ -409,6 +524,19 @@ const RoktAds = (() => {
       <span class="badge badge-${c.status === 'active' ? 'positive' : c.status === 'paused' ? 'warning' : 'gray'}">${capitalize(c.status)}</span>
       <span class="badge badge-gray">${c.objective}</span>
     `;
+
+    // Add action buttons to header
+    const headerWrap = document.querySelector('.detail-panel-title-wrap');
+    if (headerWrap && !headerWrap.querySelector('.detail-actions')) {
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'detail-actions';
+      actionsDiv.innerHTML = `
+        <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">${c.status === 'active' ? '⏸ Pause' : c.status === 'paused' ? '▶ Resume' : '✏️ Edit'}</button>
+        <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign', '${c.id}')">✏️ Edit</button>
+        <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign duplicated as draft','success')">⧉ Duplicate</button>
+      `;
+      headerWrap.appendChild(actionsDiv);
+    }
 
     // Metric ribbon
     const ribbon = document.getElementById('detailMetricRibbon');
@@ -553,7 +681,7 @@ const RoktAds = (() => {
   // ── Campaign Builder ──────────────────────────────────────
   function initBuilder() {
     builderStep = 1;
-    builderData = { objective: '', name: '', budget: 50000 };
+    builderData = { ...defaultBuilderData };
     updateBuilderStep();
 
     const nextBtn = document.getElementById('builderNext');
@@ -574,7 +702,116 @@ const RoktAds = (() => {
     });
   }
 
+  // Helper: persist form field to builderData
+  function persistField(field, value) {
+    if (field.includes('.')) {
+      const parts = field.split('.');
+      let obj = builderData;
+      for (let i = 0; i < parts.length - 1; i++) {
+        obj = obj[isNaN(parts[i]) ? parts[i] : parseInt(parts[i])];
+      }
+      obj[parts[parts.length - 1]] = value;
+    } else {
+      builderData[field] = value;
+    }
+  }
+
+  // Helper: toggle collapsible section
+  function toggleSection(sectionId) {
+    const el = document.getElementById(sectionId);
+    if (el) el.classList.toggle('collapsed');
+  }
+
+  // Helper: add ad set
+  function addAdSet() {
+    builderData.adSets.push({
+      audience: audiences[builderData.adSets.length % audiences.length]?.id || 'a1',
+      geoCountry: 'US', geoState: '', geoCity: '', geoZip: '',
+      deviceDesktop: true, deviceMobile: true, deviceTablet: true,
+      ageMin: 18, ageMax: 65, gender: 'all',
+      suppressExisting: false, budgetOverride: '', targetingExpanded: false,
+    });
+    updateBuilderStep();
+    toast(`Ad Set ${builderData.adSets.length} added`, 'success');
+  }
+
+  function removeAdSet(idx) {
+    if (builderData.adSets.length <= 1) { toast('Must have at least 1 ad set', 'warning'); return; }
+    builderData.adSets.splice(idx, 1);
+    updateBuilderStep();
+    toast('Ad set removed', 'info');
+  }
+
+  function toggleTargeting(idx) {
+    builderData.adSets[idx].targetingExpanded = !builderData.adSets[idx].targetingExpanded;
+    updateBuilderStep();
+  }
+
+  function selectBidStrategy(strategy) {
+    builderData.bidStrategy = strategy;
+    updateBuilderStep();
+  }
+
+  function simulateImageUpload() {
+    toast('Image uploaded (simulated)', 'success');
+    const zone = document.getElementById('imageUploadZone');
+    if (zone) {
+      zone.classList.add('has-image');
+      zone.innerHTML = '<div style="font-size:48px">🖼️</div><div style="font-size:12px;color:var(--text-secondary)">brand-logo.png · 1080×565px</div>';
+    }
+  }
+
+  function generateAICampaign() {
+    const prompt = document.getElementById('aiCampaignPrompt')?.value || '';
+    // Simulate AI filling out the whole campaign
+    builderData = {
+      ...defaultBuilderData,
+      objective: 'cpa',
+      aiPrompt: prompt,
+      name: 'AI-Generated: Disney+ Q2 Acquisition',
+      companyName: 'Disney+',
+      brandUrl: 'https://www.disneyplus.com',
+      measurementGroup: measurementGroups[0]?.name || '',
+      dailyCap: 2500,
+      monthlyCap: 75000,
+      lifetimeCap: 150000,
+      bidStrategy: 'smart',
+      targetCpa: '7.00',
+      adSets: [
+        { audience: 'a1', geoCountry: 'US', geoState: '', geoCity: '', geoZip: '', deviceDesktop: true, deviceMobile: true, deviceTablet: true, ageMin: 25, ageMax: 45, gender: 'female', suppressExisting: true, budgetOverride: '', targetingExpanded: false },
+        { audience: 'a2', geoCountry: 'US', geoState: '', geoCity: '', geoZip: '', deviceDesktop: true, deviceMobile: true, deviceTablet: false, ageMin: 18, ageMax: 34, gender: 'all', suppressExisting: true, budgetOverride: '', targetingExpanded: false },
+      ],
+      offerType: 'discount',
+      offerValue: '30% off first month',
+      offerCost: '$4.99',
+      landingPageUrl: 'https://www.disneyplus.com/offer?utm_source=rokt',
+      couponCode: 'ROKT30',
+      creativeTitle: 'Stream for Less!',
+      creativeBody: 'Get 30% off your first month of Disney+. Watch thousands of movies and shows.',
+      creativeCta: 'Start Streaming',
+      calloutPromotion: '30% OFF',
+      calloutSocial: '50M+ subscribers',
+      calloutGuarantee: 'Cancel anytime',
+    };
+    builderStep = 5;
+    updateBuilderStep();
+    toast('AI configured your campaign — review below', 'success');
+  }
+
+  // Objective labels map
+  const objectiveLabels = {
+    cpa: 'Customer Acquisition',
+    roas: 'Revenue Growth / ROAS',
+    app: 'App Installs',
+    dpa: 'Product Sales (DPA)',
+    leads: 'Email Subscription',
+    embed: 'Embedded Actions',
+  };
+
   function updateBuilderStep() {
+    // Clear placeholder cycling
+    if (placeholderInterval) { clearInterval(placeholderInterval); placeholderInterval = null; }
+
     // Update step indicators
     $$('.builder-step').forEach(step => {
       const s = parseInt(step.dataset.step);
@@ -592,184 +829,566 @@ const RoktAds = (() => {
     if (!content) return;
 
     if (builderStep === 1) {
-      content.innerHTML = `<div class="builder-content-inner">
-        <h3 style="margin-bottom:4px">What do you want to achieve?</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Select a campaign objective to get started, or describe your campaign in natural language.</p>
-        <div class="objective-grid">
+      content.innerHTML = renderBuilderStep1();
+      // Start cycling placeholder
+      const promptEl = document.getElementById('aiCampaignPrompt');
+      if (promptEl) {
+        const placeholders = [
+          'Acquire Disney+ subscribers at $7 CPA targeting women 25-45...',
+          'Drive app installs for my fintech app, $3 per install...',
+          'Maximize ROAS on my product catalog with dynamic ads...',
+          'Get email signups for our newsletter at scale, US only...',
+          'Promote free shipping offer to mobile users under $5 CPA...',
+        ];
+        let pIdx = 0;
+        placeholderInterval = setInterval(() => {
+          pIdx = (pIdx + 1) % placeholders.length;
+          promptEl.style.opacity = '0';
+          setTimeout(() => {
+            promptEl.placeholder = placeholders[pIdx];
+            promptEl.style.opacity = '1';
+          }, 200);
+        }, 3000);
+        promptEl.style.transition = 'opacity 200ms';
+      }
+    } else if (builderStep === 2) {
+      content.innerHTML = renderBuilderStep2();
+    } else if (builderStep === 3) {
+      content.innerHTML = renderBuilderStep3();
+    } else if (builderStep === 4) {
+      content.innerHTML = renderBuilderStep4();
+      initBuilderStep4Preview();
+    } else if (builderStep === 5) {
+      content.innerHTML = renderBuilderStep5();
+    }
+  }
+
+  // ── Builder Step Renderers ──────────────────────────────────
+
+  function renderBuilderStep1() {
+    const objectives = [
+      { id: 'cpa', icon: '🎯', name: 'Customer Acquisition', desc: 'Get new customers at a target CPA' },
+      { id: 'roas', icon: '📈', name: 'Revenue Growth', desc: 'Maximize return on ad spend' },
+      { id: 'app', icon: '📱', name: 'App Installs', desc: 'Drive mobile app downloads' },
+      { id: 'dpa', icon: '🛍️', name: 'Product Sales (DPA)', desc: 'Dynamic product ads from your catalog' },
+      { id: 'leads', icon: '✉️', name: 'Email Subscription', desc: 'Capture email addresses and signups' },
+      { id: 'embed', icon: '⚡', name: 'Embedded Actions', desc: 'Drive in-page actions and engagement' },
+    ];
+    return `<div class="builder-content-inner">
+      <div class="ai-hero-section">
+        <div class="ai-hero-label"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> Describe your campaign</div>
+        <div class="ai-hero-input-wrap">
+          <textarea id="aiCampaignPrompt" class="ai-hero-textarea" rows="2" placeholder="Acquire Disney+ subscribers at $7 CPA targeting women 25-45..." oninput="RoktAds.persistField('aiPrompt', this.value)">${builderData.aiPrompt}</textarea>
+          <button class="ai-hero-generate-btn" onclick="RoktAds.generateAICampaign()">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+            Generate Campaign
+          </button>
+        </div>
+        <div class="ai-hero-hint">AI will configure objective, targeting, budget, creative, and offer — skip straight to Review</div>
+      </div>
+
+      <div class="builder-divider">
+        <span>Or choose your objective</span>
+      </div>
+
+      <div class="objective-grid">
+        ${objectives.map(o => `
+          <div class="objective-card ${builderData.objective === o.id ? 'selected' : ''}" data-objective-id="${o.id}" onclick="RoktAds.selectObjective('${o.id}')">
+            <span class="objective-icon">${o.icon}</span>
+            <div class="objective-name">${o.name}</div>
+            <div class="objective-desc">${o.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  function renderBuilderStep2() {
+    return `<div class="builder-content-inner">
+      <h3 style="margin-bottom:4px">Campaign Setup</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Configure the basics — name, schedule, budget, and policies.</p>
+      <div class="builder-form">
+        <div class="builder-section">
+          <div class="builder-section-label">Campaign Details</div>
+          <div class="form-group">
+            <label class="form-label">Campaign Name</label>
+            <input type="text" class="form-input" value="${builderData.name || 'My New Campaign'}" placeholder="e.g. US | Customer Acquisition | Q2 2026" oninput="RoktAds.persistField('name', this.value)">
+            <div class="form-hint">Recommended format: [Country] | [Objective] | [Timeframe]</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Company Name</label>
+              <input type="text" class="form-input" value="${builderData.companyName}" placeholder="Your company name" oninput="RoktAds.persistField('companyName', this.value)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Brand URL</label>
+              <input type="url" class="form-input" value="${builderData.brandUrl}" placeholder="https://www.example.com" oninput="RoktAds.persistField('brandUrl', this.value)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Measurement Group</label>
+              <select class="form-select" onchange="RoktAds.persistField('measurementGroup', this.value)">
+                <option value="">Create New Measurement Group</option>
+                ${measurementGroups.map(mg => `<option value="${mg.name}" ${builderData.measurementGroup === mg.name ? 'selected' : ''}>${mg.name} (EMQ: ${mg.emq})</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Referral Exclusion Period</label>
+              <select class="form-select" onchange="RoktAds.persistField('referralExclusion', this.value)">
+                ${['1', '7', '14', '30', '90'].map(d => `<option value="${d}" ${builderData.referralExclusion === d ? 'selected' : ''}>${d} day${d !== '1' ? 's' : ''}</option>`).join('')}
+              </select>
+              <div class="form-hint">Time before the same customer sees this offer again</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Schedule</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Date</label>
+              <input type="date" class="form-input" value="${builderData.startDate}" oninput="RoktAds.persistField('startDate', this.value)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Date (Optional)</label>
+              <input type="date" class="form-input" value="${builderData.endDate}" oninput="RoktAds.persistField('endDate', this.value)">
+              <div class="form-hint">Leave blank to run until budget is exhausted</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Budget</div>
+          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="form-group">
+              <label class="form-label">Daily Cap</label>
+              <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${builderData.dailyCap}" placeholder="0" oninput="RoktAds.persistField('dailyCap', Number(this.value))"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monthly Cap</label>
+              <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${builderData.monthlyCap || ''}" placeholder="Optional" oninput="RoktAds.persistField('monthlyCap', Number(this.value))"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Lifetime Cap</label>
+              <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${builderData.lifetimeCap}" placeholder="0" oninput="RoktAds.persistField('lifetimeCap', Number(this.value))"></div>
+            </div>
+          </div>
+          <div class="budget-visual">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Projected Spend</div>
+            <div class="budget-bar">
+              <div class="budget-bar-segment budget-bar-daily" style="flex:${builderData.dailyCap || 1}">Daily: $${fmtNum(builderData.dailyCap)}/day</div>
+              ${builderData.monthlyCap ? `<div class="budget-bar-segment budget-bar-monthly" style="flex:${builderData.monthlyCap / 30}">Monthly: $${fmtNum(builderData.monthlyCap)}</div>` : ''}
+              <div class="budget-bar-segment budget-bar-lifetime" style="flex:${(builderData.lifetimeCap || 1) / 30}">Lifetime: $${fmtNum(builderData.lifetimeCap)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="builder-section collapsible" id="policySection">
+          <div class="builder-section-label clickable" onclick="RoktAds.toggleSection('policySectionBody')">
+            Policy Links <span class="section-chevron">▸</span>
+            <span style="font-weight:400;font-size:11px;color:var(--text-tertiary);margin-left:8px">Optional — Terms, Privacy, Disclaimer</span>
+          </div>
+          <div class="builder-section-body collapsed" id="policySectionBody">
+            <div class="policy-row">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" class="form-checkbox" ${builderData.termsEnabled ? 'checked' : ''} onchange="RoktAds.persistField('termsEnabled', this.checked)"> Terms & Conditions
+              </label>
+              ${builderData.termsEnabled ? '<textarea class="form-textarea" rows="2" placeholder="Enter terms & conditions text..." oninput="RoktAds.persistField(\'termsText\', this.value)">' + builderData.termsText + '</textarea>' : ''}
+            </div>
+            <div class="policy-row">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" class="form-checkbox" ${builderData.privacyEnabled ? 'checked' : ''} onchange="RoktAds.persistField('privacyEnabled', this.checked)"> Privacy Policy
+              </label>
+            </div>
+            <div class="policy-row">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" class="form-checkbox" ${builderData.disclaimerEnabled ? 'checked' : ''} onchange="RoktAds.persistField('disclaimerEnabled', this.checked)"> Disclaimer
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderBuilderStep3() {
+    return `<div class="builder-content-inner">
+      <h3 style="margin-bottom:4px">Strategy & Targeting</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Choose your bid strategy and define ad sets with targeting.</p>
+
+      <div class="builder-section">
+        <div class="builder-section-label">Bid Strategy</div>
+        <div class="bid-strategy-grid">
           ${[
-            { id: 'cpa', icon: '🎯', name: 'Customer Acquisition', desc: 'Get new customers at a target CPA' },
-            { id: 'roas', icon: '📈', name: 'Revenue Growth', desc: 'Maximize return on ad spend' },
-            { id: 'app', icon: '📱', name: 'App Installs', desc: 'Drive mobile app downloads' },
-            { id: 'dpa', icon: '🛍️', name: 'Product Sales (DPA)', desc: 'Dynamic product ads from your catalog' },
-            { id: 'leads', icon: '✉️', name: 'Email Leads', desc: 'Capture email addresses and signups' },
-            { id: 'embed', icon: '⚡', name: 'Embedded Actions', desc: 'Drive in-page actions and engagement' },
-          ].map(o => `
-            <div class="objective-card ${builderData.objective === o.id ? 'selected' : ''}" onclick="RoktAds.selectObjective('${o.id}')">
-              <span class="objective-icon">${o.icon}</span>
-              <div class="objective-name">${o.name}</div>
-              <div class="objective-desc">${o.desc}</div>
+            { id: 'smart', name: 'Smart Bidding', icon: '🤖', desc: 'AI optimizes bids per-customer using transaction intent signals', badge: 'Recommended', note: 'Requires 30+ conversions in past 30 days' },
+            { id: 'budget_opt', name: 'Budget Optimization', icon: '📊', desc: 'Adjusts bids based on predicted transaction volumes and budget pacing', badge: '', note: 'Cannot be combined with Smart Bidding' },
+            { id: 'manual', name: 'Manual Bidding', icon: '✋', desc: 'Set a fixed bid price per audience — full control', badge: '', note: '' },
+          ].map(s => `
+            <div class="bid-strategy-card ${builderData.bidStrategy === s.id ? 'selected' : ''}" onclick="RoktAds.selectBidStrategy('${s.id}')">
+              <div class="bid-strategy-card-header">
+                <span style="font-size:20px">${s.icon}</span>
+                <div>
+                  <div style="font-weight:600;font-size:13px">${s.name}</div>
+                  ${s.badge ? `<span class="badge badge-wine" style="font-size:9px">${s.badge}</span>` : ''}
+                </div>
+                <span class="bid-strategy-radio">${builderData.bidStrategy === s.id ? '●' : '○'}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">${s.desc}</div>
+              ${s.note ? `<div style="font-size:11px;color:var(--warning);margin-top:6px">⚠ ${s.note}</div>` : ''}
             </div>
           `).join('')}
         </div>
-        <div style="margin-top:24px;text-align:center">
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">— or describe your campaign —</div>
-          <input type="text" class="form-input" placeholder="e.g. I want to acquire Disney+ subscribers at $7 CPA targeting women 25-45" style="max-width:520px;margin:0 auto;text-align:center">
-        </div>
-      </div>`;
-    } else if (builderStep === 2) {
-      content.innerHTML = `<div class="builder-content-inner">
-        <h3 style="margin-bottom:4px">Campaign Setup</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Configure the basics — name, schedule, and budget.</p>
-        <div class="builder-form">
-          <div class="form-group">
-            <label class="form-label">Campaign Name</label>
-            <input type="text" class="form-input" value="${builderData.name || 'My New Campaign'}" placeholder="Enter campaign name">
+        ${builderData.bidStrategy === 'smart' ? `
+          <div class="form-group" style="margin-top:12px;max-width:240px">
+            <label class="form-label">Target CPA</label>
+            <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="0.01" class="form-input mono" value="${builderData.targetCpa}" oninput="RoktAds.persistField('targetCpa', this.value)"></div>
           </div>
+        ` : ''}
+        ${builderData.bidStrategy === 'manual' ? `
+          <div class="form-group" style="margin-top:12px;max-width:240px">
+            <label class="form-label">Bid Price (per referral)</label>
+            <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="0.01" class="form-input mono" value="${builderData.manualBid}" placeholder="0.00" oninput="RoktAds.persistField('manualBid', this.value)"></div>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="builder-section" style="margin-top:20px">
+        <div class="builder-section-label">Ad Sets</div>
+        ${builderData.adSets.map((as, idx) => {
+          const aud = audiences.find(a => a.id === as.audience) || audiences[0];
+          return `
+          <div class="strategy-card" style="margin-bottom:12px">
+            <div class="strategy-card-header">
+              <span style="font-weight:600">Ad Set ${idx + 1}${idx === 0 ? ' — Primary' : ''}</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="badge badge-positive">Active</span>
+                ${idx > 0 ? `<button class="btn btn-xs btn-ghost" style="color:var(--negative)" onclick="RoktAds.removeAdSet(${idx})">Remove</button>` : ''}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Audience</label>
+              <select class="form-select" onchange="RoktAds.persistField('adSets.${idx}.audience', this.value)">
+                ${audiences.map(a => `<option value="${a.id}" ${as.audience === a.id ? 'selected' : ''}>${a.icon} ${a.name} (${a.size})</option>`).join('')}
+              </select>
+            </div>
+
+            <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleTargeting(${idx})" style="margin:8px 0">
+              ${as.targetingExpanded ? '▾' : '▸'} Customize Targeting
+            </button>
+
+            ${as.targetingExpanded ? `
+              <div class="targeting-panel">
+                <div class="form-row" style="grid-template-columns:1fr 1fr">
+                  <div class="form-group">
+                    <label class="form-label">Country</label>
+                    <select class="form-select" onchange="RoktAds.persistField('adSets.${idx}.geoCountry', this.value)">
+                      ${['US', 'UK', 'AU', 'CA', 'DE', 'FR'].map(c => `<option value="${c}" ${as.geoCountry === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">State / Region</label>
+                    <input type="text" class="form-input" value="${as.geoState}" placeholder="e.g. CA, NY" oninput="RoktAds.persistField('adSets.${idx}.geoState', this.value)">
+                  </div>
+                </div>
+                <div class="form-row" style="grid-template-columns:1fr 1fr">
+                  <div class="form-group">
+                    <label class="form-label">City</label>
+                    <input type="text" class="form-input" value="${as.geoCity}" placeholder="Optional" oninput="RoktAds.persistField('adSets.${idx}.geoCity', this.value)">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">ZIP / Postal Codes</label>
+                    <input type="text" class="form-input" value="${as.geoZip}" placeholder="Comma-separated" oninput="RoktAds.persistField('adSets.${idx}.geoZip', this.value)">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Devices</label>
+                  <div class="device-checkbox-group">
+                    <label class="device-check"><input type="checkbox" ${as.deviceDesktop ? 'checked' : ''} onchange="RoktAds.persistField('adSets.${idx}.deviceDesktop', this.checked)"> Desktop</label>
+                    <label class="device-check"><input type="checkbox" ${as.deviceMobile ? 'checked' : ''} onchange="RoktAds.persistField('adSets.${idx}.deviceMobile', this.checked)"> Mobile</label>
+                    <label class="device-check"><input type="checkbox" ${as.deviceTablet ? 'checked' : ''} onchange="RoktAds.persistField('adSets.${idx}.deviceTablet', this.checked)"> Tablet</label>
+                  </div>
+                </div>
+                <div class="form-row" style="grid-template-columns:1fr 1fr 1fr">
+                  <div class="form-group">
+                    <label class="form-label">Age Min</label>
+                    <input type="number" class="form-input mono" value="${as.ageMin}" min="13" max="65" oninput="RoktAds.persistField('adSets.${idx}.ageMin', Number(this.value))">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Age Max</label>
+                    <input type="number" class="form-input mono" value="${as.ageMax}" min="13" max="65" oninput="RoktAds.persistField('adSets.${idx}.ageMax', Number(this.value))">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" onchange="RoktAds.persistField('adSets.${idx}.gender', this.value)">
+                      <option value="all" ${as.gender === 'all' ? 'selected' : ''}>All</option>
+                      <option value="male" ${as.gender === 'male' ? 'selected' : ''}>Male</option>
+                      <option value="female" ${as.gender === 'female' ? 'selected' : ''}>Female</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="form-row" style="margin-top:8px">
+              <div class="form-group">
+                <label class="form-label" style="display:flex;align-items:center;gap:8px">
+                  <input type="checkbox" class="form-checkbox" ${as.suppressExisting ? 'checked' : ''} onchange="RoktAds.persistField('adSets.${idx}.suppressExisting', this.checked)"> Suppress existing customers
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Budget Override</label>
+                <input type="text" class="form-input mono" value="${as.budgetOverride}" placeholder="Inherit from campaign" oninput="RoktAds.persistField('adSets.${idx}.budgetOverride', this.value)">
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+        <button class="btn btn-ghost" onclick="RoktAds.addAdSet()" style="margin-top:8px">+ Add Another Ad Set</button>
+      </div>
+    </div>`;
+  }
+
+  function renderBuilderStep4() {
+    const titleLen = builderData.creativeTitle.length;
+    const bodyLen = builderData.creativeBody.length;
+    const combinedLen = titleLen + bodyLen;
+    const ctaLen = builderData.creativeCta.length;
+
+    return `<div class="builder-content-inner builder-step4-layout">
+      <div class="builder-step4-forms">
+        <h3 style="margin-bottom:4px">Offers & Creatives</h3>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">What will people see? Create your offer and design creatives.</p>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Offer</div>
           <div class="form-group">
-            <label class="form-label">Measurement Group</label>
-            <select class="form-select">
-              <option>Create New Measurement Group</option>
-              ${measurementGroups.map(mg => `<option>${mg.name} (EMQ: ${mg.emq})</option>`).join('')}
+            <label class="form-label">Offer Type</label>
+            <select class="form-select" onchange="RoktAds.persistField('offerType', this.value)">
+              ${[['discount','🏷️ Discount'],['trial','🆓 Free Trial'],['cashback','💰 Cashback'],['shipping','📦 Free Shipping'],['product','🛍️ Product']].map(([v,l]) =>
+                `<option value="${v}" ${builderData.offerType === v ? 'selected' : ''}>${l}</option>`
+              ).join('')}
             </select>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Start Date</label>
-              <input type="date" class="form-input" value="2026-03-20">
-            </div>
-            <div class="form-group">
-              <label class="form-label">End Date (Optional)</label>
-              <input type="date" class="form-input" value="">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Daily Budget</label>
-            <input type="text" class="form-input mono" value="$${(builderData.budget / 30).toFixed(0)}" placeholder="$0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Lifetime Budget (Guardrail)</label>
-            <input type="text" class="form-input mono" value="$${fmtNum(builderData.budget)}" placeholder="$0">
-          </div>
-          <div class="budget-visual">
-            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Budget Distribution</div>
-            <div class="budget-bar">
-              <div class="budget-bar-segment budget-bar-daily" style="flex:7">Daily: $${(builderData.budget / 30).toFixed(0)}/day</div>
-              <div class="budget-bar-segment budget-bar-lifetime" style="flex:3">Lifetime: $${fmtNum(builderData.budget)}</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    } else if (builderStep === 3) {
-      content.innerHTML = `<div class="builder-content-inner">
-        <h3 style="margin-bottom:4px">Strategy & Targeting</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Define how you want to reach people. Add one or more ad sets with different audiences.</p>
-        <div class="strategy-card">
-          <div class="strategy-card-header">
-            <span style="font-weight:600">Ad Set 1 — Primary Audience</span>
-            <span class="badge badge-positive">Active</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Audience</label>
-            <select class="form-select">
-              ${audiences.map(a => `<option>${a.icon} ${a.name} (${a.size})</option>`).join('')}
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Bid Strategy</label>
-            <select class="form-select">
-              <option>Smart Bidding — Recommended</option>
-              <option>Target CPA</option>
-              <option>Target ROAS</option>
-              <option>Manual CPC</option>
-            </select>
-            <div class="form-hint">Smart Bidding uses Rokt's AI to optimize every impression using transaction intent signals.</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ad Set Budget Override (Optional)</label>
-            <input type="text" class="form-input mono" value="" placeholder="Inherit from campaign">
-          </div>
-        </div>
-        <button class="btn btn-ghost" onclick="RoktAds.toast('Additional ad set added','success')" style="margin-top:8px">+ Add Another Ad Set</button>
-      </div>`;
-    } else if (builderStep === 4) {
-      content.innerHTML = `<div class="builder-content-inner">
-        <h3 style="margin-bottom:4px">Offers & Creatives</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">What will people see? Create your offer and design creatives.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-          <div>
-            <h4 style="font-size:13px;margin-bottom:12px">Offer</h4>
-            <div class="form-group">
-              <label class="form-label">Offer Type</label>
-              <select class="form-select">
-                <option>🏷️ Discount</option>
-                <option>🆓 Free Trial</option>
-                <option>💰 Cashback</option>
-                <option>📦 Free Shipping</option>
-                <option>🛍️ Product</option>
-              </select>
-            </div>
-            <div class="form-group">
               <label class="form-label">Offer Value</label>
-              <input type="text" class="form-input" value="30% off first month" placeholder="e.g. $10 off, Free trial">
+              <input type="text" class="form-input" value="${builderData.offerValue}" placeholder="e.g. 30% off, $10 credit" oninput="RoktAds.persistField('offerValue', this.value)">
             </div>
             <div class="form-group">
               <label class="form-label">Cost to Advertiser</label>
-              <input type="text" class="form-input mono" value="$4.99" placeholder="$0.00">
+              <input type="text" class="form-input mono" value="${builderData.offerCost}" placeholder="$0.00" oninput="RoktAds.persistField('offerCost', this.value)">
             </div>
           </div>
-          <div>
-            <h4 style="font-size:13px;margin-bottom:12px">Creative</h4>
-            <div class="form-group">
-              <label class="form-label">Title</label>
-              <input type="text" class="form-input" value="Stream for Less!" maxlength="40">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Body</label>
-              <textarea class="form-textarea" rows="2">Get 30% off your first month. Stream thousands of movies and shows.</textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">CTA</label>
-              <input type="text" class="form-input" value="Start Streaming" maxlength="25">
-            </div>
-            <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Generating 4 AI creative variations...','info')">✨ AI Generate Variations</button>
+          <div class="form-group">
+            <label class="form-label">Landing Page URL <span style="color:var(--negative)">*</span></label>
+            <input type="url" class="form-input" value="${builderData.landingPageUrl}" placeholder="https://www.example.com/offer" oninput="RoktAds.persistField('landingPageUrl', this.value)">
+            <div class="form-hint">Must be HTTPS. Must match the offer described in creative.</div>
           </div>
-        </div>
-      </div>`;
-    } else if (builderStep === 5) {
-      content.innerHTML = `<div class="builder-content-inner">
-        <h3 style="margin-bottom:4px">Review & Launch</h3>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Review your campaign setup before launching.</p>
-        <div class="review-tree">
-          <div class="review-tree-node"><strong>📋 Campaign:</strong> ${builderData.name || 'My New Campaign'}</div>
-          <div class="review-tree-children">
-            <div class="review-tree-node"><strong>🎯 Objective:</strong> ${builderData.objective ? builderData.objective.toUpperCase() : 'Customer Acquisition'}</div>
-            <div class="review-tree-node"><strong>💰 Budget:</strong> $${fmtNum(builderData.budget)} lifetime, $${(builderData.budget/30).toFixed(0)}/day</div>
-            <div class="review-tree-node"><strong>📅 Schedule:</strong> Mar 20, 2026 — Ongoing</div>
-            <div class="review-tree-children">
-              <div class="review-tree-node"><strong>👥 Ad Set 1:</strong> ${audiences[0].name}</div>
-              <div class="review-tree-children">
-                <div class="review-tree-node"><strong>🏷️ Offer:</strong> 30% off first month ($4.99 cost)</div>
-                <div class="review-tree-node"><strong>🎨 Creative:</strong> "Stream for Less!" (Text format)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Coupon Code</label>
+              <input type="text" class="form-input mono" value="${builderData.couponCode}" placeholder="Optional" oninput="RoktAds.persistField('couponCode', this.value)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Validity</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <input type="date" class="form-input" value="${builderData.offerStartDate}" oninput="RoktAds.persistField('offerStartDate', this.value)">
+                <input type="date" class="form-input" value="${builderData.offerEndDate}" oninput="RoktAds.persistField('offerEndDate', this.value)">
               </div>
             </div>
           </div>
         </div>
-        <div class="review-checklist">
-          <div class="review-check-item"><span class="check-icon">✓</span> Campaign objective set</div>
-          <div class="review-check-item"><span class="check-icon">✓</span> Budget configured</div>
-          <div class="review-check-item"><span class="check-icon">✓</span> At least 1 ad set with audience</div>
-          <div class="review-check-item"><span class="check-icon">✓</span> Offer created</div>
-          <div class="review-check-item"><span class="check-icon">✓</span> Creative added</div>
-          <div class="review-check-item"><span class="warn-icon">⚠</span> <span style="color:var(--warning)">Recommended: Add 3 more creative variations for better optimization</span></div>
+
+        <div class="builder-section" style="margin-top:16px">
+          <div class="builder-section-label">Creative</div>
+          <div class="form-group">
+            <label class="form-label">Title <span class="char-counter ${combinedLen > 160 ? 'warning' : ''}" id="builderCharCount">${combinedLen}/175</span></label>
+            <input type="text" class="form-input" id="builderCreativeTitle" value="${builderData.creativeTitle}" maxlength="100" oninput="RoktAds.persistField('creativeTitle', this.value); RoktAds.updateBuilderPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Body Copy</label>
+            <textarea class="form-textarea" id="builderCreativeBody" rows="2" oninput="RoktAds.persistField('creativeBody', this.value); RoktAds.updateBuilderPreview()">${builderData.creativeBody}</textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Positive CTA <span class="char-counter ${ctaLen > 18 ? 'warning' : ''}">${ctaLen}/20</span></label>
+              <input type="text" class="form-input" id="builderCreativeCta" value="${builderData.creativeCta}" maxlength="20" oninput="RoktAds.persistField('creativeCta', this.value); RoktAds.updateBuilderPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Negative CTA</label>
+              <input type="text" class="form-input" value="No thanks" disabled style="opacity:0.5">
+              <div class="form-hint">Not customizable per Rokt policy</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Callout Tags</label>
+            <div class="callout-tags-row">
+              <div class="callout-tag-input">
+                <span class="callout-tag-label">Promotion</span>
+                <input type="text" class="form-input" value="${builderData.calloutPromotion}" placeholder="e.g. 30% OFF" oninput="RoktAds.persistField('calloutPromotion', this.value)">
+              </div>
+              <div class="callout-tag-input">
+                <span class="callout-tag-label">Social Proof</span>
+                <input type="text" class="form-input" value="${builderData.calloutSocial}" placeholder="e.g. 50M+ users" oninput="RoktAds.persistField('calloutSocial', this.value)">
+              </div>
+              <div class="callout-tag-input">
+                <span class="callout-tag-label">Guarantee</span>
+                <input type="text" class="form-input" value="${builderData.calloutGuarantee}" placeholder="e.g. Cancel anytime" oninput="RoktAds.persistField('calloutGuarantee', this.value)">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Disclaimer</label>
+            <textarea class="form-textarea" rows="2" placeholder="Legal disclaimer text (displayed below the offer)" oninput="RoktAds.persistField('creativeDisclaimer', this.value)">${builderData.creativeDisclaimer}</textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Image</label>
+            <div class="image-upload-zone" id="imageUploadZone" onclick="RoktAds.simulateImageUpload()">
+              <div style="font-size:28px;margin-bottom:8px">📁</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Click to upload brand logo or product image</div>
+              <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">PNG/JPG · Max 2MB · Min 400×400px · Rec. 1080×565px</div>
+            </div>
+          </div>
+
+          <button class="ai-generate-btn-large" onclick="RoktAds.toast('Generating 4 AI creative variations...','info')">
+            <svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+            AI Generate 4 Variations
+          </button>
         </div>
-      </div>`;
+      </div>
+
+      <div class="builder-step4-preview">
+        <div class="preview-sticky">
+          <div class="preview-label">Live Preview</div>
+          <div class="preview-phone-frame">
+            <div class="preview-partner-bar">Partner checkout page</div>
+            <div class="preview-offer-card">
+              <div class="preview-sponsored">SPONSORED</div>
+              ${builderData.calloutPromotion ? `<div class="preview-callout-pill">${builderData.calloutPromotion}</div>` : ''}
+              <div class="preview-title-text" id="builderPreviewTitle">${builderData.creativeTitle}</div>
+              <div class="preview-body-text" id="builderPreviewBody">${builderData.creativeBody}</div>
+              ${builderData.calloutSocial ? `<div class="preview-social-proof">⭐ ${builderData.calloutSocial}</div>` : ''}
+              <button class="preview-cta-btn" id="builderPreviewCta">${builderData.creativeCta}</button>
+              <div class="preview-decline">No thanks</div>
+              ${builderData.creativeDisclaimer ? `<div class="preview-disclaimer">* ${builderData.creativeDisclaimer}</div>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function initBuilderStep4Preview() {
+    // Wire up live preview updates
+    const titleInput = document.getElementById('builderCreativeTitle');
+    const bodyInput = document.getElementById('builderCreativeBody');
+    const ctaInput = document.getElementById('builderCreativeCta');
+    if (titleInput) titleInput.addEventListener('input', updateBuilderPreview);
+    if (bodyInput) bodyInput.addEventListener('input', updateBuilderPreview);
+    if (ctaInput) ctaInput.addEventListener('input', updateBuilderPreview);
+  }
+
+  function updateBuilderPreview() {
+    const previewTitle = document.getElementById('builderPreviewTitle');
+    const previewBody = document.getElementById('builderPreviewBody');
+    const previewCta = document.getElementById('builderPreviewCta');
+    const charCount = document.getElementById('builderCharCount');
+
+    if (previewTitle) previewTitle.textContent = builderData.creativeTitle;
+    if (previewBody) previewBody.textContent = builderData.creativeBody;
+    if (previewCta) previewCta.textContent = builderData.creativeCta;
+
+    const combined = builderData.creativeTitle.length + builderData.creativeBody.length;
+    if (charCount) {
+      charCount.textContent = `${combined}/175`;
+      charCount.className = 'char-counter' + (combined > 160 ? ' warning' : combined > 175 ? ' danger' : '');
     }
+  }
+
+  function renderBuilderStep5() {
+    const objLabel = objectiveLabels[builderData.objective] || builderData.objective || 'Not selected';
+    const aud0 = audiences.find(a => a.id === builderData.adSets[0]?.audience) || audiences[0];
+    const bidLabel = { smart: 'Smart Bidding', budget_opt: 'Budget Optimization', manual: 'Manual Bidding' }[builderData.bidStrategy] || builderData.bidStrategy;
+
+    // Validation checks
+    const checks = [
+      { ok: !!builderData.objective, label: 'Campaign objective selected' },
+      { ok: !!builderData.name && builderData.name !== 'My New Campaign' && builderData.name !== '', label: 'Campaign name configured' },
+      { ok: builderData.lifetimeCap > 0 || builderData.dailyCap > 0, label: 'Budget configured' },
+      { ok: builderData.adSets.length >= 1, label: 'At least 1 ad set with audience' },
+      { ok: !!builderData.creativeTitle, label: 'Creative title added' },
+      { ok: !!builderData.landingPageUrl, label: 'Landing page URL provided' },
+    ];
+    const allPassed = checks.every(c => c.ok);
+
+    return `<div class="builder-content-inner">
+      <div class="approval-banner">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--brand-blue)" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 6v0M9 9v4"/></svg>
+        <div>
+          <strong>Pending Rokt Approval</strong>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Your campaign will be reviewed by Rokt before going live. This typically takes 1-2 business days.</div>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom:4px">Review & Launch</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Review your campaign setup before submitting for approval.</p>
+
+      <div class="review-tree">
+        <div class="review-tree-node"><strong>📋 Campaign:</strong> ${builderData.name || 'My New Campaign'}</div>
+        <div class="review-tree-children">
+          <div class="review-tree-node"><strong>🎯 Objective:</strong> ${objLabel}</div>
+          <div class="review-tree-node"><strong>🏢 Brand:</strong> ${builderData.companyName || '—'} ${builderData.brandUrl ? `(${builderData.brandUrl})` : ''}</div>
+          <div class="review-tree-node"><strong>💰 Budget:</strong> $${fmtNum(builderData.dailyCap)}/day ${builderData.monthlyCap ? '· $' + fmtNum(builderData.monthlyCap) + '/mo' : ''} · $${fmtNum(builderData.lifetimeCap)} lifetime</div>
+          <div class="review-tree-node"><strong>📅 Schedule:</strong> ${builderData.startDate || 'Not set'} — ${builderData.endDate || 'Ongoing'}</div>
+          <div class="review-tree-node"><strong>🎲 Bid Strategy:</strong> ${bidLabel}${builderData.bidStrategy === 'smart' ? ' (Target CPA: $' + builderData.targetCpa + ')' : ''}${builderData.bidStrategy === 'manual' ? ' ($' + builderData.manualBid + '/referral)' : ''}</div>
+          ${builderData.adSets.map((as, idx) => {
+            const a = audiences.find(x => x.id === as.audience) || audiences[0];
+            return `
+            <div class="review-tree-children">
+              <div class="review-tree-node"><strong>👥 Ad Set ${idx + 1}:</strong> ${a.name} (${a.size})</div>
+              <div class="review-tree-children">
+                <div class="review-tree-node">Geo: ${as.geoCountry}${as.geoState ? ', ' + as.geoState : ''} · ${[as.deviceDesktop && 'Desktop', as.deviceMobile && 'Mobile', as.deviceTablet && 'Tablet'].filter(Boolean).join(', ')} · Age ${as.ageMin}-${as.ageMax}${as.gender !== 'all' ? ' · ' + capitalize(as.gender) : ''}</div>
+              </div>
+            </div>`;
+          }).join('')}
+          <div class="review-tree-children">
+            <div class="review-tree-node"><strong>🏷️ Offer:</strong> ${builderData.offerValue} (${builderData.offerCost} cost) ${builderData.couponCode ? '· Code: ' + builderData.couponCode : ''}</div>
+            <div class="review-tree-node"><strong>🔗 Landing Page:</strong> ${builderData.landingPageUrl || '⚠ Not set'}</div>
+            <div class="review-tree-node"><strong>🎨 Creative:</strong> "${builderData.creativeTitle}" · CTA: "${builderData.creativeCta}"</div>
+            ${builderData.calloutPromotion || builderData.calloutSocial || builderData.calloutGuarantee ? `
+              <div class="review-tree-node"><strong>🏷 Callouts:</strong> ${[builderData.calloutPromotion, builderData.calloutSocial, builderData.calloutGuarantee].filter(Boolean).join(' · ')}</div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="review-checklist">
+        ${checks.map(c => `
+          <div class="review-check-item ${c.ok ? '' : 'failing'}">
+            <span class="${c.ok ? 'check-icon' : 'warn-icon'}">${c.ok ? '✓' : '⚠'}</span>
+            ${c.ok ? c.label : `<span style="color:var(--warning)">${c.label}</span>`}
+          </div>
+        `).join('')}
+        <div class="review-check-item"><span class="warn-icon">⚠</span> <span style="color:var(--text-tertiary)">Pending Rokt approval after submission</span></div>
+      </div>
+    </div>`;
   }
 
   function selectObjective(id) {
     builderData.objective = id;
-    $$('.objective-card').forEach(c => c.classList.toggle('selected', c.onclick.toString().includes(id)));
-    updateBuilderStep();
+    $$('.objective-card').forEach(c => {
+      const isSelected = c.dataset.objectiveId === id;
+      c.classList.toggle('selected', isSelected);
+      if (isSelected) c.classList.add('pulse');
+    });
+    // Auto-advance to step 2 after brief delay so user sees selection
+    setTimeout(() => {
+      builderStep = 2;
+      updateBuilderStep();
+    }, 400);
   }
 
   function launchCampaign() {
@@ -822,7 +1441,8 @@ const RoktAds = (() => {
     if (search) filtered = filtered.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
 
     grid.innerHTML = filtered.map(a => `
-      <div class="audience-card" onclick="RoktAds.openModal('viewAudience', '${a.id}')">
+      <div class="audience-card" onclick="RoktAds.openModal('editAudience', '${a.id}')">
+        <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editAudience('${a.id}')" title="Edit">✏️</button>
         <div class="audience-card-header">
           <div class="audience-card-icon">${a.icon}</div>
           <div class="audience-card-info">
@@ -850,6 +1470,7 @@ const RoktAds = (() => {
         </div>
       </div>
     `).join('');
+    initCardGlow();
   }
 
   // ── Creatives ──────────────────────────────────────────────
@@ -1091,7 +1712,8 @@ const RoktAds = (() => {
     const grid = document.getElementById('experimentsGrid');
     if (!grid) return;
     grid.innerHTML = experiments.map(e => `
-      <div class="experiment-card" onclick="RoktAds.openModal('viewExperiment', '${e.id}')">
+      <div class="experiment-card" onclick="RoktAds.openModal('editExperiment', '${e.id}')">
+        <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editExperiment('${e.id}')" title="Edit">✏️</button>
         <div class="experiment-card-header">
           <span class="experiment-name">${e.name}</span>
           <span class="badge badge-${e.status === 'concluded' ? 'positive' : e.status === 'running' ? 'info' : 'gray'}">${capitalize(e.status)}</span>
@@ -1137,7 +1759,8 @@ const RoktAds = (() => {
     const grid = document.getElementById('offerGrid');
     if (!grid) return;
     grid.innerHTML = offers.map(o => `
-      <div class="offer-card" onclick="RoktAds.openModal('viewOffer', '${o.id}')">
+      <div class="offer-card" onclick="RoktAds.openModal('editOffer', '${o.id}')">
+        <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editOffer('${o.id}')" title="Edit">✏️</button>
         <div class="offer-card-header">
           <div class="offer-card-icon">${o.icon}</div>
           <div>
@@ -1152,6 +1775,7 @@ const RoktAds = (() => {
         </div>
       </div>
     `).join('');
+    initCardGlow();
   }
 
   function renderProducts() {
@@ -1227,7 +1851,7 @@ const RoktAds = (() => {
     const tbody = document.getElementById('measurementGroupsBody');
     if (!tbody) return;
     tbody.innerHTML = measurementGroups.map(mg => `
-      <tr>
+      <tr class="clickable" onclick="RoktAds.openModal('editMeasurementGroup', '${mg.name}')">
         <td class="campaign-name">${mg.name}</td>
         <td>${mg.campaigns}</td>
         <td><span class="badge badge-${mg.status === 'Live' ? 'positive' : 'gray'}">${mg.status}</span></td>
@@ -1723,6 +2347,283 @@ const RoktAds = (() => {
         `;
         break;
 
+      case 'editCampaign': {
+        const camp = campaigns.find(c => c.id === id);
+        if (!camp) return;
+        content.classList.add('modal-lg');
+        html = `
+          <div class="modal-header">
+            <h2>Edit Campaign — ${camp.name}</h2>
+            <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Campaign Name</label>
+              <input type="text" class="form-input" value="${camp.name}" id="editCampName">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Budget</label>
+                <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${camp.budget}" id="editCampBudget"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CPA Target</label>
+                <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" step="0.01" class="form-input mono" value="${camp.cpaTarget || ''}" placeholder="N/A" id="editCampCpaTarget"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="editCampStatus">
+                  <option value="active" ${camp.status === 'active' ? 'selected' : ''}>Active</option>
+                  <option value="paused" ${camp.status === 'paused' ? 'selected' : ''}>Paused</option>
+                  <option value="draft" ${camp.status === 'draft' ? 'selected' : ''}>Draft</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Objective</label>
+                <select class="form-select" id="editCampObjective">
+                  ${['CPA', 'ROAS'].map(o => `<option ${camp.objective === o ? 'selected' : ''}>${o}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bid Strategy</label>
+              <select class="form-select">
+                <option ${camp.biddingState === 'optimizing' ? 'selected' : ''}>Smart Bidding</option>
+                <option>Budget Optimization</option>
+                <option>Manual Bidding</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Campaign archived','info')">Archive</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
+              <button class="btn btn-primary btn-pill" onclick="
+                var c = window._editCamp;
+                if (c) {
+                  c.name = document.getElementById('editCampName').value;
+                  c.budget = Number(document.getElementById('editCampBudget').value);
+                  c.cpaTarget = Number(document.getElementById('editCampCpaTarget').value) || null;
+                  c.status = document.getElementById('editCampStatus').value;
+                  c.objective = document.getElementById('editCampObjective').value;
+                }
+                RoktAds.closeModal();
+                RoktAds.toast('Campaign updated','success');
+                if (location.hash === '#campaigns') { location.hash = 'campaigns'; }
+              ">Save Changes</button>
+            </div>
+          </div>
+        `;
+        // Store reference for save handler
+        window._editCamp = camp;
+        break;
+      }
+
+      case 'editAudience': {
+        const aud2 = audiences.find(a => a.id === id);
+        if (!aud2) return;
+        content.classList.add('modal-lg');
+        html = `
+          <div class="modal-header">
+            <h2>Edit Audience — ${aud2.name}</h2>
+            <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div style="display:grid;grid-template-columns:1fr 240px;gap:24px">
+              <div>
+                <div class="form-group">
+                  <label class="form-label">Audience Name</label>
+                  <input type="text" class="form-input" value="${aud2.name}">
+                </div>
+                <div class="rule-group">
+                  <div class="rule-group-header">
+                    <span>Rules</span>
+                    <div class="rule-group-logic"><button class="active">AND</button><button>OR</button></div>
+                  </div>
+                  <div class="rule-row">
+                    <select><option>Demographics</option><option>Geography</option><option>Device</option></select>
+                    <select><option>Age Range</option><option>Gender</option><option>Income</option></select>
+                    <select><option>is</option><option>is not</option><option>between</option></select>
+                    <input type="text" value="25-45" placeholder="Value">
+                    <button class="rule-remove">✕</button>
+                  </div>
+                  <button class="btn btn-xs btn-ghost" style="margin-top:8px">+ Add Rule</button>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Type</label>
+                  <select class="form-select">
+                    ${['Custom', 'LAL', 'Behavioral', 'Demographic', 'Experian', 'Starter'].map(t => `<option ${aud2.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div class="reach-estimator">
+                  <div class="reach-number">${aud2.size}</div>
+                  <div class="reach-label">Current Size</div>
+                  <div class="reach-bar"><div class="reach-bar-fill" style="width:${parseInt(aud2.matchRate)}%"></div></div>
+                  <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px">Match Rate: ${aud2.matchRate}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Audience deleted','info')">Delete</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
+              <button class="btn btn-ghost" onclick="RoktAds.closeModal();RoktAds.toast('Audience duplicated','success')">Duplicate</button>
+              <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Audience updated','success')">Save Changes</button>
+            </div>
+          </div>
+        `;
+        break;
+      }
+
+      case 'editOffer': {
+        const off = offers.find(o => o.id === id);
+        if (!off) return;
+        html = `
+          <div class="modal-header">
+            <h2>Edit Offer — ${off.name}</h2>
+            <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Offer Type</label>
+              <div class="filter-pills" style="gap:8px">
+                ${['🏷️ Discount', '🆓 Free Trial', '💰 Cashback', '📦 Shipping', '🛍️ Product'].map((t, i) => {
+                  const types = ['discount','trial','cashback','shipping','product'];
+                  return `<button class="filter-pill ${off.type === types[i] ? 'active' : ''}" style="padding:8px 16px">${t}</button>`;
+                }).join('')}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Offer Value</label>
+              <input type="text" class="form-input" value="${off.value}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cost to Advertiser</label>
+              <input type="text" class="form-input mono" value="${off.cost}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Validity</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <input type="date" class="form-input" value="2026-03-20">
+                <input type="date" class="form-input" value="2026-06-30">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Offer archived','info')">Archive</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
+              <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Offer updated','success')">Save Changes</button>
+            </div>
+          </div>
+        `;
+        break;
+      }
+
+      case 'editExperiment': {
+        const exp = experiments.find(e => e.id === id);
+        if (!exp) return;
+        const isDraft = exp.status === 'draft';
+        html = `
+          <div class="modal-header">
+            <h2>${isDraft ? 'Edit' : 'View'} Experiment — ${exp.name}</h2>
+            <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Experiment Name</label>
+              <input type="text" class="form-input" value="${exp.name}" ${isDraft ? '' : 'disabled'}>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <div class="filter-pills">
+                <button class="filter-pill ${exp.type === 'A/B' ? 'active' : ''}" ${isDraft ? '' : 'disabled'}>A/B Test</button>
+                <button class="filter-pill ${exp.type === 'MAB' ? 'active' : ''}" ${isDraft ? '' : 'disabled'}>Multi-Armed Bandit</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaign</label>
+              <input type="text" class="form-input" value="${exp.campaign}" ${isDraft ? '' : 'disabled'}>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Progress</label>
+              <div style="font-size:13px">${exp.days} days · Significance: <strong style="color:${exp.significance >= 95 ? 'var(--positive)' : 'var(--text-secondary)'}">${exp.significance}%</strong></div>
+              <div class="significance-bar" style="margin-top:8px"><div class="significance-bar-fill" style="width:${exp.significance}%;background:${exp.significance >= 95 ? 'var(--positive)' : 'var(--brand-blue)'}"></div></div>
+            </div>
+            ${exp.status !== 'draft' ? `
+              <div class="form-group">
+                <label class="form-label">Current Leader</label>
+                <div style="font-size:14px;font-weight:600">${exp.leader} · <span style="color:var(--positive)">${exp.lift}</span></div>
+              </div>
+            ` : ''}
+          </div>
+          <div class="modal-footer">
+            ${exp.status === 'running' ? `<button class="btn btn-ghost" style="color:var(--warning)" onclick="RoktAds.closeModal();RoktAds.toast('Experiment paused','warning')">⏸ Pause</button>` : ''}
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Close</button>
+              ${exp.status === 'concluded' ? `<button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Winner applied to campaign','success')">Apply Winner</button>` : ''}
+              ${isDraft ? `<button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Experiment updated','success')">Save Changes</button>` : ''}
+            </div>
+          </div>
+        `;
+        break;
+      }
+
+      case 'editMeasurementGroup': {
+        const mg = measurementGroups.find(m => m.name === id);
+        if (!mg) return;
+        html = `
+          <div class="modal-header">
+            <h2>Edit Measurement Group</h2>
+            <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Group Name</label>
+              <input type="text" class="form-input" value="${mg.name}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Linked Campaigns</label>
+              <input type="text" class="form-input" value="${mg.campaigns}" disabled>
+              <div class="form-hint">Change linked campaigns via the campaign builder</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Optimization Event</label>
+              <select class="form-select">
+                ${['Purchase', 'Signup', 'Application Submit', 'Add to Cart', 'Custom Event'].map(e => `<option ${mg.event === e ? 'selected' : ''}>${e}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Attribution Window</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div>
+                  <label class="form-label" style="font-size:10px;text-transform:none">Click-through</label>
+                  <select class="form-select"><option ${mg.window.includes('7C') ? 'selected' : ''}>7 days</option><option ${mg.window.includes('14C') ? 'selected' : ''}>14 days</option><option ${mg.window.includes('30C') ? 'selected' : ''}>30 days</option></select>
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:10px;text-transform:none">View-through</label>
+                  <select class="form-select"><option ${mg.window.includes('1V') ? 'selected' : ''}>1 day</option><option>None</option></select>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current EMQ</label>
+              <div style="font-size:18px;font-weight:700;color:${mg.emq >= 7 ? 'var(--positive)' : mg.emq >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.emq} / 10</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
+            <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Measurement group updated','success')">Save Changes</button>
+          </div>
+        `;
+        break;
+      }
+
       case 'newProductSet':
         html = `
           <div class="modal-header">
@@ -1970,6 +2871,20 @@ const RoktAds = (() => {
     if (overlay) overlay.classList.remove('open');
   }
 
+  // ── Keyboard Chord Indicator ──────────────────────────────
+  let keyChordEl = null;
+  function showKeyChord(key) {
+    hideKeyChord();
+    keyChordEl = document.createElement('div');
+    keyChordEl.className = 'key-chord-indicator';
+    const labels = { g: 'Go to...', n: 'New...' };
+    keyChordEl.innerHTML = `<kbd>${key.toUpperCase()}</kbd> ${labels[key] || '...'}`;
+    document.body.appendChild(keyChordEl);
+  }
+  function hideKeyChord() {
+    if (keyChordEl) { keyChordEl.remove(); keyChordEl = null; }
+  }
+
   // ── Keyboard Shortcuts ────────────────────────────────────
   function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
@@ -2022,6 +2937,7 @@ const RoktAds = (() => {
       // Two-key shortcuts (g+key, n+key)
       if (pendingKey) {
         clearTimeout(pendingKeyTimer);
+        hideKeyChord();
         const combo = pendingKey + e.key.toLowerCase();
         pendingKey = null;
 
@@ -2041,9 +2957,28 @@ const RoktAds = (() => {
         return;
       }
 
+      // j/k table navigation
+      if (e.key === 'j' || e.key === 'k') {
+        const rows = document.querySelectorAll('.data-table tbody tr.clickable');
+        if (rows.length === 0) return;
+        const currentIdx = Array.from(rows).findIndex(r => r.classList.contains('selected'));
+        let nextIdx;
+        if (e.key === 'j') nextIdx = Math.min(currentIdx + 1, rows.length - 1);
+        else nextIdx = Math.max(currentIdx - 1, 0);
+        if (nextIdx >= 0 && rows[nextIdx]) {
+          rows[nextIdx].click();
+          rows[nextIdx].scrollIntoView({ block: 'nearest' });
+        }
+        return;
+      }
+
       if (e.key === 'g' || e.key === 'n') {
         pendingKey = e.key;
-        pendingKeyTimer = setTimeout(() => { pendingKey = null; }, 500);
+        showKeyChord(e.key);
+        pendingKeyTimer = setTimeout(() => {
+          pendingKey = null;
+          hideKeyChord();
+        }, 500);
         return;
       }
     });
@@ -2077,20 +3012,67 @@ const RoktAds = (() => {
       messages.appendChild(userMsg);
       input.value = '';
 
-      // Simulate AI response
+      // Show typing indicator
+      const typing = document.createElement('div');
+      typing.className = 'ai-message assistant';
+      typing.innerHTML = '<div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div>';
+      messages.appendChild(typing);
+      messages.scrollTop = messages.scrollHeight;
+
+      // Contextual AI response
       setTimeout(() => {
-        const responses = [
-          { text: `I analyzed your request: "${text}". Here's what I found:`, actions: true },
-          { text: 'Based on your campaign data, CPA has improved 12% week-over-week. The Disney+ campaign is performing best with a 4.12% CoPI.' },
-          { text: 'I can help with that. Would you like me to create a new campaign, adjust bidding, or analyze performance?' },
-        ];
-        const resp = responses[Math.floor(Math.random() * responses.length)];
+        typing.remove();
+        const lowerText = text.toLowerCase();
+        let resp;
+
+        if (lowerText.includes('pause') || lowerText.includes('stop')) {
+          const matchedCamps = campaigns.filter(c => c.status === 'active' && (lowerText.includes('all') || c.name.toLowerCase().split(' ').some(w => lowerText.includes(w.toLowerCase()))));
+          resp = {
+            text: `I found <strong>${matchedCamps.length || 'several'} campaigns</strong> matching your request. Here's a preview of the changes:`,
+            actions: matchedCamps.slice(0, 3).map(c => `<div class="ai-action-card"><span>⏸ Pause <strong>${c.name}</strong></span><span class="action-apply" onclick="RoktAds.toggleCampaignStatus('${c.id}')">Apply</span></div>`).join('')
+          };
+        } else if (lowerText.includes('how') && (lowerText.includes('campaign') || lowerText.includes('doing') || lowerText.includes('performance'))) {
+          const active = campaigns.filter(c => c.status === 'active');
+          const avgCpa = (active.reduce((s, c) => s + c.cpa, 0) / active.length).toFixed(2);
+          const totalConv = active.reduce((s, c) => s + c.conversions, 0);
+          resp = {
+            text: `<strong>Portfolio Summary</strong><br/>` +
+              `• <strong>${active.length}</strong> active campaigns spending <strong>$${fmtNum(active.reduce((s,c) => s + c.spend, 0))}</strong><br/>` +
+              `• Avg CPA: <strong>$${avgCpa}</strong> across <strong>${fmtNum(totalConv)}</strong> conversions<br/>` +
+              `• Top performer: <strong>Disney+ Spring</strong> at $5.82 CPA (23% below target)<br/>` +
+              `• ⚠️ Hulu CPA is 22% above target — recommend expanding LAL audience`,
+            actions: '<div class="ai-action-card"><span>📊 Open full Intelligence report</span><span class="action-apply" onclick="location.hash=\'intelligence\'">Go</span></div>'
+          };
+        } else if (lowerText.includes('creative') || lowerText.includes('headline') || lowerText.includes('generate')) {
+          resp = {
+            text: `Here are <strong>3 headline variations</strong> with predicted performance:`,
+            actions: [
+              { title: 'Stream 10,000+ titles — 30% off today', score: 8.7 },
+              { title: 'Your next binge starts here. Save 30%', score: 7.9 },
+              { title: 'Disney+ for less. Limited time offer.', score: 7.2 },
+            ].map(v => `<div class="ai-action-card"><span style="flex:1"><strong>${v.title}</strong><br/><span style="color:var(--positive);font-size:10px;font-family:var(--font-mono)">Score: ${v.score}/10</span></span><span class="action-apply" onclick="RoktAds.toast('Creative applied','success')">Use</span></div>`).join('')
+          };
+        } else if (lowerText.includes('budget') || lowerText.includes('spend')) {
+          resp = {
+            text: `<strong>Budget Analysis:</strong><br/>` +
+              `• Capital One is hitting daily cap before noon — <strong>20% increase recommended</strong><br/>` +
+              `• Disney+ has $32.8K remaining budget, pacing well at 56% through<br/>` +
+              `• PayPal is paused with $11.1K unspent budget`,
+            actions: '<div class="ai-action-card"><span>💰 Increase Capital One budget by 20%</span><span class="action-apply" onclick="RoktAds.toast(\'Budget updated\',\'success\')">Apply</span></div>'
+          };
+        } else {
+          resp = {
+            text: `I analyzed your request. Based on current campaign data, here's what I recommend:`,
+            actions: '<div class="ai-actions" style="margin-top:8px"><button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast(\'Action applied\',\'success\')">Apply Suggestion</button><button class="btn btn-xs btn-ghost">More Details</button></div>'
+          };
+        }
+
         const aiMsg = document.createElement('div');
         aiMsg.className = 'ai-message assistant';
-        aiMsg.innerHTML = `<p>${resp.text}</p>${resp.actions ? '<div class="ai-actions"><button class="btn btn-xs btn-primary" onclick="RoktAds.toast(\'Action applied\',\'success\')">Apply</button><button class="btn btn-xs btn-ghost">More Details</button></div>' : ''}`;
+        aiMsg.innerHTML = `<p>${resp.text}</p>${resp.actions || ''}`;
         messages.appendChild(aiMsg);
         messages.scrollTop = messages.scrollHeight;
-      }, 800);
+      }, 1200);
     }
 
     if (sendBtn) sendBtn.addEventListener('click', sendMessage);
@@ -2228,6 +3210,43 @@ const RoktAds = (() => {
     init();
   }
 
+  // ── Edit Workflows (Phase 2) ────────────────────────────────
+
+  function toggleCampaignStatus(id) {
+    const c = campaigns.find(x => x.id === id);
+    if (!c) return;
+    if (c.status === 'active') {
+      c.status = 'paused';
+      toast(`${c.name} paused`, 'warning');
+    } else if (c.status === 'paused') {
+      c.status = 'active';
+      toast(`${c.name} resumed`, 'success');
+    }
+    // Re-render
+    if (currentView === 'campaigns') {
+      renderCampaignTable();
+      openCampaignDetail(id);
+    }
+  }
+
+  function editAudience(id) {
+    const aud = audiences.find(a => a.id === id);
+    if (!aud) return;
+    openModal('editAudience', id);
+  }
+
+  function editOffer(id) {
+    openModal('editOffer', id);
+  }
+
+  function editExperiment(id) {
+    openModal('editExperiment', id);
+  }
+
+  function editMeasurementGroup(name) {
+    openModal('editMeasurementGroup', name);
+  }
+
   // ── Public API ─────────────────────────────────────────────
   return {
     navigate,
@@ -2244,5 +3263,21 @@ const RoktAds = (() => {
     insertAttr,
     selectCreative,
     sortReport,
+    // Phase 1: Campaign builder
+    persistField,
+    selectBidStrategy,
+    addAdSet,
+    removeAdSet,
+    toggleTargeting,
+    toggleSection,
+    simulateImageUpload,
+    generateAICampaign,
+    updateBuilderPreview,
+    // Phase 2: Edit workflows
+    toggleCampaignStatus,
+    editAudience,
+    editOffer,
+    editExperiment,
+    editMeasurementGroup,
   };
 })();
