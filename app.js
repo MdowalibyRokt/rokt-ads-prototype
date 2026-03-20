@@ -138,6 +138,17 @@ const RoktAds = (() => {
   let pendingKeyTimer = null;
   let reportSort = { col: null, dir: 'desc' };
   let placeholderInterval = null;
+  let selectedAdvertiser = 'all'; // 'all' or advertiser name
+  let accountSwitcherOpen = false;
+
+  const advertisers = [
+    { name: 'Disney+', initials: 'D+', campaigns: ['c1'] },
+    { name: 'Capital One', initials: 'CO', campaigns: ['c2'] },
+    { name: 'Hulu', initials: 'Hu', campaigns: ['c3'] },
+    { name: 'True Classic', initials: 'TC', campaigns: ['c4'] },
+    { name: 'PayPal', initials: 'PP', campaigns: ['c5'] },
+    { name: 'Audible', initials: 'Au', campaigns: ['c6'] },
+  ];
 
   const defaultBuilderData = {
     // Step 1
@@ -496,14 +507,14 @@ const RoktAds = (() => {
   function renderCampaignTable(filter = 'all', search = '') {
     const tbody = document.getElementById('campaignsTableBody');
     if (!tbody) return;
-    let filtered = campaigns;
-    if (filter === 'active') filtered = campaigns.filter(c => c.status === 'active');
-    else if (filter === 'requires_action') filtered = campaigns.filter(c => c.status === 'requires_action');
-    else if (filter === 'paused') filtered = campaigns.filter(c => c.status === 'paused');
-    else if (filter === 'draft') filtered = campaigns.filter(c => c.status === 'draft');
-    else if (filter === 'pending_review') filtered = campaigns.filter(c => c.status === 'pending_review');
-    else if (filter === 'archived') filtered = campaigns.filter(c => c.status === 'archived');
-    else if (filter === 'ended') filtered = campaigns.filter(c => c.status === 'ended');
+    let filtered = getFilteredCampaigns();
+    if (filter === 'active') filtered = filtered.filter(c => c.status === 'active');
+    else if (filter === 'requires_action') filtered = filtered.filter(c => c.status === 'requires_action');
+    else if (filter === 'paused') filtered = filtered.filter(c => c.status === 'paused');
+    else if (filter === 'draft') filtered = filtered.filter(c => c.status === 'draft');
+    else if (filter === 'pending_review') filtered = filtered.filter(c => c.status === 'pending_review');
+    else if (filter === 'archived') filtered = filtered.filter(c => c.status === 'archived');
+    else if (filter === 'ended') filtered = filtered.filter(c => c.status === 'ended');
     if (search) filtered = filtered.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
 
     tbody.innerHTML = filtered.map(c => {
@@ -2156,6 +2167,7 @@ const RoktAds = (() => {
     if (!overlay || !content) return;
 
     content.className = 'modal';
+    document.body.style.overflow = 'hidden';
     let html = '';
 
     switch (type) {
@@ -2966,6 +2978,7 @@ const RoktAds = (() => {
   function closeModal() {
     const overlay = document.getElementById('modalOverlay');
     if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
   }
 
   // ── Filter Dropdowns ──────────────────────────────────────
@@ -3149,9 +3162,25 @@ const RoktAds = (() => {
   // ── Keyboard Shortcuts ────────────────────────────────────
   function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      // Don't trigger in inputs
+      // Escape — ALWAYS close overlays/modals, even from inputs
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCommandPalette();
+        closeModal();
+        const shortcuts = document.getElementById('shortcutsOverlay');
+        if (shortcuts) shortcuts.classList.remove('open');
+        const aiDrawer = document.getElementById('aiDrawer');
+        if (aiDrawer) aiDrawer.classList.remove('open');
+        closeAccountSwitcher();
+        closeCampaignDetail();
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+          e.target.blur();
+        }
+        return;
+      }
+
+      // Don't trigger other shortcuts in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-        if (e.key === 'Escape') e.target.blur();
         return;
       }
 
@@ -3166,18 +3195,6 @@ const RoktAds = (() => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
         e.preventDefault();
         toggleTheme();
-        return;
-      }
-
-      // Escape — Close overlays
-      if (e.key === 'Escape') {
-        closeCommandPalette();
-        closeModal();
-        const shortcuts = document.getElementById('shortcutsOverlay');
-        if (shortcuts) shortcuts.classList.remove('open');
-        const aiDrawer = document.getElementById('aiDrawer');
-        if (aiDrawer) aiDrawer.classList.remove('open');
-        closeCampaignDetail();
         return;
       }
 
@@ -3417,8 +3434,8 @@ const RoktAds = (() => {
     });
 
     // Sidebar collapse
-    const collapseBtn = document.getElementById('sidebarCollapseBtn');
-    if (collapseBtn) collapseBtn.addEventListener('click', () => {
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    if (toggleBtn) toggleBtn.addEventListener('click', () => {
       document.getElementById('app')?.classList.toggle('sidebar-collapsed');
     });
 
@@ -3446,10 +3463,22 @@ const RoktAds = (() => {
       if (e.target === shortcutsOverlay) shortcutsOverlay.classList.remove('open');
     });
 
-    // Modal overlay close on bg click
+    // Modal overlay close on bg click (not on scrollbar area)
     const modalOverlay = document.getElementById('modalOverlay');
-    if (modalOverlay) modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
+    if (modalOverlay) modalOverlay.addEventListener('mousedown', (e) => {
+      if (e.target === modalOverlay) {
+        // Only close if the click is actually on the backdrop, not the scrollbar
+        const modal = modalOverlay.querySelector('.modal');
+        if (modal) {
+          const rect = modal.getBoundingClientRect();
+          if (e.clientX < rect.left || e.clientX > rect.right ||
+              e.clientY < rect.top || e.clientY > rect.bottom) {
+            closeModal();
+          }
+        } else {
+          closeModal();
+        }
+      }
     });
 
     // Context alert dismiss and action
@@ -3483,6 +3512,13 @@ const RoktAds = (() => {
     // AI monitor indicator click handler
     document.getElementById('aiMonitor')?.addEventListener('click', () => toggleAIDrawer());
 
+    // Account switcher
+    const acctBtn = document.querySelector('.account-switcher-btn');
+    if (acctBtn) acctBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAccountSwitcher();
+    });
+
     // Init subsystems
     initKeyboardShortcuts();
     initAICopilot();
@@ -3490,6 +3526,7 @@ const RoktAds = (() => {
 
     // Initial route
     handleRoute();
+    updateNavBadges();
   }
 
   // Boot
@@ -3536,6 +3573,106 @@ const RoktAds = (() => {
     openModal('editMeasurementGroup', name);
   }
 
+  // ── Account/Advertiser Switcher ──────────────────────────────
+  function toggleAccountSwitcher() {
+    accountSwitcherOpen = !accountSwitcherOpen;
+    renderAccountSwitcher();
+  }
+
+  function closeAccountSwitcher() {
+    if (!accountSwitcherOpen) return;
+    accountSwitcherOpen = false;
+    const dropdown = document.querySelector('.account-switcher-dropdown');
+    if (dropdown) dropdown.remove();
+  }
+
+  function renderAccountSwitcher() {
+    // Remove existing
+    const existing = document.querySelector('.account-switcher-dropdown');
+    if (existing) existing.remove();
+    if (!accountSwitcherOpen) return;
+
+    const switcher = document.querySelector('.account-switcher');
+    if (!switcher) return;
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'account-switcher-dropdown';
+    dropdown.innerHTML = `
+      <div class="account-switcher-header">
+        <div class="account-avatar-lg">RA</div>
+        <div class="account-switcher-info">
+          <div class="account-name-lg">Rokt Ads Demo</div>
+          <div class="account-id">ACC-2847291</div>
+        </div>
+      </div>
+      <div class="account-switcher-section">
+        <div class="account-switcher-section-label">Advertisers</div>
+        <div class="advertiser-item ${selectedAdvertiser === 'all' ? 'active' : ''}" data-adv="all">
+          <div class="advertiser-avatar">All</div>
+          <span class="advertiser-name">All Advertisers</span>
+          ${selectedAdvertiser === 'all' ? '<span class="advertiser-check">&#10003;</span>' : ''}
+        </div>
+        ${advertisers.map(a => `
+          <div class="advertiser-item ${selectedAdvertiser === a.name ? 'active' : ''}" data-adv="${a.name}">
+            <div class="advertiser-avatar">${a.initials}</div>
+            <span class="advertiser-name">${a.name}</span>
+            ${selectedAdvertiser === a.name ? '<span class="advertiser-check">&#10003;</span>' : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    switcher.appendChild(dropdown);
+
+    // Wire click handlers
+    dropdown.querySelectorAll('.advertiser-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const adv = item.dataset.adv;
+        selectedAdvertiser = adv;
+        closeAccountSwitcher();
+        if (adv === 'all') {
+          toast('Showing all advertisers', 'info');
+        } else {
+          toast(`Switched to ${adv}`, 'success');
+        }
+        // Update account name in topbar
+        const nameEl = document.querySelector('.account-switcher-btn .account-name');
+        if (nameEl) nameEl.textContent = adv === 'all' ? 'Rokt Ads Demo' : adv;
+        // Re-render campaigns if on that view
+        if (currentView === 'campaigns') renderCampaignTable();
+        updateNavBadges();
+      });
+    });
+
+    // Close on outside click
+    setTimeout(() => {
+      const handler = (e) => {
+        if (!e.target.closest('.account-switcher')) {
+          closeAccountSwitcher();
+          document.removeEventListener('click', handler);
+        }
+      };
+      document.addEventListener('click', handler);
+    }, 0);
+  }
+
+  // ── Nav Badge Updates ──────────────────────────────────────
+  function updateNavBadges() {
+    const badge = document.getElementById('navCampaignBadge');
+    if (badge) {
+      const actionCount = getFilteredCampaigns().filter(c => c.status === 'requires_action').length;
+      badge.textContent = actionCount > 0 ? actionCount : '';
+      badge.style.display = actionCount > 0 ? 'flex' : 'none';
+    }
+  }
+
+  function getFilteredCampaigns() {
+    if (selectedAdvertiser === 'all') return campaigns;
+    const advData = advertisers.find(a => a.name === selectedAdvertiser);
+    if (!advData) return campaigns;
+    return campaigns.filter(c => advData.campaigns.includes(c.id));
+  }
+
   // ── Public API ─────────────────────────────────────────────
   return {
     navigate,
@@ -3575,5 +3712,10 @@ const RoktAds = (() => {
     // Phase 4: Workflow completeness
     switchDetailTab,
     selectSmartStrategy,
+    // Phase 5: Account switcher
+    toggleAccountSwitcher,
+    closeAccountSwitcher,
+    updateNavBadges,
+    getFilteredCampaigns,
   };
 })();
