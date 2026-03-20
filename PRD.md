@@ -879,4 +879,151 @@ EMQ is Rokt-unique and critical to campaign success. Burying it in settings woul
 
 ---
 
-*This PRD was generated from a working prototype — every feature described above has been implemented and visually verified through 3 rounds of critique and polish. The prototype can be opened by serving the `rokt-ads-prototype/` directory with any HTTP server.*
+---
+
+## 12. Version 2.0 — Major Enhancement Pass (March 20, 2026)
+
+### 12.1 Campaign Builder Fixes & Real Platform Alignment
+
+**Bug Fix:** Clicking an objective card now auto-advances to Step 2 after a 400ms pulse animation. Previously, `selectObjective()` set the data but did not increment `builderStep`.
+
+**AI Hero Input (Step 1):** Prominent AI prompt area at top of Step 1 with animated gradient border (wine → blue cycling) and "Generate Campaign" button. Cycling placeholder text demonstrates use cases. Clicking "Generate Campaign" auto-fills all `builderData` fields with a realistic Disney+ Q2 campaign and jumps directly to Step 5 (Review).
+
+**Expanded `builderData` State:** 40+ fields covering all 5 steps with a `persistField()` helper supporting dot-notation for nested paths (e.g., `adSets.0.audience`). All form inputs read from and write to `builderData` so back/forward navigation preserves state.
+
+**Step 2 — Campaign Setup (Real Platform Fields):**
+- Campaign Name with recommended format hint
+- Company Name + Brand URL
+- Measurement Group dropdown (with "Create New" option)
+- Referral Exclusion Period (1d/7d/14d/30d/90d) per real Rokt platform
+- Schedule: Start Date + optional End Date
+- Budget: Daily Cap + Monthly Cap + Lifetime Cap with visual budget bar
+- Policy Links: collapsible Terms & Conditions, Privacy Policy, Disclaimer sections with toggles
+
+**Step 3 — Bid Strategy + Targeting (Real Platform):**
+- 3 mutually-exclusive bid strategy cards: Smart Bidding (Target CPA, requires 30+ conversions), Budget Optimization (auto-adjusts based on predicted volume), Manual Bidding (static price)
+- Ad Set cards with: Audience dropdown, expandable targeting panel (Geography: Country/State/City/ZIP; Device: Desktop/Mobile/Tablet checkboxes; Demographics: Age range + Gender), Suppress Existing Customers toggle, Budget Override
+- "+ Add Ad Set" button (creates new ad set in array), Remove ad set (minimum 1)
+
+**Step 4 — Offer + Creative (Real Platform Fields):**
+- Offer: Type/Value/Cost + Landing Page URL (required, HTTPS hint) + Coupon Code + Validity dates
+- Creative: Title (175 combined char limit) + Body + CTA (20 char max) + disabled Negative CTA "No thanks"
+- Callout Tags: Promotion / Social Proof / Guarantee pill inputs
+- Image Upload zone (simulated) + AI Generate button
+- Live Preview panel (sticky, right column) updating in real-time: phone frame mockup with partner bar, sponsored label, callout pills, title, body, CTA button, decline link, disclaimer
+
+**Step 5 — Review & Launch:**
+- Approval banner: "Your campaign will be reviewed by Rokt before going live. Typically 1-2 business days."
+- Full campaign tree showing all configured details
+- Dynamic validation checklist (objective, name, budget, audience, creative, landing page URL)
+- Launch button with confetti celebration
+
+### 12.2 Edit Workflows (Phase 2)
+
+Every object type now supports Create + View + **Edit**:
+
+| Object | Edit Trigger | Modal/Action |
+|---|---|---|
+| Campaign | Row action buttons (hover), Detail panel "Edit" button | `editCampaign` modal with pre-populated fields |
+| Campaign Status | Pause/Resume button on row hover and detail panel | `toggleCampaignStatus()` — mutates data, re-renders |
+| Audience | Hover edit pencil icon on card, or click card | `editAudience` modal |
+| Offer | Hover edit pencil icon on card, or click card | `editOffer` modal |
+| Experiment | Hover edit pencil icon on card, or click card | `editExperiment` modal |
+| Measurement Group | Click table row | `editMeasurementGroup` modal |
+
+**Row Action Buttons:** Campaign table rows show Pause/Edit/Duplicate buttons that slide in on hover with a smooth translateX animation.
+
+**Hover Edit Buttons:** Audience, Offer, and Experiment cards show a pencil icon button in the top-right corner on hover, with a scale-in animation.
+
+### 12.3 AI Media Buying Features (Phase 3)
+
+Inspired by Google PMax, Amazon DSP Ads Agent, TTD Koa, Meta Advantage+ Creative, TikTok Symphony.
+
+**Optimization Score (Dashboard):**
+- Semi-circle gauge showing account health score (0-100)
+- Color-coded: green (80+), yellow (60-79), red (<60)
+- Shows improvement potential: "+6 pts available from 3 recommendations"
+
+**AI Recommendations Feed (Dashboard):**
+- Prioritized recommendation cards with estimated impact
+- Each has Apply / Dismiss actions
+- Examples: "Add 2 more creatives → Est. +15% CoPI", "Increase budget — hitting daily cap before noon → Est. +$2.4K conv."
+- High/Medium/Low priority with color-coded icons
+
+**AI Copilot Enhancement:**
+- Typing indicator (3 bouncing dots) while "thinking"
+- Context-aware responses based on message content:
+  - "how are my campaigns doing?" → Portfolio Summary with real data aggregation
+  - "pause all campaigns..." → Shows affected campaigns with individual "Apply" buttons
+  - "generate headlines..." → 3 variations with predicted performance scores (1-10)
+  - "budget/spend" → Budget analysis with actionable recommendations
+- Each response includes actionable cards with Apply/Go/Use buttons
+
+### 12.4 Keyboard Shortcuts (Phase 4)
+
+**Visual Chord Indicator:** When pressing the first key of a two-key sequence (G or N), a floating indicator appears at bottom-left showing `G → Go to...` or `N → New...` with styled kbd tags. Auto-dismisses after 500ms.
+
+**J/K Table Navigation:** Pressing J moves selection down, K moves selection up in any table with `.clickable` rows. Selected row scrolls into view.
+
+### 12.5 Visual Design Upgrade (Phase 5)
+
+**Inspired by:** Linear, Vercel, Stripe, Robinhood
+
+**Animated Gradient Mesh Background:** Dashboard has a subtle animated radial gradient mesh (wine/blue/cyan) that drifts behind content.
+
+**Card Mouse-Tracking Glow:** KPI cards, health cards, audience cards, experiment cards, and offer cards have a radial gradient that follows the mouse cursor on hover.
+
+**Staggered Card Entrance:** KPI cards animate in with 60ms staggered delays using a scale+translateY animation.
+
+**Gradient Text Headings:** View titles and detail panel titles use a subtle wine gradient text effect.
+
+**Progress Bar Shimmer:** All progress bars have an animated shimmer highlight that sweeps across.
+
+**Toast Progress Indicator:** Toast notifications show a 2px progress bar that shrinks over the auto-dismiss duration.
+
+**Enhanced Page Transitions:** Views enter with a combined translateY + scale animation (350ms).
+
+**Sparkline Glow:** Sparkline polylines have a drop-shadow glow filter matching their stroke color.
+
+**Sidebar Active Glow:** Active nav item has a box-shadow inset and a gradient overlay effect.
+
+**Glassmorphism Enhancement:** Topbar uses `blur(20px) saturate(1.8)` for enhanced frosted glass effect.
+
+**Builder Dot Grid:** Campaign builder content area has a subtle dot grid pattern.
+
+**Robinhood-Inspired:** Number-focused KPI values with tight letter-spacing, green trend badges with pill backgrounds, generous whitespace.
+
+### 12.6 Updated Public API
+
+New methods added to `RoktAds.*`:
+
+| Method | Description |
+|---|---|
+| `persistField(field, value)` | Write to builderData, supports dot notation |
+| `selectBidStrategy(strategy)` | Set bid strategy, re-render Step 3 |
+| `addAdSet()` | Add new ad set to builder |
+| `removeAdSet(idx)` | Remove ad set (minimum 1) |
+| `toggleTargeting(idx)` | Expand/collapse targeting panel |
+| `toggleSection(sectionId)` | Expand/collapse builder section |
+| `simulateImageUpload()` | Simulated image upload with toast |
+| `generateAICampaign()` | AI auto-fill all builder fields |
+| `updateBuilderPreview()` | Live-update Step 4 preview panel |
+| `toggleCampaignStatus(id)` | Pause/resume campaign |
+| `editAudience(id)` | Open audience edit modal |
+| `editOffer(id)` | Open offer edit modal |
+| `editExperiment(id)` | Open experiment edit modal |
+| `editMeasurementGroup(name)` | Open measurement group edit modal |
+
+### 12.7 Updated File Sizes
+
+```
+rokt-ads-prototype/
+├── index.html       # ~845 lines
+├── styles.css       # ~3,900 lines (+900 lines of visual enhancements)
+├── app.js           # ~3,130 lines (+880 lines of new features)
+├── PRD.md           # This document (updated)
+```
+
+---
+
+*This PRD was updated on March 20, 2026 to reflect the v2.0 enhancement pass — all features described above have been implemented and visually verified. The prototype can be opened by serving the `rokt-ads-prototype/` directory with any HTTP server (`python3 -m http.server 8800`).*
