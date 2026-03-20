@@ -13,7 +13,7 @@ const RoktAds = (() => {
       id: 'c1', name: 'Disney+ Spring Acquisition', status: 'active', objective: 'CPA',
       spend: 42150, budget: 75000, cpa: 5.82, cpaTarget: 7.50, copi: 4.12, roas: 5.1,
       conversions: 7241, impressions: 175800, clicks: 12460, ctr: 7.09, cvr: 58.1,
-      emq: 8.4, biddingState: 'optimizing', adSets: 2, creatives: 4,
+      integrationHealth: 8.4, biddingState: 'optimizing', adSets: 2, creatives: 4,
       trend: [10,9,8,7,6,5,5,4], trendDir: 'up',
       dailySpend: [5200, 5800, 6100, 6400, 6850, 5600, 6200],
       publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 85
@@ -22,7 +22,7 @@ const RoktAds = (() => {
       id: 'c2', name: 'Capital One Card Acquisition', status: 'active', objective: 'CPA',
       spend: 31200, budget: 50000, cpa: 8.45, cpaTarget: 10.00, copi: 3.21, roas: 3.8,
       conversions: 3692, impressions: 115000, clicks: 8970, ctr: 7.8, cvr: 41.2,
-      emq: 7.9, biddingState: 'optimizing', adSets: 1, creatives: 3,
+      integrationHealth: 7.9, biddingState: 'optimizing', adSets: 1, creatives: 3,
       trend: [8,7,7,6,5,6,5,5], trendDir: 'up',
       dailySpend: [4200, 4500, 4400, 4700, 4600, 4300, 4500],
       publishState: 'published', objectiveType: 'email', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 72
@@ -31,7 +31,7 @@ const RoktAds = (() => {
       id: 'c3', name: 'Hulu Streaming Signup', status: 'active', objective: 'CPA',
       spend: 18700, budget: 25000, cpa: 9.14, cpaTarget: 7.50, copi: 2.84, roas: 2.9,
       conversions: 2046, impressions: 72000, clicks: 5040, ctr: 7.0, cvr: 40.6,
-      emq: 8.1, biddingState: 'learning', adSets: 1, creatives: 2,
+      integrationHealth: 8.1, biddingState: 'learning', adSets: 1, creatives: 2,
       trend: [5,6,7,7,8,8,9,9], trendDir: 'down',
       dailySpend: [2400, 2600, 2700, 2800, 2700, 2600, 2900],
       publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 91
@@ -40,7 +40,7 @@ const RoktAds = (() => {
       id: 'c4', name: 'True Classic DPA', status: 'requires_action', statusDetail: 'hit_limit', objective: 'ROAS',
       spend: 22400, budget: 40000, cpa: 12.30, cpaTarget: null, copi: 2.15, roas: 4.8,
       conversions: 1821, impressions: 84700, clicks: 5930, ctr: 7.0, cvr: 30.7,
-      emq: 4.8, biddingState: 'limited', adSets: 2, creatives: 5,
+      integrationHealth: 4.8, biddingState: 'limited', adSets: 2, creatives: 5,
       trend: [4,5,5,6,6,7,7,8], trendDir: 'down',
       dailySpend: [3000, 3200, 3100, 3300, 3400, 3200, 3200],
       publishState: 'published', objectiveType: 'product_sales', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 45
@@ -49,7 +49,7 @@ const RoktAds = (() => {
       id: 'c5', name: 'PayPal Pay+ Activation', status: 'paused', objective: 'CPA',
       spend: 8900, budget: 20000, cpa: 6.20, cpaTarget: 8.00, copi: 3.95, roas: 4.2,
       conversions: 1435, impressions: 36300, clicks: 2540, ctr: 7.0, cvr: 56.5,
-      emq: 7.2, biddingState: 'optimizing', adSets: 1, creatives: 3,
+      integrationHealth: 7.2, biddingState: 'optimizing', adSets: 1, creatives: 3,
       trend: [6,5,5,4,4,4,4,4], trendDir: 'flat',
       dailySpend: [1400, 1500, 1300, 1200, 1300, 1100, 1100],
       publishState: 'published', objectiveType: 'payment_trigger', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 78
@@ -58,7 +58,7 @@ const RoktAds = (() => {
       id: 'c6', name: 'Audible Free Trial', status: 'draft', objective: 'CPA',
       spend: 0, budget: 30000, cpa: 0, cpaTarget: 6.00, copi: 0, roas: 0,
       conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
-      emq: 7.5, biddingState: 'draft', adSets: 0, creatives: 0,
+      integrationHealth: 7.5, biddingState: 'draft', adSets: 0, creatives: 0,
       trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
       dailySpend: [0,0,0,0,0,0,0],
       publishState: 'draft', objectiveType: 'app_download', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 88
@@ -67,7 +67,7 @@ const RoktAds = (() => {
       id: 'c7', name: 'Disney+ Bundle Upsell', status: 'active', objective: 'CPA',
       spend: 28400, budget: 60000, cpa: 6.10, cpaTarget: 8.00, copi: 3.85, roas: 4.6,
       conversions: 4656, impressions: 132000, clicks: 9240, ctr: 7.0, cvr: 50.4,
-      emq: 8.1, biddingState: 'optimizing', adSets: 2, creatives: 3,
+      integrationHealth: 8.1, biddingState: 'optimizing', adSets: 2, creatives: 3,
       trend: [8,7,7,6,5,5,4,4], trendDir: 'up',
       dailySpend: [3800, 4100, 4200, 4000, 4300, 3900, 4100],
       publishState: 'published', objectiveType: 'cross_sell', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 82
@@ -76,7 +76,7 @@ const RoktAds = (() => {
       id: 'c8', name: 'Disney+ App Install', status: 'active', objective: 'CPA',
       spend: 15200, budget: 35000, cpa: 3.40, cpaTarget: 5.00, copi: 4.55, roas: 6.2,
       conversions: 4471, impressions: 98000, clicks: 7840, ctr: 8.0, cvr: 57.0,
-      emq: 8.6, biddingState: 'learning', adSets: 1, creatives: 2,
+      integrationHealth: 8.6, biddingState: 'learning', adSets: 1, creatives: 2,
       trend: [6,5,5,4,4,3,3,3], trendDir: 'up',
       dailySpend: [2000, 2100, 2200, 2300, 2100, 2200, 2300],
       publishState: 'published', objectiveType: 'app_download', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 90
@@ -85,7 +85,7 @@ const RoktAds = (() => {
       id: 'c9', name: 'Capital One Venture Rewards', status: 'active', objective: 'CPA',
       spend: 19500, budget: 40000, cpa: 9.75, cpaTarget: 12.00, copi: 2.95, roas: 3.5,
       conversions: 2000, impressions: 88000, clicks: 6160, ctr: 7.0, cvr: 32.5,
-      emq: 7.6, biddingState: 'optimizing', adSets: 1, creatives: 2,
+      integrationHealth: 7.6, biddingState: 'optimizing', adSets: 1, creatives: 2,
       trend: [9,8,8,7,7,6,6,5], trendDir: 'up',
       dailySpend: [2600, 2800, 2900, 2700, 2800, 2900, 2800],
       publishState: 'published', objectiveType: 'email', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 75
@@ -94,7 +94,7 @@ const RoktAds = (() => {
       id: 'c10', name: 'Capital One Travel Portal', status: 'draft', objective: 'CPA',
       spend: 0, budget: 25000, cpa: 0, cpaTarget: 10.00, copi: 0, roas: 0,
       conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
-      emq: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
+      integrationHealth: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
       trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
       dailySpend: [0,0,0,0,0,0,0],
       publishState: 'draft', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 70
@@ -103,7 +103,7 @@ const RoktAds = (() => {
       id: 'c11', name: 'Hulu + Live TV Bundle', status: 'paused', objective: 'CPA',
       spend: 12300, budget: 30000, cpa: 11.20, cpaTarget: 9.00, copi: 2.10, roas: 2.3,
       conversions: 1098, impressions: 52000, clicks: 3640, ctr: 7.0, cvr: 30.2,
-      emq: 7.4, biddingState: 'optimizing', adSets: 1, creatives: 2,
+      integrationHealth: 7.4, biddingState: 'optimizing', adSets: 1, creatives: 2,
       trend: [4,5,6,7,8,9,10,11], trendDir: 'down',
       dailySpend: [1800, 1900, 1700, 1800, 1700, 1700, 1700],
       publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 55
@@ -112,7 +112,7 @@ const RoktAds = (() => {
       id: 'c12', name: 'True Classic Seasonal Sale', status: 'active', objective: 'ROAS',
       spend: 16800, budget: 35000, cpa: 10.50, cpaTarget: null, copi: 2.65, roas: 5.2,
       conversions: 1600, impressions: 71000, clicks: 4970, ctr: 7.0, cvr: 32.2,
-      emq: 6.8, biddingState: 'learning', adSets: 1, creatives: 3,
+      integrationHealth: 6.8, biddingState: 'learning', adSets: 1, creatives: 3,
       trend: [7,6,6,5,5,4,4,3], trendDir: 'up',
       dailySpend: [2200, 2400, 2500, 2400, 2500, 2400, 2400],
       publishState: 'published', objectiveType: 'product_sales', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 68
@@ -121,7 +121,7 @@ const RoktAds = (() => {
       id: 'c13', name: 'PayPal Business Solutions', status: 'draft', objective: 'CPA',
       spend: 0, budget: 15000, cpa: 0, cpaTarget: 12.00, copi: 0, roas: 0,
       conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
-      emq: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
+      integrationHealth: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
       trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
       dailySpend: [0,0,0,0,0,0,0],
       publishState: 'draft', objectiveType: 'payment_trigger', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 72
@@ -187,10 +187,10 @@ const RoktAds = (() => {
   ];
 
   const measurementGroups = [
-    { name: 'Disney+ Acquisition MG', campaigns: 'Disney+ Spring', status: 'Live', event: 'Purchase', window: '7C + 1V', emq: 8.4 },
-    { name: 'Capital One Cards MG', campaigns: 'Capital One Card', status: 'Live', event: 'Application Submit', window: '30C + 1V', emq: 7.9 },
-    { name: 'Streaming Bundle MG', campaigns: 'Hulu Streaming', status: 'Live', event: 'Signup', window: '7C + 1V', emq: 8.1 },
-    { name: 'True Classic DPA MG', campaigns: 'True Classic DPA', status: 'Live', event: 'Purchase', window: '7C', emq: 4.8 },
+    { name: 'Disney+ Acquisition MG', campaigns: 'Disney+ Spring', status: 'Live', event: 'Purchase', window: '7C + 1V', integrationHealth: 8.4 },
+    { name: 'Capital One Cards MG', campaigns: 'Capital One Card', status: 'Live', event: 'Application Submit', window: '30C + 1V', integrationHealth: 7.9 },
+    { name: 'Streaming Bundle MG', campaigns: 'Hulu Streaming', status: 'Live', event: 'Signup', window: '7C + 1V', integrationHealth: 8.1 },
+    { name: 'True Classic DPA MG', campaigns: 'True Classic DPA', status: 'Live', event: 'Purchase', window: '7C', integrationHealth: 4.8 },
   ];
 
   // ── Partners (Inventory) ──────────────────────────────────
@@ -385,7 +385,7 @@ const RoktAds = (() => {
         audiences: initAudiences,
         creatives: initCreatives,
         intelligence: initIntelligence,
-        catalog: initCatalog,
+        offers: initCatalog,
         measurement: initMeasurement,
         account: initAccount,
       };
@@ -407,9 +407,9 @@ const RoktAds = (() => {
     const text = document.getElementById('contextAlertText');
     if (!alert || !text) return;
     const alerts = {
-      dashboard: 'EMQ dropped below 5.0 on True Classic — conversion tracking may be degraded',
-      campaigns: 'EMQ dropped below 5.0 on True Classic DPA — conversion tracking may be degraded',
-      measurement: 'Phone identifier is missing from CAPI integration — estimated +1.5 EMQ impact',
+      dashboard: 'Integration Health dropped below 5.0 on True Classic — conversion tracking may be degraded',
+      campaigns: 'Integration Health dropped below 5.0 on True Classic DPA — conversion tracking may be degraded',
+      measurement: 'Phone identifier is missing from CAPI integration — estimated +1.5 Integration Health impact',
       creatives: 'Creative refresh overdue on 2 campaigns — last updated 47 days ago',
     };
     if (alerts[view]) {
@@ -428,7 +428,7 @@ const RoktAds = (() => {
         audiences: 'Find audiences...',
         creatives: 'Search creatives...',
         intelligence: 'Search reports...',
-        catalog: 'Search offers & products...',
+        offers: 'Search offers & products...',
         measurement: 'Search measurement groups...',
         account: 'Search settings...',
         builder: 'Search campaigns...',
@@ -473,6 +473,20 @@ const RoktAds = (() => {
       renderPortfolioDashboard();
       return;
     }
+    // Compute KPIs from filtered campaign data
+    const fc = getFilteredCampaigns().filter(c => c.status !== 'draft');
+    const totalSpend = fc.reduce((s, c) => s + c.spend, 0);
+    const totalConv = fc.reduce((s, c) => s + c.conversions, 0);
+    const avgCopi = fc.length ? (fc.reduce((s, c) => s + c.copi, 0) / fc.length).toFixed(2) : '0.00';
+    const avgCPA = totalConv > 0 ? (totalSpend / totalConv).toFixed(2) : '0.00';
+    const avgROAS = fc.length ? (fc.reduce((s, c) => s + c.roas, 0) / fc.length).toFixed(1) : '0.0';
+
+    const kpiEls = $$('.kpi-number[data-target]');
+    const kpiValues = [totalSpend, totalConv, avgCopi, avgCPA, avgROAS];
+    kpiEls.forEach((el, i) => {
+      if (kpiValues[i] !== undefined) el.dataset.target = kpiValues[i];
+    });
+
     animateCounters();
     renderDashboardHealth();
     renderDashboardInsights();
@@ -689,12 +703,31 @@ const RoktAds = (() => {
   function renderDashboardInsights() {
     const list = document.getElementById('insightList');
     if (!list) return;
-    const insights = [
-      { icon: '💡', type: 'tip', text: '<strong>Hulu CPA</strong> is 22% above target — consider expanding LAL to Broad tier' },
-      { icon: '⚠️', type: 'warn', text: '<strong>True Classic EMQ</strong> dropped to 4.8 — check CAPI integration' },
-      { icon: '✅', type: 'good', text: '<strong>Disney+ Creative #3</strong> (Hero) outperforming by 3x CoPI — consider expanding' },
-      { icon: '💡', type: 'tip', text: '<strong>3 campaigns</strong> have stale audiences — refresh recommended for better targeting' },
-    ];
+    // Build insights from filtered campaigns for the selected advertiser
+    const fc = getFilteredCampaigns();
+    const insights = [];
+    // Find campaigns above CPA target
+    const aboveTarget = fc.filter(c => c.cpaTarget && c.cpa > c.cpaTarget && c.status === 'active');
+    if (aboveTarget.length) {
+      const worst = aboveTarget.sort((a,b) => (b.cpa/b.cpaTarget) - (a.cpa/a.cpaTarget))[0];
+      const pct = Math.round(((worst.cpa - worst.cpaTarget) / worst.cpaTarget) * 100);
+      insights.push({ icon: '💡', type: 'tip', text: `<strong>${worst.name}</strong> CPA is ${pct}% above target — consider expanding LAL to Broad tier` });
+    }
+    // Low integration health
+    const lowHealth = fc.filter(c => c.integrationHealth < 5 && c.status !== 'draft');
+    if (lowHealth.length) {
+      insights.push({ icon: '⚠️', type: 'warn', text: `<strong>${lowHealth[0].name}</strong> Integration Health at ${lowHealth[0].integrationHealth} — check CAPI integration` });
+    }
+    // Best performer
+    const active = fc.filter(c => c.status === 'active' && c.copi > 0);
+    if (active.length) {
+      const best = active.sort((a,b) => b.copi - a.copi)[0];
+      insights.push({ icon: '✅', type: 'good', text: `<strong>${best.name}</strong> leading with ${best.copi}% CoPI — consider expanding budget` });
+    }
+    // Stale audience hint
+    if (fc.filter(c => c.status === 'active').length >= 2) {
+      insights.push({ icon: '💡', type: 'tip', text: `<strong>${fc.filter(c => c.status === 'active').length} active campaigns</strong> — consider refreshing audiences for better targeting` });
+    }
     list.innerHTML = `<div class="insight-list">${insights.map(i => `
       <div class="insight-item">
         <div class="insight-icon-wrap ${i.type}">${i.icon}</div>
@@ -734,7 +767,7 @@ const RoktAds = (() => {
       <div class="opt-score-card">
         <div class="opt-score-gauge">
           <svg viewBox="0 0 120 60" width="120" height="60">
-            <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="var(--border)" stroke-width="8" stroke-linecap="round"/>
             <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"
               stroke-dasharray="${score * 1.57} 157" style="transition:stroke-dasharray 1.2s var(--ease-out)"/>
           </svg>
@@ -749,12 +782,29 @@ const RoktAds = (() => {
   function renderAIRecommendations() {
     const container = document.getElementById('aiRecsContainer');
     if (!container) return;
-    const recs = [
-      { icon: '🎨', priority: 'high', text: 'Add <strong>2 more creatives</strong> to Disney+ campaign', impact: 'Est. +15% CoPI', action: 'Create Creative' },
-      { icon: '💰', priority: 'high', text: '<strong>Increase budget</strong> on Capital One by 20% — hitting daily cap before noon', impact: 'Est. +$2.4K conv.', action: 'Apply' },
-      { icon: '👥', priority: 'medium', text: '<strong>Refresh stale audiences</strong> on 3 campaigns — data is 14+ days old', impact: 'Est. +8% match rate', action: 'Refresh All' },
-      { icon: '⏸️', priority: 'low', text: 'Consider pausing <strong>True Classic DPA</strong> — EMQ below threshold', impact: 'Save $3.2K/wk', action: 'Review' },
-    ];
+    // Generate advertiser-scoped recommendations
+    const fc = getFilteredCampaigns();
+    const recs = [];
+    // Low creative count recommendation
+    const lowCreative = fc.filter(c => c.creatives <= 2 && c.status === 'active');
+    if (lowCreative.length) {
+      recs.push({ icon: '🎨', priority: 'high', text: `Add <strong>more creatives</strong> to ${lowCreative[0].name}`, impact: 'Est. +15% CoPI', action: 'Create Creative' });
+    }
+    // Budget cap recommendation
+    const highPacing = fc.filter(c => c.spend / c.budget > 0.7 && c.status === 'active');
+    if (highPacing.length) {
+      recs.push({ icon: '💰', priority: 'high', text: `<strong>Increase budget</strong> on ${highPacing[0].name} — high pacing rate`, impact: 'Est. +$2.4K conv.', action: 'Apply' });
+    }
+    // Stale audiences
+    const activeCount = fc.filter(c => c.status === 'active').length;
+    if (activeCount >= 2) {
+      recs.push({ icon: '👥', priority: 'medium', text: `<strong>Refresh audiences</strong> across ${activeCount} active campaigns`, impact: 'Est. +8% match rate', action: 'Refresh All' });
+    }
+    // Low health
+    const lowHealth = fc.filter(c => c.integrationHealth < 5 && c.status !== 'draft');
+    if (lowHealth.length) {
+      recs.push({ icon: '⏸️', priority: 'low', text: `Consider pausing <strong>${lowHealth[0].name}</strong> — Integration Health below threshold`, impact: `Save $${fmtNum(Math.round(lowHealth[0].spend * 0.15))}/wk`, action: 'Review' });
+    }
     container.innerHTML = recs.map(r => `
       <div class="ai-rec-card">
         <div class="ai-rec-icon ${r.priority}">${r.icon}</div>
@@ -945,7 +995,7 @@ const RoktAds = (() => {
       { l: 'Conversions', v: fmtNum(c.conversions) },
       { l: 'CTR', v: c.ctr + '%' },
       { l: 'CoPI', v: c.copi + '%', hero: true },
-      { l: 'EMQ', v: c.emq, color: c.emq >= 7 ? 'var(--positive)' : c.emq >= 5 ? 'var(--warning)' : 'var(--negative)' },
+      { l: 'Int. Health', v: c.integrationHealth, color: c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)' },
     ].map(m => `
       <div class="metric-chip ${m.hero ? 'kpi-card--hero' : ''}">
         <span class="metric-chip-label">${m.l}</span>
@@ -971,7 +1021,7 @@ const RoktAds = (() => {
     if (c.cpaTarget && c.cpa > c.cpaTarget) insights.push(`CPA is ${Math.round((c.cpa/c.cpaTarget - 1) * 100)}% above target at $${c.cpa.toFixed(2)}.`);
     else if (c.cpaTarget && c.cpa > 0) insights.push(`CPA is ${Math.round((1 - c.cpa/c.cpaTarget) * 100)}% below target — strong performance.`);
     if (c.trendDir === 'down' && c.trend && c.trend[c.trend.length-1] > c.trend[0]) insights.push(`Spend trending up week-over-week.`);
-    if (c.emq && c.emq < 5) insights.push(`EMQ score of ${c.emq} is below recommended threshold of 5.0.`);
+    if (c.integrationHealth && c.integrationHealth < 5) insights.push(`Integration Health score of ${c.integrationHealth} is below recommended threshold of 5.0.`);
     if (c.biddingState === 'learning') insights.push('Smart Bidding is still in learning phase — avoid major changes.');
     if (c.biddingState === 'limited') insights.push('Smart Bidding is budget-limited — consider increasing budget or narrowing audience.');
     if (c.aiHealthScore >= 80) insights.push(`AI Health Score: ${c.aiHealthScore}/100 — campaign is performing well.`);
@@ -1124,7 +1174,7 @@ const RoktAds = (() => {
             <tr><td>ROAS</td><td class="mono">${c.roas}x</td><td>—</td><td>—</td></tr>
             <tr><td>CTR</td><td class="mono">${c.ctr}%</td><td>—</td><td>—</td></tr>
             <tr><td>CVR</td><td class="mono">${c.cvr}%</td><td>—</td><td>—</td></tr>
-            <tr><td>EMQ</td><td class="mono" style="color:${c.emq >= 7 ? 'var(--positive)' : c.emq >= 5 ? 'var(--warning)' : 'var(--negative)'}">${c.emq}/10</td><td>—</td><td>—</td></tr>
+            <tr><td>Integration Health</td><td class="mono" style="color:${c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${c.integrationHealth}/10</td><td>—</td><td>—</td></tr>
           </tbody>
         </table>
       `;
@@ -1579,7 +1629,7 @@ const RoktAds = (() => {
               <label class="form-label">Measurement Group</label>
               <select class="form-select" onchange="RoktAds.persistField('measurementGroup', this.value)">
                 <option value="">Create New Measurement Group</option>
-                ${measurementGroups.map(mg => `<option value="${mg.name}" ${builderData.measurementGroup === mg.name ? 'selected' : ''}>${mg.name} (EMQ: ${mg.emq})</option>`).join('')}
+                ${measurementGroups.map(mg => `<option value="${mg.name}" ${builderData.measurementGroup === mg.name ? 'selected' : ''}>${mg.name} (Health: ${mg.integrationHealth})</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
@@ -2747,7 +2797,7 @@ const RoktAds = (() => {
     const insights = [
       { icon: '📈', text: 'CPA improved <strong>12%</strong> week-over-week across all campaigns' },
       { icon: '🏆', text: 'Creative #3 (Hero) outperforming by <strong>3x CoPI</strong>' },
-      { icon: '⚠️', text: 'True Classic EMQ at <strong>4.8</strong> — affecting optimization' },
+      { icon: '⚠️', text: 'True Classic Integration Health at <strong>4.8</strong> — affecting optimization' },
       { icon: '🧪', text: 'Experiment #1 reached <strong>97% significance</strong> — apply winner' },
     ];
     strip.innerHTML = insights.map(i => `
@@ -2996,7 +3046,7 @@ const RoktAds = (() => {
   // ── Measurement ────────────────────────────────────────────
   function initMeasurement() {
     renderIdentifierCoverage();
-    renderEMQRecommendations();
+    renderIntegrationHealthRecs();
     renderMeasurementGroups();
   }
 
@@ -3022,13 +3072,13 @@ const RoktAds = (() => {
     `).join('');
   }
 
-  function renderEMQRecommendations() {
+  function renderIntegrationHealthRecs() {
     const el = document.getElementById('emqRecommendations');
     if (!el) return;
     const recs = [
-      { icon: '📱', text: 'Add phone number to CAPI integration', impact: '+1.5 EMQ' },
-      { icon: '🔗', text: 'Enable server-side Click ID passback', impact: '+0.5 EMQ' },
-      { icon: '📧', text: 'Increase email coverage from 78% to 90%', impact: '+0.3 EMQ' },
+      { icon: '📱', text: 'Add phone number to CAPI integration', impact: '+1.5 Health' },
+      { icon: '🔗', text: 'Enable server-side Click ID passback', impact: '+0.5 Health' },
+      { icon: '📧', text: 'Increase email coverage from 78% to 90%', impact: '+0.3 Health' },
     ];
     el.innerHTML = recs.map(r => `
       <div class="emq-rec-item">
@@ -3049,7 +3099,7 @@ const RoktAds = (() => {
         <td><span class="badge badge-${mg.status === 'Live' ? 'positive' : 'gray'}">${mg.status}</span></td>
         <td>${mg.event}</td>
         <td class="mono">${mg.window}</td>
-        <td><span class="mono" style="color:${mg.emq >= 7 ? 'var(--positive)' : mg.emq >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.emq}</span></td>
+        <td><span class="mono" style="color:${mg.integrationHealth >= 7 ? 'var(--positive)' : mg.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.integrationHealth}</span></td>
       </tr>
     `).join('');
   }
@@ -3058,6 +3108,7 @@ const RoktAds = (() => {
   function initAccount() {
     renderTeamTable();
     renderIntegrations();
+    renderMCPConnectors();
   }
 
   function renderTeamTable() {
@@ -3094,6 +3145,57 @@ const RoktAds = (() => {
         <button class="btn btn-xs btn-ghost">${i.status === 'connected' ? 'Configure' : 'Connect'}</button>
       </div>
     `).join('')}</div>`;
+  }
+
+  function renderMCPConnectors() {
+    const el = document.getElementById('mcpConnectorsGrid');
+    if (!el) return;
+    const connectors = [
+      { id: 'claude', name: 'Claude (Anthropic)', desc: 'Connect Claude as an AI copilot for campaign management, audience building, and creative generation via MCP', icon: '✦', status: 'connected', badge: 'MCP Server', tools: ['Campaign Management', 'Audience Builder', 'Creative Generator', 'Performance Analyzer', 'Bid Optimizer'] },
+      { id: 'reporting', name: 'Reporting API', desc: 'Programmatic access to campaign metrics, spend data, and conversion reporting', icon: '📊', status: 'connected', badge: 'MCP Server', tools: ['Query Metrics', 'Export Reports', 'Schedule Dashboards'] },
+      { id: 'catalog', name: 'Offer Catalog API', desc: 'Manage offers, creatives, and landing pages via the Rokt MCP server', icon: '🏷️', status: 'connected', badge: 'MCP Server', tools: ['Create Offers', 'Update Creatives', 'Manage Landing Pages'] },
+      { id: 'audiences', name: 'Audience API', desc: 'Build, manage, and sync audiences programmatically. Supports lookalike generation and rule-based targeting', icon: '👥', status: 'connected', badge: 'MCP Server', tools: ['Build Audiences', 'Sync Segments', 'Lookalike Generation'] },
+      { id: 'experiments', name: 'Experimentation API', desc: 'Configure and monitor A/B tests, traffic splits, and holdout groups', icon: '🧪', status: 'available', badge: 'MCP Server', tools: ['Create Experiments', 'Analyze Results', 'Apply Winners'] },
+      { id: 'chatgpt', name: 'ChatGPT (OpenAI)', desc: 'Alternative AI provider for content generation and campaign summaries', icon: '🤖', status: 'available', badge: 'AI Provider', tools: ['Text Generation', 'Summarization'] },
+      { id: 'gemini', name: 'Gemini (Google)', desc: 'Google AI for multi-modal creative analysis and performance prediction', icon: '💎', status: 'available', badge: 'AI Provider', tools: ['Image Analysis', 'Performance Prediction'] },
+    ];
+    el.innerHTML = `
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--space-4)">Connect AI tools and external services via <strong>Model Context Protocol (MCP)</strong>. MCP servers expose Rokt Ads capabilities as tools that AI assistants can use to manage your campaigns.</p>
+      <div class="mcp-connectors-grid">
+        ${connectors.map(c => `
+          <div class="mcp-connector-card ${c.status}">
+            <div class="mcp-connector-header">
+              <div class="mcp-connector-icon">${c.icon}</div>
+              <div class="mcp-connector-info">
+                <div class="mcp-connector-name">${c.name}</div>
+                <span class="badge badge-${c.status === 'connected' ? 'positive' : 'gray'}" style="font-size:9px">${c.badge}</span>
+              </div>
+              <div class="mcp-connector-status">
+                ${c.status === 'connected'
+                  ? '<span class="badge badge-positive">Connected</span>'
+                  : `<button class="btn btn-xs btn-primary btn-pill" onclick="this.textContent='Connecting...';this.disabled=true;setTimeout(()=>{this.closest('.mcp-connector-card').classList.replace('available','connected');this.outerHTML='<span class=\\'badge badge-positive\\'>Connected</span>';RoktAds.toast('${c.name} connected via MCP','success')},1200)">Connect</button>`
+                }
+              </div>
+            </div>
+            <div class="mcp-connector-desc">${c.desc}</div>
+            <div class="mcp-connector-tools">
+              <div class="mcp-tools-label">Available Tools:</div>
+              <div class="mcp-tools-list">${c.tools.map(t => `<span class="mcp-tool-chip">${t}</span>`).join('')}</div>
+            </div>
+            ${c.id === 'claude' ? `
+              <div class="mcp-claude-config">
+                <div class="mcp-config-label">MCP Server Endpoint</div>
+                <div class="mcp-config-value mono">mcp://rokt-ads.mcp.rokt.com/v1</div>
+                <button class="btn btn-xs btn-ghost" onclick="navigator.clipboard?.writeText('mcp://rokt-ads.mcp.rokt.com/v1');RoktAds.toast('Copied MCP endpoint','success')" style="margin-top:6px">
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M2 11V3a1 1 0 011-1h8"/></svg>
+                  Copy Endpoint
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
   // ── Modal System ──────────────────────────────────────────
@@ -3606,7 +3708,7 @@ const RoktAds = (() => {
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.archiveCampaign('${c.id}')">Archive</button>
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.archiveCampaign('${camp.id}')">Archive</button>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
               <button class="btn btn-primary btn-pill" onclick="
@@ -3620,7 +3722,7 @@ const RoktAds = (() => {
                 }
                 RoktAds.closeModal();
                 RoktAds.toast('Campaign updated','success');
-                if (location.hash === '#campaigns') { location.hash = 'campaigns'; }
+                RoktAds.navigate('campaigns');
               ">Save Changes</button>
             </div>
           </div>
@@ -3821,8 +3923,8 @@ const RoktAds = (() => {
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Current EMQ</label>
-              <div style="font-size:18px;font-weight:700;color:${mg.emq >= 7 ? 'var(--positive)' : mg.emq >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.emq} / 10</div>
+              <label class="form-label">Integration Health</label>
+              <div style="font-size:18px;font-weight:700;color:${mg.integrationHealth >= 7 ? 'var(--positive)' : mg.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.integrationHealth} / 10</div>
             </div>
           </div>
           <div class="modal-footer">
@@ -3990,7 +4092,7 @@ const RoktAds = (() => {
         { icon: '👥', text: 'Audiences', shortcut: 'G A', action: () => navigate('audiences') },
         { icon: '🎨', text: 'Creative Studio', action: () => navigate('creatives') },
         { icon: '📈', text: 'Intelligence', shortcut: 'G R', action: () => navigate('intelligence') },
-        { icon: '🏷️', text: 'Catalog', action: () => navigate('catalog') },
+        { icon: '🏷️', text: 'Offers', action: () => navigate('offers') },
         { icon: '🎯', text: 'Measurement', action: () => navigate('measurement') },
         { icon: '⚙️', text: 'Account', action: () => navigate('account') },
       ]},
@@ -4011,7 +4113,7 @@ const RoktAds = (() => {
       }))},
       { group: 'Offers', items: offers.map(o => ({
         icon: o.icon, text: o.name + ' (' + o.type + ')',
-        action: () => { navigate('catalog'); setTimeout(() => openModal('editOffer', o.id), 200); },
+        action: () => { navigate('offers'); setTimeout(() => openModal('editOffer', o.id), 200); },
       }))},
     ];
 
@@ -4214,7 +4316,7 @@ const RoktAds = (() => {
   // ── AI Sparkle Effect ─────────────────────────────────────
   let sparkleCount = 0;
   function initAISparkles() {
-    document.querySelectorAll('.ai-badge, .ai-rec-card, .ai-hero-section, .ai-fab, .ai-monitor, .ai-analysis-card').forEach(el => {
+    document.querySelectorAll('.ai-badge, .ai-rec-card, .ai-hero-section, .sidebar-ai-btn, .ai-monitor, .ai-analysis-card').forEach(el => {
       if (el._sparkleInit) return;
       el._sparkleInit = true;
       el.addEventListener('mousemove', e => {
@@ -4438,9 +4540,9 @@ const RoktAds = (() => {
     const alertAction = document.getElementById('contextAlertAction');
     if (alertAction) alertAction.addEventListener('click', () => {
       const alertText = (document.getElementById('contextAlertText') || {}).textContent || '';
-      if (alertText.includes('EMQ') || alertText.includes('conversion tracking') || alertText.includes('CAPI')) {
+      if (alertText.includes('Integration Health') || alertText.includes('conversion tracking') || alertText.includes('CAPI')) {
         location.hash = 'measurement';
-        toast('Navigated to Measurement \u2014 check EMQ dashboard', 'info');
+        toast('Navigated to Measurement \u2014 check Integration Health', 'info');
       } else if (alertText.includes('Creative refresh') || alertText.includes('creative')) {
         location.hash = 'creatives';
         toast('Navigated to Creative Studio \u2014 review overdue creatives', 'info');
@@ -4464,7 +4566,7 @@ const RoktAds = (() => {
       notifDrop.querySelectorAll('.notif-item').forEach((item, idx) => {
         item.addEventListener('click', () => {
           notifDrop.style.display = 'none';
-          if (idx === 0) { location.hash = 'measurement'; toast('Navigated to Measurement \u2014 check EMQ', 'info'); }
+          if (idx === 0) { location.hash = 'measurement'; toast('Navigated to Measurement \u2014 check Integration Health', 'info'); }
           else if (idx === 1) { location.hash = 'campaigns'; setTimeout(() => openCampaignDetail('c2'), 300); }
           else if (idx === 2) { location.hash = 'intelligence'; setTimeout(() => switchIntelTab('experiments'), 300); }
           else { location.hash = 'intelligence'; }
@@ -4728,7 +4830,7 @@ const RoktAds = (() => {
     const im = { discount: '\ud83c\udff7\ufe0f', trial: '\ud83c\udd93', cashback: '\ud83d\udcb0', shipping: '\ud83d\udce6', product: '\ud83d\udecd\ufe0f' };
     offers.push({ id: 'o' + (offers.length + 1), type, icon: im[type] || '\ud83c\udff7\ufe0f', name: value || 'New Offer', value: value || 'New Offer', cost: cost || '$0.00', campaigns: 0, copi: 0, cvr: 0 });
     closeModal(); toast('Offer created', 'success');
-    if (currentView === 'catalog') renderOffers();
+    if (currentView === 'offers') renderOffers();
   }
 
   function createExperiment() {
@@ -4765,7 +4867,7 @@ const RoktAds = (() => {
   function confirmDelete(entityType, id) {
     showConfirm('Delete ' + capitalize(entityType), 'Are you sure? This cannot be undone.', () => {
       if (entityType === 'audience') { const idx = audiences.findIndex(a => a.id === id); if (idx >= 0) audiences.splice(idx, 1); closeModal(); toast('Audience deleted', 'info'); if (currentView === 'audiences') { renderAudienceGrid(); updateAudienceCounts(); } }
-      else if (entityType === 'offer') { const idx = offers.findIndex(o => o.id === id); if (idx >= 0) offers.splice(idx, 1); closeModal(); toast('Offer deleted', 'info'); if (currentView === 'catalog') renderOffers(); }
+      else if (entityType === 'offer') { const idx = offers.findIndex(o => o.id === id); if (idx >= 0) offers.splice(idx, 1); closeModal(); toast('Offer deleted', 'info'); if (currentView === 'offers') renderOffers(); }
       else if (entityType === 'experiment') { const idx = experiments.findIndex(e => e.id === id); if (idx >= 0) experiments.splice(idx, 1); closeModal(); toast('Experiment deleted', 'info'); if (currentView === 'intelligence') renderExperiments(); }
     });
   }

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
   <!-- ========== ADVERTISER PICKER GATE ========== -->
@@ -80,9 +80,9 @@
           <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="14" height="14" rx="2"/><circle cx="6.5" cy="6.5" r="1.5"/><path d="M2 12l4-4 3 3 2-2 5 5H2z"/></svg>
           <span class="nav-label">Creative Studio</span>
         </a>
-        <a href="#catalog" class="nav-item" data-view="catalog">
+        <a href="#offers" class="nav-item" data-view="offers">
           <svg class="nav-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h14v3H2zM2 8h6v7H2zM10 8h6v7h-6z"/></svg>
-          <span class="nav-label">Catalog</span>
+          <span class="nav-label">Offers</span>
         </a>
         <!-- ANALYZE -->
         <div class="nav-section-label">Analyze</div>
@@ -102,6 +102,12 @@
         </a>
       </nav>
       <div class="sidebar-footer">
+        <button class="sidebar-ai-btn" id="aiFab" title="AI Copilot">
+          <svg width="18" height="18" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/>
+          </svg>
+          <span class="sidebar-ai-label">AI Copilot</span>
+        </button>
         <button class="sidebar-switch-adv" id="sidebarSwitchAdv" title="Switch Advertiser">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4h14M1 8h14M1 12h14"/><circle cx="12" cy="4" r="2" fill="var(--beetroot)" stroke="var(--beetroot)"/></svg>
           <span class="sidebar-switch-label">Switch Advertiser</span>
@@ -149,7 +155,7 @@
             <div class="notif-item notif-unread">
               <span class="notif-dot critical"></span>
               <div class="notif-body">
-                <div class="notif-text"><strong>True Classic DPA</strong> — EMQ dropped below 5.0</div>
+                <div class="notif-text"><strong>True Classic DPA</strong> — Integration Health dropped below 5.0</div>
                 <div class="notif-time">12 min ago</div>
               </div>
             </div>
@@ -270,13 +276,6 @@
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
-
-  <!-- AI Copilot FAB -->
-  <button class="ai-fab" id="aiFab" title="AI Copilot">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/>
-    </svg>
-  </button>
 
   <!-- AI Drawer -->
   <div class="ai-drawer" id="aiDrawer">
@@ -508,7 +507,7 @@
             <button class="detail-tab" data-tab="adsets">Ad Sets</button>
             <button class="detail-tab" data-tab="creatives">Creatives</button>
             <button class="detail-tab" data-tab="analytics">Analytics</button>
-            <button class="detail-tab" data-tab="nurture" onclick="RoktAds.switchDetailTab('nurture')">Nurture</button>
+            <button class="detail-tab" data-tab="nurture">Nurture</button>
           </div>
           <div class="detail-tab-content" id="detailTabContent"></div>
         </div>
@@ -755,11 +754,11 @@
   </template>
 
   <!-- CATALOG -->
-  <template id="tmpl-catalog">
-    <div class="view view-catalog" style="padding:var(--space-5) var(--space-6)">
+  <template id="tmpl-offers">
+    <div class="view view-offers" style="padding:var(--space-5) var(--space-6)">
       <div class="view-header">
         <div class="view-header-left">
-          <h2 class="view-title">Catalog</h2>
+          <h2 class="view-title">Offers</h2>
         </div>
         <div class="view-header-right">
           <button class="filter-pill active" data-catalog-tab="offers" onclick="RoktAds.switchCatalogTab('offers')">Offers</button>
@@ -796,9 +795,9 @@
         <div class="view-header-left"><h2 class="view-title">Measurement</h2></div>
       </div>
       <div class="measurement-grid">
-        <!-- EMQ Dashboard -->
+        <!-- Integration Health Dashboard -->
         <div class="card emq-card">
-          <div class="card-header"><h3 class="card-title">Event Match Quality (EMQ)</h3></div>
+          <div class="card-header"><h3 class="card-title">Integration Health</h3></div>
           <div class="card-body" style="text-align:center">
             <div class="emq-gauge" id="emqGauge">
               <svg width="160" height="100" viewBox="0 0 160 100">
@@ -820,9 +819,9 @@
           <div class="card-header"><h3 class="card-title">Identifier Coverage</h3></div>
           <div class="card-body" id="identifierCoverage"></div>
         </div>
-        <!-- Improve EMQ -->
+        <!-- Improve Integration Health -->
         <div class="card">
-          <div class="card-header"><h3 class="card-title">Improve EMQ</h3></div>
+          <div class="card-header"><h3 class="card-title">Improve Integration Health</h3></div>
           <div class="card-body" id="emqRecommendations"></div>
         </div>
       </div>
@@ -834,7 +833,7 @@
         </div>
         <div class="card-body" style="padding:0">
           <table class="data-table" id="measurementGroupsTable">
-            <thead><tr><th>NAME</th><th>LINKED CAMPAIGNS</th><th>STATUS</th><th>OPTIMIZATION EVENT</th><th>ATTRIBUTION WINDOW</th><th>EMQ</th></tr></thead>
+            <thead><tr><th>NAME</th><th>LINKED CAMPAIGNS</th><th>STATUS</th><th>OPTIMIZATION EVENT</th><th>ATTRIBUTION WINDOW</th><th>HEALTH</th></tr></thead>
             <tbody id="measurementGroupsBody"></tbody>
           </table>
         </div>
@@ -889,10 +888,16 @@
           <div class="card-header"><h3 class="card-title">Integrations</h3></div>
           <div class="card-body" id="integrationsGrid"></div>
         </div>
+        <div class="card" style="grid-column: 1 / -1">
+          <div class="card-header">
+            <h3 class="card-title"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-2px;margin-right:6px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>AI &amp; MCP Connectors</h3>
+          </div>
+          <div class="card-body" id="mcpConnectorsGrid"></div>
+        </div>
       </div>
     </div>
   </template>
 
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>
