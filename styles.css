@@ -1890,9 +1890,11 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--space-3);
-  max-height: 360px;
+  max-height: 380px;
   overflow-y: auto;
-  padding-right: 4px;
+  overflow-x: visible;
+  padding: 4px;
+  margin: -4px;
 }
 .campaign-health-grid::-webkit-scrollbar { width: 4px; }
 .campaign-health-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
@@ -3774,7 +3776,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   pointer-events: none;
   border-radius: inherit;
 }
-.health-card { position: relative; overflow: hidden; }
+.health-card { position: relative; overflow: visible; }
 .audience-card { position: relative; overflow: hidden; }
 .experiment-card { position: relative; overflow: hidden; }
 .offer-card { position: relative; overflow: hidden; }

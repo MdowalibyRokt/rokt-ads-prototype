@@ -23,7 +23,7 @@ This document maps every action, workflow, and feature available in the live Rok
 
 | Feature | OP Implementation | Prototype | Notes |
 |---------|------------------|-----------|-------|
-| Campaign creation wizard | CCC (Compound Campaign Creator) — 4-step wizard + Ease Flow (5-step simplified) + DTC (accelerated self-serve) | 5-step builder with AI hero | OP has 3 wizard variants |
+| Campaign creation wizard | CCC (Compound Campaign Creator) — 4-step wizard + Ease Flow (5-step simplified) + DTC (accelerated self-serve) | Dual-mode builder: Autopilot (3-step AI-managed) + Advanced (5-step full control) | OP has 3 wizard variants; prototype has 2 modes inspired by PMax/Advantage+ |
 | Campaign name | Required, max 200 chars | Free text with format hint | Same |
 | Campaign objectives | 14 types: Email, Phone, Traffic, App, Calendar, CrossSell, AddToCart, Promotion, CustomerFeedback, IntegratedApplication, PaymentTrigger, BrandCampaign, ProductSales, ShoppableAd | 6 types: Acquisition, Revenue, App Install, DPA, Email, Embedded | **Prototype has fewer** — should map to OP types |
 | Campaign status: Active | Active (via object status system) | Active | Same |
@@ -39,7 +39,8 @@ This document maps every action, workflow, and feature available in the live Rok
 | Language selection | campaignLanguageCode (max 5 chars) | ❌ Not yet implemented | **GAP** |
 | Timezone selection | timezoneId (required) | ❌ Not yet implemented | **GAP** |
 | Campaign labels | campaignLabels array with toggle | ❌ Not yet implemented | **GAP** |
-| Duplicate campaign | `POST /campaigns/{id}/duplicate` + UI "Clone Campaign" modal | Duplicate button (toast only) | Prototype is mock |
+| Duplicate campaign | `POST /campaigns/{id}/duplicate` + UI "Clone Campaign" modal | Duplicate button with data mutation — creates "Copy of..." entry | Now functional (v3.0) |
+| Archive campaign | Archive + restore to draft | Archive button with confirmation dialog | Now functional (v3.0) |
 | Edit campaign | PATCH endpoint, draft/publish workflow | Edit button → opens builder | Different approach |
 
 ### 1.2 Ad Sets
@@ -55,7 +56,7 @@ This document maps every action, workflow, and feature available in the live Rok
 
 | Feature | OP Implementation | Prototype | Notes |
 |---------|------------------|-----------|-------|
-| Create audience | 51-field AudienceCore with targeting config | Build Audience modal with rule builder | OP much more complex |
+| Create audience | 51-field AudienceCore with targeting config | Build Audience modal with rule builder — now persists to data and renders (v3.0) | OP much more complex but prototype now has real data mutation |
 | Edit audience | PATCH endpoint with targeting update | Edit modal with rule builder | Same concept |
 | Archive audience | Separate endpoint | Not implemented | **GAP** |
 | AND/OR targeting logic | Feature-flagged AND/OR toggle | AND/OR toggle in rule builder | Same |
@@ -66,7 +67,7 @@ This document maps every action, workflow, and feature available in the live Rok
 | OS targeting | TargetOperatingSystem (android/ios/other) | ❌ Not implemented | **GAP** |
 | Device manufacturer | TargetDeviceManufacturer (apple/htc/lg/nokia/samsung/other) | ❌ Not implemented | **GAP** |
 | Industry verticals | industries array (int32 IDs) | ❌ Not implemented | **GAP** — core Rokt dimension |
-| Placement targeting | TargetPlacement (coreg/engagement/pretickCoreg/survey) | ❌ Not implemented | **GAP** — fundamental Rokt concept |
+| Placement targeting | TargetPlacement (coreg/engagement/pretickCoreg/survey) | Inventory Targeting: 8 partners, Overlay/Embedded/Post-Transaction placement types, position targeting, frequency caps (v3.0) | Different taxonomy but concept now covered |
 | Interaction targeting | TargetInteraction (10 bool fields: purchase, registration, etc.) | ❌ Not implemented | **GAP** |
 | Attribute targeting | TargetAttributeTargeting with 24 condition types (Equals/Contains/StartsWith/Regex/NumberGreaterThan/DateLessThan/etc.) | Categories in rule builder | OP much more powerful |
 | Custom audience rules | CustomAudienceRule with types (Email/Retargeting/Lookalike) | Suppress existing customers toggle | OP more complex |
@@ -145,7 +146,7 @@ This document maps every action, workflow, and feature available in the live Rok
 
 | Feature | OP Implementation | Prototype | Notes |
 |---------|------------------|-----------|-------|
-| Creative experiments | Full wizard with variants, bucket preview, metrics chart, publish | A/B Test + MAB experiment creation modal | OP more mature |
+| Creative experiments | Full wizard with variants, bucket preview, metrics chart, publish | A/B Test + MAB experiment creation modal with data mutation (v3.0) | OP more mature; prototype now persists |
 | Page experiments | Separate experiment type for page/layout testing | ❌ Not in prototype | **GAP** — partner-side feature |
 | Experiment statuses | Draft, Active, Disapproved, Inactive, Scheduled, In Review, Paused, Archived, Deleted | Draft, Running, Concluded | Prototype simplified |
 | ACE agent | AI-powered experiment agent (feature-flagged) | Not implemented | **GAP** |
@@ -169,10 +170,11 @@ This document maps every action, workflow, and feature available in the live Rok
 
 | Feature | OP Implementation | Prototype | Notes |
 |---------|------------------|-----------|-------|
-| Campaign reporting | Reporting dashboard with templates (5 types), headline metrics, charts, drag-and-drop editor | Intelligence view with charts and tables | OP more feature-rich |
+| Campaign reporting | Reporting dashboard with templates (5 types), headline metrics, charts, drag-and-drop editor | Intelligence view with 3-line chart (Spend/Conversions/CPA), working filters, Group By breakdowns, compare toggle (v3.0) | Prototype significantly enhanced |
 | Metrics | 200+ campaign metric keys including base+parameterized variants | ~15 metrics in table | OP massively more |
-| Dimensions | 56 dimension keys (demographic, geographic, device, campaign, creative, placement, etc.) | Filter by Campaign/AdSet/Creative/Status | OP much more granular |
-| Date ranges | Global date range selector | Today, 7D, 30D, MTD, Custom | Same concept |
+| Dimensions | 56 dimension keys (demographic, geographic, device, campaign, creative, placement, etc.) | Group By dropdown: Campaign/Ad Set/Creative/Device/Geography/Day of Week (v3.0) | OP still more granular but prototype now has working breakdowns |
+| Date ranges | Global date range selector | Today, 7D, 30D, MTD, Custom — now functional with data filtering (v3.0) | Same concept, now working |
+| Period comparison | Period-over-period comparison in reports | Compare toggle for period-over-period with dashed overlay lines (v3.0) | New in prototype |
 | Export | Async CSV export via API with status polling + download URL | Export modal (CSV/PDF/Excel) | OP is async pipeline |
 | Scheduled reports | 3-step wizard: Setup (name, type, format) → Build (columns, filters) → Schedule & Delivery (frequency, recipients) | Recurring export checkbox | OP is full workflow |
 | Real-time dashboard | Feature-flagged ClickHouse-backed | ❌ Not implemented | **GAP** |
@@ -183,6 +185,10 @@ This document maps every action, workflow, and feature available in the live Rok
 
 | Feature | OP Implementation | Prototype | Notes |
 |---------|------------------|-----------|-------|
+| Advertiser account selection | Account picker in nav, per-account context | Full-page advertiser picker gate on load with favorites, recents, search (v3.0) | Prototype has richer picker UX |
+| Account switching | Account dropdown in header | Topbar account switcher dropdown with quick-switch, favorites stars (v3.0) + sidebar "Switch Advertiser" button | Enhanced UX |
+| Per-account data scoping | All views scoped to selected account | Per-advertiser data scoping across all views (v3.0) | Same concept |
+| Portfolio/multi-account view | Account summary dashboard | Portfolio Dashboard for multi-advertiser internal overview (v3.0) | Prototype adds cross-account view |
 | User roles | Editor, Reporter (OP) + Admin/Staff roles | Admin, Editor, Viewer | Different taxonomy |
 | User management | Per-account access page + global user management (staff) | Invite User modal | Simplified |
 | Company settings | Account details, commercial terms (acquire + commerce), data governance, tags, approved partner domains, mParticle provisioning, account teams | Account overview card | OP much more complex |
@@ -234,7 +240,7 @@ This document maps every action, workflow, and feature available in the live Rok
 | Feature | Details | Priority |
 |---------|---------|----------|
 | **Industry verticals** | industries[] — core Rokt targeting dimension | 🔴 High |
-| **Placement targeting** | coreg/engagement/pretickCoreg/survey — fundamental to Rokt model | 🔴 High |
+| **Placement targeting** | coreg/engagement/pretickCoreg/survey — fundamental to Rokt model | 🟡 Medium — prototype now has Inventory Targeting with placement types (Overlay/Embedded/Post-Transaction) but different taxonomy |
 | **Interaction targeting** | 10 types: purchase, registration, enquiry, etc. | 🟡 Medium |
 | **OS targeting** | android/ios/other | 🟢 Low |
 | **Device manufacturer** | apple/htc/lg/nokia/samsung/other | 🟢 Low |
@@ -345,7 +351,39 @@ These features exist in the prototype but **NOT** in the current live One Platfo
 
 *Note: OP has Creative AI chat and Recommendations, but prototype's implementation is more tightly integrated into workflows with actionable inline buttons.*
 
-### 3.2 Enhanced Builder UX
+### 3.2 Advertiser Account Model (v3.0)
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| Full-page advertiser picker gate | Favorites, recents, all advertisers with search on app load | ⭐ High |
+| Per-advertiser data scoping | All views filtered to selected advertiser context | ⭐ High |
+| Portfolio Dashboard | Multi-advertiser internal overview with cross-account KPIs | ⭐ High |
+| Topbar account switcher | Quick-switch dropdown with favorites stars | ⭐ High |
+| Sidebar "Switch Advertiser" | Always-visible button to return to picker | 🟡 Medium |
+
+### 3.3 Dual-Mode Campaign Builder (v3.0)
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| Autopilot mode (3 steps) | Goal → Assets → Launch — AI handles targeting/bidding/optimization | 🔥 Very High |
+| Advanced mode (5 steps) | Full control builder for power users | ⭐ High |
+| Mode selector cards | Visual choice between Autopilot and Advanced at Step 1 | ⭐ High |
+| Asset Group step | Consolidated creative + audience signals in one step (Autopilot) | 🔥 Very High |
+| Audience signals (hints) | Interest keywords and demographic hints — AI expands autonomously | 🔥 Very High |
+| Ad Strength gauge | Poor/Average/Good/Excellent creative quality indicator (both modes) | ⭐ High |
+| AI Managed card | Visual indicator of what AI controls in Autopilot | 🟡 Medium |
+
+### 3.4 Inventory Targeting (v3.0)
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| 8 mock partners | Ticketmaster, Fanatics, Booking.com, StubHub, Grubhub, Shutterfly, Chewy, LiveNation | ⭐ High |
+| Placement type cards | Overlay, Embedded, Post-Transaction selection | ⭐ High |
+| Partner search + select all | Searchable partner list with bulk selection | 🟡 Medium |
+| Position targeting | Any / 1st / 1st or 2nd position preference | 🟡 Medium |
+| Frequency caps | Per user per day + per user lifetime limits | ⭐ High |
+
+### 3.5 Enhanced Builder UX
 
 | Feature | Description | Value |
 |---------|-------------|-------|
@@ -357,42 +395,71 @@ These features exist in the prototype but **NOT** in the current live One Platfo
 | Validation checklist | Dynamic 6-point check before launch | 🟡 Medium |
 | Confetti celebration | 60-particle launch animation | 🟢 Low |
 
-### 3.3 Visual Design & Interactions
+### 3.6 Visual Design & Interactions
 
 | Feature | Description | Value |
 |---------|-------------|-------|
 | Mouse-tracking card glow | Radial gradient follows cursor | 🟡 Medium |
 | Animated gradient mesh background | Dashboard backdrop | 🟢 Low |
-| Staggered card animations | 60ms cascade entrance | 🟡 Medium |
+| Staggered card animations | 60ms cascade entrance with scale+translateY+opacity | 🟡 Medium |
 | Row action buttons | Slide-in Pause/Edit/Duplicate on hover | ⭐ High |
 | Campaign detail panel | Slide-in right panel with 4 tabs | ⭐ High |
 | SVG sparkline charts | Inline trend visualization | 🟡 Medium |
 | Spend pacing chart | SVG line chart with filters | 🟡 Medium |
 | Campaign health grid | Card-based dashboard overview | 🟡 Medium |
 | Progress bar shimmer | Animated shine effect | 🟢 Low |
+| Rokt connector data points | Connector logo shapes as chart data points on all charts (v3.0) | 🟡 Medium |
+| Entity-specific card designs | Type strips, thumbnails, status-driven progress per entity type (v3.0) | 🟡 Medium |
+| Empty state CSS patterns | Dot grids and geometric shapes with CTA prompts for empty views (v3.0) | 🟡 Medium |
+| Typography hierarchy | Systematic type scale: display, heading, body, caption, mono (v3.0) | 🟡 Medium |
+| Warm light mode surfaces | Cream/warm-tinted whites instead of cold pure white (v3.0) | ⭐ High |
+| 9 overlay opacity tokens | CSS custom properties that auto-flip between dark/light (v3.0) | 🟡 Medium |
+| Sidebar grouped sections | Workspace/Build/Analyze/Settings with beetroot accent bar (v3.0) | ⭐ High |
+| Sidebar badge counts | Attention indicators on nav items needing action (v3.0) | 🟡 Medium |
 
-### 3.4 Navigation & Productivity
+### 3.7 Navigation & Productivity
 
 | Feature | Description | Value |
 |---------|-------------|-------|
-| Command Palette (Cmd+K) | Fuzzy search across views, actions, campaigns | ⭐ High |
+| Command Palette (Cmd+K) | Fuzzy search across all entity types with grouped results (v3.0 enhanced) | ⭐ High |
 | 12 keyboard shortcuts | G+D, G+C, N+C, J/K navigation, ?, / | ⭐ High |
-| Key chord visual indicator | Floating label for key sequences | 🟡 Medium |
-| Dark/Light theme toggle | Full CSS custom property theming | 🟡 Medium |
+| Key chord visual indicator | Floating label showing available completions for key sequences (v3.0 enhanced) | 🟡 Medium |
+| Dark/Light theme toggle | Full CSS custom property theming with warm light mode (v3.0 enhanced) | 🟡 Medium |
+| Notification navigation | Clicking notifications navigates to relevant view and entity (v3.0) | ⭐ High |
 | Notification center | Categorized unread notifications | 🟡 Medium |
 | Context alerts | View-specific actionable bars | 🟡 Medium |
 | Status bar | Live metrics footer | 🟢 Low |
+| Confirmation dialogs | Required confirmation for destructive actions (archive, delete) (v3.0) | ⭐ High |
+| Toast action cleanup | Duplicate/Archive/Fix Now toasts now trigger real workflows (v3.0) | 🟡 Medium |
 
-### 3.5 Intelligence Enhancements
+### 3.8 Intelligence Enhancements
 
 | Feature | Description | Value |
 |---------|-------------|-------|
+| 3-line performance chart | Spend, Conversions, CPA displayed simultaneously (v3.0) | ⭐ High |
+| Working date range filtering | Date pills now actually filter chart and table data (v3.0) | ⭐ High |
+| Compare toggle | Period-over-period comparison with dashed overlay lines (v3.0) | ⭐ High |
+| Group By breakdowns | Dimension grouping: Campaign/Ad Set/Creative/Device/Geography/Day (v3.0) | ⭐ High |
+| Working filter dropdowns | Campaign, Status, Objective filters functional (v3.0) | ⭐ High |
+| Rokt connector chart markers | Brand-shaped data points on all charts (v3.0) | 🟡 Medium |
 | Insight strip | 4 contextual insight cards above reports | 🟡 Medium |
 | Attribution window presets | Default, Social ROAS, Search ROAS, Click-only quick toggle | 🟡 Medium |
 | Add Metric modal | 8 advanced metrics (AOV, CPiA, Incremental Lift, etc.) | 🟡 Medium |
 | Multi-Armed Bandit experiments | MAB type alongside A/B | ⭐ High |
 
-### 3.6 Catalog & Product Management
+### 3.9 Entity CRUD Completeness (v3.0)
+
+| Feature | Description | Value |
+|---------|-------------|-------|
+| Create audiences with persistence | Build Audience modal now mutates data array and renders | ⭐ High |
+| Create offers with persistence | Create Offer modal adds to catalog data | ⭐ High |
+| Create experiments with persistence | New Experiment modal with type/campaign/variants | ⭐ High |
+| Duplicate campaigns | Creates "Copy of..." entry with data mutation | ⭐ High |
+| Archive campaigns | Removes with confirmation dialog | ⭐ High |
+| Creative live preview updates | Typing in editor immediately reflected in preview (v3.0) | ⭐ High |
+| Creative format switching | Format change updates editor fields and preview (v3.0) | 🟡 Medium |
+
+### 3.10 Catalog & Product Management
 
 | Feature | Description | Value |
 |---------|-------------|-------|
@@ -409,9 +476,9 @@ These features exist in the prototype but **NOT** in the current live One Platfo
 2. **14 campaign objectives** — Prototype has 6, OP has 14. Map prototype objectives to OP enums.
 3. **Country/Language/Timezone** — Required locked fields. Add to builder Step 2.
 4. **Industry vertical targeting** — Core Rokt dimension. Add to audience targeting.
-5. **Placement type targeting** — Fundamental to the Rokt model (coreg/engagement/etc.). Add to audience targeting.
+5. ~~**Placement type targeting**~~ — **Partially addressed in v3.0:** Inventory Targeting now includes Overlay/Embedded/Post-Transaction placement types, 8 partner selections, position targeting, and frequency caps. Taxonomy differs from OP's coreg/engagement model but concept is covered.
 6. **5 Smart Bidding strategies** — Prototype only shows generic "Smart Bidding." Add strategy selector: Scale at CPA, Maximize Conversions, Balance, Scale at ROAS, Learning Phase.
-7. **Full status lifecycle** — Add: Requires Action (with sub-states), Pending Review, Archived, Ended, Suspended, Limit Reached.
+7. **Full status lifecycle** — Add: Requires Action (with sub-states), Pending Review, Archived (partially addressed — archive now works in v3.0), Ended, Suspended, Limit Reached.
 
 ### 🟡 Important Gaps
 
@@ -438,21 +505,23 @@ These features exist in the prototype but **NOT** in the current live One Platfo
 
 | Category | Count |
 |----------|-------|
-| Features in both platforms | 65+ |
-| OP-only features (total) | 80+ |
-| OP-only — critical gaps | 7 |
+| Features in both platforms | 75+ (up from 65+ — advertiser model, inventory targeting, CRUD ops, reporting filters now overlap) |
+| OP-only features (total) | 75+ (down from 80+ — placement targeting and archive partially addressed) |
+| OP-only — critical gaps | 5-6 (down from 7 — placement targeting partially covered, archive added) |
 | OP-only — important gaps | 8 |
-| OP-only — low priority/N/A | 65+ |
-| Prototype-only features | 38+ |
+| OP-only — low priority/N/A | 60+ |
+| Prototype-only features | 65+ (up from 38+ — advertiser model, dual-mode builder, inventory targeting, visual polish, CRUD completeness) |
 
 ### Key Takeaway
 
-The prototype preserves the core advertiser workflow (create campaign → configure audiences → build creatives → set bidding → launch) and significantly enhances it with AI-native features, premium visual design, and keyboard productivity that don't exist in the OP.
+The v3.0 prototype now goes well beyond a UX demo. It includes a full advertiser account model (picker gate, per-advertiser scoping, portfolio view, account switcher), a dual-mode campaign builder inspired by Google PMax and Meta Advantage+ (Autopilot for speed, Advanced for control), inventory targeting with partner/placement/position/frequency controls, fully functional entity CRUD (create/edit/duplicate/archive with data mutation), a significantly upgraded intelligence view (3-line charts, working filters, compare toggle, group-by breakdowns), and comprehensive visual polish (warm light mode, Rokt connector data points, entity-specific cards, systematic typography, animation fixes).
 
-The **critical gaps** are mostly Rokt-specific platform concepts (placement types, industry verticals, draft/publish workflow, full status lifecycle) and real-platform fields (country/language/timezone, 14 objectives, 5 bidding strategies) that would make the prototype feel less like a real Rokt product without them.
+The **remaining critical gaps** are Rokt-specific platform concepts (draft/publish workflow, industry verticals, full status lifecycle) and real-platform fields (country/language/timezone, 14 objectives, 5 bidding strategies). Placement targeting is now partially addressed through the Inventory Targeting feature, though the taxonomy differs from OP's coreg/engagement model.
 
 The **vast majority** of OP-only features are either partner-side (transactions/layouts), staff-only (admin/finance), or backend integrations (APIs, CDPs) that are out of scope for an advertiser UX prototype.
 
+The prototype-only feature count has grown from 38+ to 65+, reflecting the addition of the advertiser account model (5 features), dual-mode builder (7 features), inventory targeting (5 features), entity CRUD completeness (7 features), intelligence enhancements (6 features), visual polish (8 features), and navigation improvements (3 features) — none of which exist in the current OP.
+
 ---
 
-*Sources: `rokt/op2-workspace` (Angular/React frontend), `rokt/control-plane` (OpenAPI 3.1 contracts), `rokt/campaign-configuration-schemas` (Go entity schemas), `docs.rokt.com` (public docs), prototype codebase*
+*Sources: `rokt/op2-workspace` (Angular/React frontend), `rokt/control-plane` (OpenAPI 3.1 contracts), `rokt/campaign-configuration-schemas` (Go entity schemas), `docs.rokt.com` (public docs), prototype codebase. Updated March 20, 2026 to reflect v3.0 features.*

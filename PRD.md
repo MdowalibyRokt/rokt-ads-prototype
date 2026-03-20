@@ -1,10 +1,10 @@
 # Rokt Ads — Next-Generation Media Buying Platform
 ## Product Requirements Document (PRD)
 
-**Version:** 1.0
-**Date:** March 19, 2026
+**Version:** 3.0
+**Date:** March 20, 2026
 **Author:** Max Dowaliby + Claude (AI-assisted design)
-**Status:** Prototype Complete — 3 critique rounds applied
+**Status:** Prototype Complete — v3.0 with advertiser model, dual-mode builder, inventory targeting, and full visual overhaul
 
 ---
 
@@ -13,15 +13,18 @@
 Rokt Ads is a reimagined media buying platform prototype, designed from scratch to feel like a bleeding-edge product built by a top-tier design agency (IDEO/Work&Co/Clay caliber). The prototype is a fully interactive, clickable HTML/CSS/JS single-page application with zero dependencies — no frameworks, no build tools, no npm. Open `index.html` in any browser.
 
 ### Key Stats
-- **9 interconnected views** with hash-based routing and animated transitions
-- **6,076 lines** of handcrafted code across 3 files
-- **15+ modal types** for create/edit workflows
-- **5-step campaign builder** with cinematic step transitions
-- **Command palette** (Cmd+K) with fuzzy search across all entities
+- **10+ interconnected views** with hash-based routing and animated transitions (including Portfolio Dashboard)
+- **Advertiser account model** with full-page picker gate, favorites, recents, and per-advertiser data scoping
+- **Dual-mode campaign builder:** Autopilot (3-step AI-managed) and Advanced (5-step full control)
+- **Inventory targeting** with 8 mock partners, placement types, position targeting, and frequency caps
+- **20+ modal types** for create/edit/confirm workflows
+- **Command palette** (Cmd+K) with fuzzy search across all entity types
 - **AI Copilot** drawer with conversational interaction
-- **Dark + Light mode** with full token swap
-- **Keyboard-first** navigation (12+ shortcuts)
+- **Dark + Light mode** with warm-tinted light surfaces and 9 overlay opacity tokens
+- **Keyboard-first** navigation (12+ shortcuts with chord visual feedback)
 - **Mock data** for 6 campaigns, 12 audiences, 8 creatives, 6 offers, 4 experiments, 6 products
+- **Entity CRUD completeness:** Create, edit, duplicate, and archive for all major entity types
+- **Rokt connector** logo shapes as chart data points across all visualizations
 
 ---
 
@@ -1026,4 +1029,246 @@ rokt-ads-prototype/
 
 ---
 
-*This PRD was updated on March 20, 2026 to reflect the v2.0 enhancement pass — all features described above have been implemented and visually verified. The prototype can be opened by serving the `rokt-ads-prototype/` directory with any HTTP server (`python3 -m http.server 8800`).*
+## 13. Version 3.0 — Advertiser Model, Dual-Mode Builder, Inventory & Visual Overhaul (March 20, 2026)
+
+### 13.1 Advertiser Account Model
+
+**Full-Page Advertiser Picker Gate:** On app load, users are presented with a full-page advertiser selection screen before accessing any views. This ensures all data is properly scoped to a single advertiser context.
+
+**Picker Sections:**
+- **Favorites** — Starred advertisers pinned to the top for quick access
+- **Recents** — Recently accessed advertiser accounts
+- **All Advertisers** — Complete list with search/filter functionality
+
+**Per-Advertiser Data Scoping:** Once an advertiser is selected, all views (Dashboard, Campaigns, Audiences, Intelligence, etc.) display data scoped to that advertiser only.
+
+**Portfolio Dashboard:** A multi-advertiser internal overview available to Rokt internal users. Provides aggregate KPIs and performance comparison across multiple advertiser accounts.
+
+**Account Switcher (Topbar):** Dropdown in the topbar showing the current advertiser with a quick-switch menu. Includes:
+- Current advertiser name and ID
+- Quick-switch options for recent/favorite advertisers
+- Favorite star toggle on each advertiser
+- Full "Switch Advertiser" action
+
+**Sidebar "Switch Advertiser" Button:** Always-visible button in the sidebar for returning to the advertiser picker.
+
+### 13.2 Dual-Mode Campaign System
+
+Inspired by Google Performance Max, Meta Advantage+, and The Trade Desk Koa.
+
+**Mode Selector (Builder Step 1):** Two mode cards presented at the start of the campaign builder:
+
+**Autopilot Mode (3 Steps: Goal → Assets → Launch):**
+- Designed for speed and simplicity — AI handles targeting, bidding, and optimization
+- Step 1: Goal selection (same objective cards as Advanced)
+- Step 2: Asset Group — consolidated creative and targeting in one step:
+  - Budget allocation and conversion goal
+  - Creative assets: 3 headlines, 2 descriptions, CTA text, image upload
+  - Audience signals: hints (not hard targeting) — interest keywords, demographic suggestions
+  - The AI uses signals as starting points and expands autonomously
+- Step 3: Review & Launch
+- **AI Managed Card:** Visual indicator showing which levers AI controls (bidding, targeting expansion, budget allocation, placement optimization)
+
+**Advanced Mode (5 Steps: Goal → Setup → Strategy → Creative → Launch):**
+- Full control for power users — same 5-step builder as v2.0
+- All targeting, bidding, and creative decisions made explicitly by the user
+
+**Ad Strength Gauge:** Available in both modes. Visual indicator showing creative quality:
+- **Poor** (red) — Missing assets or low variety
+- **Average** (amber) — Acceptable but room for improvement
+- **Good** (green) — Strong asset mix
+- **Excellent** (dark green) — Optimal creative variety and quality
+
+### 13.3 Inventory Targeting (Advanced Mode)
+
+New targeting step available in Advanced mode for selecting where ads appear.
+
+**Mock Partners (8):**
+1. Ticketmaster
+2. Fanatics
+3. Booking.com
+4. StubHub
+5. Grubhub
+6. Shutterfly
+7. Chewy
+8. LiveNation
+
+**Placement Type Cards:** Visual cards for selecting placement format:
+- **Overlay** — Modal/lightbox appearing over partner content
+- **Embedded** — Inline placement within the partner page flow
+- **Post-Transaction** — Appears after the user completes a purchase/action on the partner site
+
+**Partner Selection:** Searchable partner list with:
+- Individual partner checkboxes
+- "Select All" toggle
+- Search filter for partner names
+
+**Position Targeting:** Controls ad position preference:
+- Any Position (default)
+- 1st Position only
+- 1st or 2nd Position
+
+**Frequency Caps:** Controls exposure limits:
+- Per user per day (e.g., max 3 impressions/user/day)
+- Per user lifetime (e.g., max 10 impressions/user total)
+
+### 13.4 Sidebar Redesign
+
+**Grouped Navigation Sections:**
+- **Workspace** — Dashboard, Portfolio
+- **Build** — Campaigns, Audiences, Creatives, Catalog
+- **Analyze** — Intelligence, Measurement, Experiments
+- **Settings** — Account, Integrations
+
+**Always-Visible Collapse/Expand Toggle:** The sidebar collapse button is always visible regardless of hover state. Clicking toggles between full sidebar (with labels) and icon-only collapsed mode.
+
+**Badge Counts:** Navigation items that need attention show badge counts (e.g., "2" on Campaigns for items needing action, "3" on Intelligence for unread insights).
+
+**Beetroot Accent Bar:** Active navigation item displays a left-side accent bar in the beetroot/wine color, replacing the previous background-based active state.
+
+### 13.5 Light Mode Overhaul
+
+**Warm-Tinted Surfaces:** Light mode no longer uses cold pure-white backgrounds. Instead, surfaces use warm-tinted whites (slightly cream/warm gray) for a more premium, less clinical feel.
+
+**9 Overlay Opacity Tokens:** New CSS custom property tokens for overlay and surface opacity that automatically flip values between dark and light mode:
+- Card backgrounds, modal overlays, dropdown backgrounds, tooltip surfaces
+- Ensures consistent depth hierarchy in both themes
+
+**Fixed Visual Components in Light Mode:**
+- Gradient text headings — now readable in both modes
+- Glassmorphism (backdrop-blur) — adjusted blur and saturation values
+- AI Copilot drawer — surface colors properly themed
+- Command palette — background and result hover states corrected
+
+**All Components Verified:** Every component in the prototype has been visually verified in both dark and light mode to ensure proper contrast, readability, and visual hierarchy.
+
+### 13.6 Intelligence/Reporting Upgrade
+
+**3-Line Performance Chart:** The Intelligence reports chart now shows three simultaneous metrics:
+- **Spend** (wine/red line)
+- **Conversions** (blue line)
+- **CPA** (green line)
+
+**Working Date Range Pills:** The date range selector pills (Today, 7D, 30D, MTD, Custom) now actually filter the displayed data and update the chart.
+
+**Compare Toggle:** Period-over-period comparison mode. When enabled, shows the current period alongside the previous equivalent period (e.g., this week vs last week) as dashed overlay lines on the chart.
+
+**Group By Dimension Breakdowns:** Dropdown to group report data by dimensions:
+- Campaign, Ad Set, Creative, Device, Geography, Day of Week
+
+**Working Filter Dropdowns:** Filter controls for Campaign, Status, and Objective now actually filter the report table data.
+
+**Rokt Connector Logo Data Points:** All chart data points use the Rokt connector shape (the distinctive Rokt logo mark) instead of standard circles, reinforcing brand identity in every visualization.
+
+### 13.7 Entity CRUD Completeness
+
+**New Create Workflows:**
+- **Create Audience** — Full modal with rule builder, now persists to mock data array and renders on the Audiences view
+- **Create Offer** — Modal creates offer and adds to catalog
+- **Create Experiment** — Modal with type selection, campaign linking, and variant configuration
+
+**Duplicate & Archive:**
+- **Duplicate Campaign** — Creates a copy with "Copy of..." prefix, adds to campaign list
+- **Archive Campaign** — Removes from active list with confirmation dialog
+- Both actions produce real data mutations (not just toast placeholders)
+
+**Confirmation Dialogs:** Destructive actions (archive, delete, bulk operations) now show a confirmation dialog requiring explicit user approval before proceeding.
+
+**Creative Studio Enhancements:**
+- **Live Preview Updates** — Typing in the editor immediately reflects in the preview panel
+- **Format Switching** — Changing creative format (Text/Benefits/Savings/Hero Image/Carousel) updates both the editor fields and the preview
+
+### 13.8 Visual Polish
+
+**Rokt Connector Data Points:** All charts across the prototype (spend pacing, intelligence reports, campaign detail analytics) use Rokt connector-shaped markers instead of standard circles.
+
+**Staggered Card Entrance Animations:** Cards animate in with staggered delays (60ms between cards) using a combined scale + translateY + opacity transition for a polished cascade effect.
+
+**Entity-Specific Card Designs:**
+- Campaign cards: colored type strip on left edge matching objective type
+- Audience cards: type-based icon and color coding
+- Offer cards: thumbnail preview of offer value
+- Experiment cards: status-driven progress visualization
+
+**Empty State CSS Patterns:** Views with no data show styled empty states with illustrative CSS patterns (dot grids, subtle geometric shapes) and call-to-action prompts.
+
+**Typography Hierarchy:** Systematic type scale applied across all views:
+- Display (KPI values): 2rem+, tight letter-spacing
+- Heading (section titles): gradient text effect
+- Body: Inter 14px/1.5
+- Caption/Label: 12px, muted color
+- Mono (data): JetBrains Mono for numbers and codes
+
+**Animation Conflict Fixes:**
+- View transition animations deduplicated — no more double-firing of entrance animations
+- `border-image` / `border-radius` conflict resolved — cards with gradient borders now properly round their corners
+
+### 13.9 Account Switcher Details
+
+**Topbar Dropdown Component:**
+- Shows current advertiser name with a chevron indicator
+- Click opens dropdown with:
+  - Current advertiser (highlighted)
+  - Favorite advertisers section (starred)
+  - Recent advertisers section
+  - "View All Advertisers" link back to full picker
+- Favorite star toggle directly in the dropdown
+
+### 13.10 Functional Completeness
+
+**Command Palette Enhancement:** Now searches across all entity types — campaigns, audiences, creatives, offers, experiments, measurement groups, and settings pages. Results grouped by type with entity-specific icons.
+
+**Keyboard Chord Visual Feedback:** When pressing the first key of a two-key shortcut (G or N), a floating indicator shows the available completions (e.g., `G → D Dashboard, C Campaigns, A Audiences, R Reports`).
+
+**Notification Navigation:** Clicking a notification item in the notification dropdown navigates to the relevant view and highlights the relevant entity (e.g., clicking a campaign alert navigates to Campaigns and opens that campaign's detail panel).
+
+**Toast Action Cleanup:** Previously placeholder toast actions (Duplicate, Archive, Fix Now) now trigger real workflows:
+- "Duplicate" toast → actually duplicates the entity
+- "Archive" toast → triggers confirmation dialog then archives
+- "Fix Now" toast → navigates to the relevant view/modal
+
+### 13.11 Bug Fixes
+
+| Bug | Fix |
+|-----|-----|
+| Sidebar collapse/expand toggle not always visible | Toggle button is now always rendered outside the hover-dependent area |
+| Modals not closing on Escape from input fields | Escape key handler now fires even when an input/textarea has focus |
+| Body scroll behind modals | `document.body.style.overflow = 'hidden'` applied when any modal is open, restored on close |
+| `border-image` / `border-radius` conflict | Replaced `border-image` with pseudo-element gradient overlay that respects border-radius |
+| View transition animations firing twice | Transition class is now removed after animation completes; new transitions check for in-progress state |
+
+### 13.12 Updated Public API
+
+New methods added to `RoktAds.*`:
+
+| Method | Description |
+|---|---|
+| `selectAdvertiser(id)` | Select advertiser and scope all data |
+| `switchAdvertiser()` | Return to advertiser picker |
+| `toggleFavoriteAdvertiser(id)` | Star/unstar an advertiser |
+| `setBuilderMode(mode)` | Set 'autopilot' or 'advanced' builder mode |
+| `updateAdStrength()` | Recalculate and display ad strength gauge |
+| `selectPlacementType(type)` | Set inventory placement type |
+| `togglePartner(id)` | Select/deselect inventory partner |
+| `setPositionTarget(position)` | Set position targeting preference |
+| `setFrequencyCap(type, value)` | Set frequency cap (daily or lifetime) |
+| `toggleCompare()` | Toggle period-over-period comparison |
+| `setGroupBy(dimension)` | Set reporting group-by dimension |
+| `duplicateCampaign(id)` | Duplicate a campaign with data mutation |
+| `archiveCampaign(id)` | Archive a campaign with confirmation |
+| `confirmAction(action, callback)` | Show confirmation dialog for destructive actions |
+
+### 13.13 Updated File Sizes
+
+```
+rokt-ads-prototype/
+├── index.html       # ~1,050+ lines (advertiser picker, dual-mode builder templates, inventory targeting)
+├── styles.css       # ~5,200+ lines (+1,300 lines: light mode overhaul, sidebar redesign, entity cards, empty states)
+├── app.js           # ~4,500+ lines (+1,370 lines: advertiser model, dual-mode builder, inventory, CRUD completeness)
+├── PRD.md           # This document (updated to v3.0)
+├── OP-COMPARISON.md # Feature comparison (updated)
+```
+
+---
+
+*This PRD was updated on March 20, 2026 to reflect the v3.0 enhancement pass — advertiser account model, dual-mode campaign builder, inventory targeting, sidebar redesign, light mode overhaul, intelligence upgrades, entity CRUD completeness, and comprehensive visual polish. All features described above have been implemented and visually verified. The prototype can be opened by serving the `rokt-ads-prototype/` directory with any HTTP server (`python3 -m http.server 8800`).*

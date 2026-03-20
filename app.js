@@ -62,6 +62,69 @@ const RoktAds = (() => {
       trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
       dailySpend: [0,0,0,0,0,0,0],
       publishState: 'draft', objectiveType: 'app_download', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 88
+    },
+    {
+      id: 'c7', name: 'Disney+ Bundle Upsell', status: 'active', objective: 'CPA',
+      spend: 28400, budget: 60000, cpa: 6.10, cpaTarget: 8.00, copi: 3.85, roas: 4.6,
+      conversions: 4656, impressions: 132000, clicks: 9240, ctr: 7.0, cvr: 50.4,
+      emq: 8.1, biddingState: 'optimizing', adSets: 2, creatives: 3,
+      trend: [8,7,7,6,5,5,4,4], trendDir: 'up',
+      dailySpend: [3800, 4100, 4200, 4000, 4300, 3900, 4100],
+      publishState: 'published', objectiveType: 'cross_sell', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 82
+    },
+    {
+      id: 'c8', name: 'Disney+ App Install', status: 'active', objective: 'CPA',
+      spend: 15200, budget: 35000, cpa: 3.40, cpaTarget: 5.00, copi: 4.55, roas: 6.2,
+      conversions: 4471, impressions: 98000, clicks: 7840, ctr: 8.0, cvr: 57.0,
+      emq: 8.6, biddingState: 'learning', adSets: 1, creatives: 2,
+      trend: [6,5,5,4,4,3,3,3], trendDir: 'up',
+      dailySpend: [2000, 2100, 2200, 2300, 2100, 2200, 2300],
+      publishState: 'published', objectiveType: 'app_download', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 90
+    },
+    {
+      id: 'c9', name: 'Capital One Venture Rewards', status: 'active', objective: 'CPA',
+      spend: 19500, budget: 40000, cpa: 9.75, cpaTarget: 12.00, copi: 2.95, roas: 3.5,
+      conversions: 2000, impressions: 88000, clicks: 6160, ctr: 7.0, cvr: 32.5,
+      emq: 7.6, biddingState: 'optimizing', adSets: 1, creatives: 2,
+      trend: [9,8,8,7,7,6,6,5], trendDir: 'up',
+      dailySpend: [2600, 2800, 2900, 2700, 2800, 2900, 2800],
+      publishState: 'published', objectiveType: 'email', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 75
+    },
+    {
+      id: 'c10', name: 'Capital One Travel Portal', status: 'draft', objective: 'CPA',
+      spend: 0, budget: 25000, cpa: 0, cpaTarget: 10.00, copi: 0, roas: 0,
+      conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
+      emq: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
+      trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
+      dailySpend: [0,0,0,0,0,0,0],
+      publishState: 'draft', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 70
+    },
+    {
+      id: 'c11', name: 'Hulu + Live TV Bundle', status: 'paused', objective: 'CPA',
+      spend: 12300, budget: 30000, cpa: 11.20, cpaTarget: 9.00, copi: 2.10, roas: 2.3,
+      conversions: 1098, impressions: 52000, clicks: 3640, ctr: 7.0, cvr: 30.2,
+      emq: 7.4, biddingState: 'optimizing', adSets: 1, creatives: 2,
+      trend: [4,5,6,7,8,9,10,11], trendDir: 'down',
+      dailySpend: [1800, 1900, 1700, 1800, 1700, 1700, 1700],
+      publishState: 'published', objectiveType: 'website_traffic', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 55
+    },
+    {
+      id: 'c12', name: 'True Classic Seasonal Sale', status: 'active', objective: 'ROAS',
+      spend: 16800, budget: 35000, cpa: 10.50, cpaTarget: null, copi: 2.65, roas: 5.2,
+      conversions: 1600, impressions: 71000, clicks: 4970, ctr: 7.0, cvr: 32.2,
+      emq: 6.8, biddingState: 'learning', adSets: 1, creatives: 3,
+      trend: [7,6,6,5,5,4,4,3], trendDir: 'up',
+      dailySpend: [2200, 2400, 2500, 2400, 2500, 2400, 2400],
+      publishState: 'published', objectiveType: 'product_sales', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 68
+    },
+    {
+      id: 'c13', name: 'PayPal Business Solutions', status: 'draft', objective: 'CPA',
+      spend: 0, budget: 15000, cpa: 0, cpaTarget: 12.00, copi: 0, roas: 0,
+      conversions: 0, impressions: 0, clicks: 0, ctr: 0, cvr: 0,
+      emq: 7.0, biddingState: 'draft', adSets: 0, creatives: 0,
+      trend: [0,0,0,0,0,0,0,0], trendDir: 'flat',
+      dailySpend: [0,0,0,0,0,0,0],
+      publishState: 'draft', objectiveType: 'payment_trigger', country: 'US', language: 'en', timezone: 'America/New_York', aiHealthScore: 72
     }
   ];
 
@@ -159,11 +222,11 @@ const RoktAds = (() => {
   let accountSwitcherOpen = false;
 
   const advertisers = [
-    { id: 'adv1', name: 'Disney+', avatar: 'D+', color: '#1A3B8F', campaigns: ['c1'], spend: 42150, activeCampaigns: 2, favorited: true, lastAccessed: '2026-03-20' },
-    { id: 'adv2', name: 'Capital One', avatar: 'CO', color: '#C41230', campaigns: ['c2'], spend: 31200, activeCampaigns: 1, favorited: true, lastAccessed: '2026-03-19' },
-    { id: 'adv3', name: 'Hulu', avatar: 'Hu', color: '#1CE783', campaigns: ['c3'], spend: 18700, activeCampaigns: 1, favorited: false, lastAccessed: '2026-03-18' },
-    { id: 'adv4', name: 'True Classic', avatar: 'TC', color: '#2D3748', campaigns: ['c4'], spend: 22400, activeCampaigns: 1, favorited: false, lastAccessed: '2026-03-17' },
-    { id: 'adv5', name: 'PayPal', avatar: 'PP', color: '#003087', campaigns: ['c5'], spend: 8900, activeCampaigns: 0, favorited: false, lastAccessed: '2026-03-15' },
+    { id: 'adv1', name: 'Disney+', avatar: 'D+', color: '#1A3B8F', campaigns: ['c1', 'c7', 'c8'], spend: 85750, activeCampaigns: 3, favorited: true, lastAccessed: '2026-03-20' },
+    { id: 'adv2', name: 'Capital One', avatar: 'CO', color: '#C41230', campaigns: ['c2', 'c9', 'c10'], spend: 50700, activeCampaigns: 2, favorited: true, lastAccessed: '2026-03-19' },
+    { id: 'adv3', name: 'Hulu', avatar: 'Hu', color: '#1CE783', campaigns: ['c3', 'c11'], spend: 31000, activeCampaigns: 1, favorited: false, lastAccessed: '2026-03-18' },
+    { id: 'adv4', name: 'True Classic', avatar: 'TC', color: '#2D3748', campaigns: ['c4', 'c12'], spend: 39200, activeCampaigns: 2, favorited: false, lastAccessed: '2026-03-17' },
+    { id: 'adv5', name: 'PayPal', avatar: 'PP', color: '#003087', campaigns: ['c5', 'c13'], spend: 8900, activeCampaigns: 0, favorited: false, lastAccessed: '2026-03-15' },
     { id: 'adv6', name: 'Audible', avatar: 'Au', color: '#F7991C', campaigns: ['c6'], spend: 0, activeCampaigns: 0, favorited: false, lastAccessed: '2026-03-10' },
   ];
 
@@ -402,7 +465,14 @@ const RoktAds = (() => {
   }
 
   // ── Dashboard ──────────────────────────────────────────────
+  let pacingTimeRange = '7D';
+
   function initDashboard() {
+    // Portfolio mode: show cross-advertiser dashboard
+    if (selectedAdvertiser === 'all') {
+      renderPortfolioDashboard();
+      return;
+    }
     animateCounters();
     renderDashboardHealth();
     renderDashboardInsights();
@@ -410,6 +480,173 @@ const RoktAds = (() => {
     renderOptimizationScore();
     renderAIRecommendations();
     initCardGlow();
+    initPacingTimeHorizon();
+  }
+
+  function renderPortfolioDashboard() {
+    const content = document.getElementById('content');
+    const view = content?.querySelector('.view');
+    if (!view) return;
+
+    const totalSpend = advertisers.reduce((s, a) => s + a.spend, 0);
+    const totalActive = campaigns.filter(c => c.status === 'active' || c.status === 'requires_action').length;
+    const totalConversions = campaigns.filter(c => c.status !== 'draft').reduce((s, c) => s + c.conversions, 0);
+    const avgCPA = totalConversions > 0 ? (totalSpend / totalConversions).toFixed(2) : '0.00';
+
+    view.innerHTML = `
+      <div style="padding:var(--space-5) var(--space-6)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-5)">
+          <div>
+            <h2 class="view-title" style="margin-bottom:4px">Portfolio Dashboard</h2>
+            <p style="font-size:13px;color:var(--text-secondary)">Cross-advertiser overview for all managed accounts</p>
+          </div>
+        </div>
+
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-label">TOTAL SPEND</div>
+            <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="${totalSpend}">${totalSpend.toLocaleString()}</span></div>
+            <div class="kpi-meta"><span class="kpi-period">Across ${advertisers.length} advertisers</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">ACTIVE CAMPAIGNS</div>
+            <div class="kpi-value"><span class="kpi-number" data-target="${totalActive}">${totalActive}</span></div>
+            <div class="kpi-meta"><span class="kpi-period">of ${campaigns.length} total</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">TOTAL CONVERSIONS</div>
+            <div class="kpi-value"><span class="kpi-number" data-target="${totalConversions}">${totalConversions.toLocaleString()}</span></div>
+            <div class="kpi-meta"><span class="trend-up">All advertisers</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">BLENDED CPA</div>
+            <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="${avgCPA}">${avgCPA}</span></div>
+            <div class="kpi-meta"><span class="kpi-period">Weighted average</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">ADVERTISERS</div>
+            <div class="kpi-value"><span class="kpi-number" data-target="${advertisers.length}">${advertisers.length}</span></div>
+            <div class="kpi-meta"><span class="kpi-period">Managed accounts</span></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-header">
+            <h3 class="card-title">Advertiser Overview</h3>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:var(--space-4)">
+              ${advertisers.map(adv => {
+                const advCampaigns = campaigns.filter(c => adv.campaigns.includes(c.id));
+                const advActive = advCampaigns.filter(c => c.status === 'active' || c.status === 'requires_action').length;
+                const advConv = advCampaigns.reduce((s, c) => s + c.conversions, 0);
+                const advSpend = advCampaigns.reduce((s, c) => s + c.spend, 0);
+                const healthColor = advCampaigns.some(c => c.status === 'requires_action') ? 'var(--negative)' : advActive > 0 ? 'var(--positive)' : 'var(--text-tertiary)';
+                return `
+                  <div class="health-card" style="cursor:pointer" onclick="RoktAds.switchAdvertiser('${adv.id}')">
+                    <div class="health-card-header">
+                      <div class="health-card-name">
+                        <div style="width:28px;height:28px;border-radius:var(--radius-md);background:${adv.color};color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${adv.avatar}</div>
+                        ${adv.name}
+                      </div>
+                      <span style="width:8px;height:8px;border-radius:50%;background:${healthColor};flex-shrink:0"></span>
+                    </div>
+                    <div class="health-card-metrics">
+                      <div>
+                        <div class="health-metric-label">Spend</div>
+                        <div class="health-metric-value">$${fmtNum(advSpend)}</div>
+                      </div>
+                      <div>
+                        <div class="health-metric-label">Active</div>
+                        <div class="health-metric-value">${advActive} / ${advCampaigns.length}</div>
+                      </div>
+                      <div>
+                        <div class="health-metric-label">Conversions</div>
+                        <div class="health-metric-value">${fmtNum(advConv)}</div>
+                      </div>
+                      <div>
+                        <div class="health-metric-label">Health</div>
+                        <div class="health-metric-value" style="color:${healthColor}">${advCampaigns.some(c => c.status === 'requires_action') ? 'Needs Attn' : advActive > 0 ? 'Healthy' : 'Inactive'}</div>
+                      </div>
+                    </div>
+                    <div style="margin-top:8px;font-size:11px;color:var(--beetroot);font-weight:500">Click to manage &rarr;</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    animateCounters();
+    initCardGlow();
+  }
+
+  function initPacingTimeHorizon() {
+    const pills = document.querySelectorAll('.view-dashboard .card:first-of-type .filter-pills .filter-pill');
+    if (!pills.length) return;
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        pacingTimeRange = pill.textContent.trim();
+        updatePacingChart();
+      });
+    });
+  }
+
+  function updatePacingChart() {
+    const svg = document.getElementById('pacingChartSvg');
+    if (!svg) return;
+
+    const range = pacingTimeRange;
+    let points, labels, projected, budgetY;
+
+    if (range === '7D') {
+      points = [[0,180],[100,160],[200,138],[300,118],[400,90]];
+      projected = [[0,180],[100,155],[200,130],[300,108],[400,85],[500,62],[600,40],[700,18]];
+      labels = [['Mon',0],['Tue',100],['Wed',200],['Thu',300],['Today',400],['Sat',500],['Sun',600]];
+      budgetY = 20;
+    } else if (range === '30D') {
+      points = [[0,170],[175,140],[350,105],[525,72]];
+      projected = [[0,170],[175,140],[350,105],[525,72],[700,30]];
+      labels = [['Wk 1',0],['Wk 2',175],['Wk 3',350],['Wk 4',525],['Wk 5',700]];
+      budgetY = 15;
+    } else if (range === 'MTD') {
+      points = [[0,175],[50,168],[100,160],[150,152],[200,142],[250,132],[300,120],[350,108],[400,96],[450,84],[500,72],[550,60],[600,50],[650,40],[700,30]];
+      projected = points;
+      labels = [['Mar 1',0],['Mar 5',150],['Mar 10',350],['Mar 15',500],['Mar 20',700]];
+      budgetY = 15;
+    } else if (range === 'QTD') {
+      points = [[0,175],[233,120],[466,65]];
+      projected = [[0,175],[233,120],[466,65],[700,20]];
+      labels = [['Jan',0],['Feb',233],['Mar',466],['Apr (Proj)',700]];
+      budgetY = 10;
+    }
+
+    const actualStr = points.map(p => p.join(',')).join(' ');
+    const projStr = projected.map(p => p.join(',')).join(' ');
+    const lastPoint = points[points.length - 1];
+    const fillStr = actualStr + ` ${lastPoint[0]},200 0,200`;
+
+    const dotSvg = points.map(p => `<use href="#roktDot" x="${p[0]-6}" y="${p[1]-6}" width="12" height="12" color="var(--beetroot)"/>`).join('');
+    const labelSvg = labels.map(l => `<text x="${l[1]}" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">${l[0]}</text>`).join('');
+
+    // Keep existing defs, replace content
+    const defs = svg.querySelector('defs');
+    const defsHTML = defs ? defs.outerHTML : '';
+
+    svg.innerHTML = `
+      ${defsHTML}
+      <defs><linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0.02"/></linearGradient></defs>
+      <line x1="0" y1="${budgetY}" x2="700" y2="${budgetY}" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
+      <text x="705" y="${budgetY+4}" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">${range === '30D' ? '$100K' : range === 'QTD' ? '$300K' : '$25K'}</text>
+      <polyline points="${projStr}" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
+      <polygon points="${fillStr}" fill="url(#spendGrad)"/>
+      <polyline points="${actualStr}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+      ${dotSvg}
+      ${labelSvg}
+    `;
   }
 
   function renderDashboardHealth() {
@@ -548,6 +785,7 @@ const RoktAds = (() => {
 
   // ── Campaigns ──────────────────────────────────────────────
   function initCampaigns() {
+    updateCampaignFilterCounts();
     renderCampaignTable();
 
     // Filter pills
@@ -566,6 +804,26 @@ const RoktAds = (() => {
     // Search
     const search = document.getElementById('campaignSearch');
     if (search) search.addEventListener('input', () => renderCampaignTable('all', search.value));
+  }
+
+  function updateCampaignFilterCounts() {
+    const fc = getFilteredCampaigns();
+    const counts = {
+      all: fc.length,
+      active: fc.filter(c => c.status === 'active').length,
+      requires_action: fc.filter(c => c.status === 'requires_action').length,
+      paused: fc.filter(c => c.status === 'paused').length,
+      draft: fc.filter(c => c.status === 'draft').length,
+      pending_review: fc.filter(c => c.status === 'pending_review').length,
+      archived: fc.filter(c => c.status === 'archived').length,
+    };
+    $$('#campaignFilters .filter-pill').forEach(pill => {
+      const f = pill.dataset.filter;
+      const countEl = pill.querySelector('.filter-count');
+      if (countEl && counts[f] !== undefined) countEl.textContent = counts[f];
+    });
+    const countBadge = document.getElementById('campaignCount');
+    if (countBadge) countBadge.textContent = fc.length;
   }
 
   function renderCampaignTable(filter = 'all', search = '') {
@@ -750,7 +1008,7 @@ const RoktAds = (() => {
           </div>
           <svg width="100%" height="120" viewBox="0 0 460 120" preserveAspectRatio="none">
             <defs>
-              <symbol id="rDotDetail" viewBox="0 0 12 12"><path d="M1.5 2h3l2 4-2 4h-3l2-4-2-4z" fill="currentColor"/><path d="M5.5 2h3l-2 4 2 4h-3l-2-4 2-4z" fill="currentColor" opacity="0.65"/></symbol>
+              <symbol id="rDotDetail" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>
               <linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient>
             </defs>
             <polygon points="${c.dailySpend.map((v,i) => `${i*460/6},${120 - v/60}`).join(' ')} 460,120 0,120" fill="url(#detailGrad)"/>
@@ -779,6 +1037,39 @@ const RoktAds = (() => {
           </div>
         </div>
       `;
+      // Wire detail chart time pills
+      setTimeout(() => {
+        const detailPills = container.querySelectorAll('.detail-chart-area .filter-pill');
+        detailPills.forEach(pill => {
+          pill.addEventListener('click', () => {
+            detailPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            const is30d = pill.textContent.trim() === '30D';
+            const chartSvg = container.querySelector('.detail-chart-area svg');
+            if (!chartSvg) return;
+            let spendData;
+            if (is30d) {
+              // Aggregate daily into 4 weekly points
+              const weeklySpend = [];
+              for (let w = 0; w < 4; w++) {
+                let wk = 0;
+                for (let d = 0; d < 7; d++) wk += c.dailySpend[d % c.dailySpend.length] * (0.9 + Math.random() * 0.2);
+                weeklySpend.push(Math.round(wk));
+              }
+              spendData = weeklySpend;
+            } else {
+              spendData = c.dailySpend;
+            }
+            const n = spendData.length;
+            const maxV = Math.max(...spendData);
+            const w = 460, h = 120;
+            const pts = spendData.map((v, i) => `${i * w / (n - 1)},${h - (v / maxV) * (h - 10)}`).join(' ');
+            const fillPts = pts + ` ${w},${h} 0,${h}`;
+            const dots = spendData.map((v, i) => `<use href="#rDotDetail" x="${i * w / (n - 1) - 5}" y="${h - (v / maxV) * (h - 10) - 5}" width="10" height="10" color="var(--beetroot)"/>`).join('');
+            chartSvg.innerHTML = `<defs><symbol id="rDotDetail" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol><linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fillPts}" fill="url(#detailGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
+          });
+        });
+      }, 0);
     } else if (tab === 'adsets') {
       const adSetNames = ['Broad — Women 25-45', 'Lookalike — Streaming Subs'];
       container.innerHTML = `
@@ -2181,6 +2472,55 @@ const RoktAds = (() => {
   function initCreatives() {
     renderCreativeLibrary();
     initCreativeEditor();
+    initCreativePartnerContexts();
+    initPolicyCheckBtn();
+    initCreativeSearch();
+  }
+
+  function initCreativePartnerContexts() {
+    const badges = document.querySelectorAll('.preview-partner-contexts .context-badges .filter-pill');
+    const partnerContext = document.querySelector('.preview-partner-context');
+    badges.forEach(badge => {
+      badge.addEventListener('click', () => {
+        badges.forEach(b => b.classList.remove('active'));
+        badge.classList.add('active');
+        if (partnerContext) partnerContext.textContent = badge.textContent.trim().toLowerCase() + '.com';
+      });
+    });
+  }
+
+  function initPolicyCheckBtn() {
+    const btn = document.getElementById('policyCheckBtn');
+    const status = document.getElementById('policyStatus');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        if (status) {
+          status.innerHTML = '<span style="color:var(--warning)">&#8987;</span> Checking policy compliance...';
+          setTimeout(() => {
+            status.innerHTML = '<span style="color:var(--positive)">&#10003;</span> Passes policy check';
+            toast('Policy check passed', 'success');
+          }, 1200);
+        }
+      });
+    }
+  }
+
+  function initCreativeSearch() {
+    const search = document.getElementById('creativeSearch');
+    if (search) {
+      search.addEventListener('input', () => {
+        const query = search.value.toLowerCase();
+        const list = document.getElementById('creativeLibraryList');
+        if (!list) return;
+        const filtered = getFilteredCreatives().filter(cr => cr.name.toLowerCase().includes(query));
+        list.innerHTML = filtered.map((cr, i) => `
+          <div class="creative-lib-item ${i === 0 ? 'active' : ''}" onclick="RoktAds.selectCreative('${cr.id}')">
+            <div class="creative-lib-name">${cr.name}</div>
+            <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
+          </div>
+        `).join('');
+      });
+    }
   }
 
   function renderCreativeLibrary() {
@@ -2321,6 +2661,21 @@ const RoktAds = (() => {
     renderReportTable();
     renderExperiments();
     initIntelligenceControls();
+    initExperimentFilters();
+  }
+
+  function initExperimentFilters() {
+    const container = document.getElementById('intelExperiments');
+    if (!container) return;
+    const pills = container.querySelectorAll('.filter-pills .filter-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const text = pill.textContent.trim().toLowerCase();
+        renderExperiments(text === 'all' ? 'all' : text);
+      });
+    });
   }
 
   function initIntelligenceControls() {
@@ -2334,6 +2689,16 @@ const RoktAds = (() => {
         renderReportTable();
       });
     });
+
+    // Attribution model dropdown
+    const attrSelect = document.getElementById('reportAttribution');
+    if (attrSelect) {
+      attrSelect.addEventListener('change', () => {
+        toast(`Attribution changed to: ${attrSelect.value.split(': ')[1] || attrSelect.value}`, 'info');
+        renderReportChart();
+        renderReportTable();
+      });
+    }
 
     // Compare toggle — inject after date range pills
     const dateRangeContainer = document.querySelector('.report-controls-left');
@@ -2420,7 +2785,7 @@ const RoktAds = (() => {
     let compareSvg = '';
     if (reportCompare) { compareSvg = `<polyline points="${toLine(data.prevSpend, maxSpend)}" fill="none" stroke="var(--beetroot)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/><polyline points="${toLine(data.prevConversions, maxConv)}" fill="none" stroke="var(--positive)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/>`; }
     // Rokt connector symbol for data points
-    const roktSymbol = `<symbol id="rDot" viewBox="0 0 12 12"><path d="M1.5 2h3l2 4-2 4h-3l2-4-2-4z" fill="currentColor"/><path d="M5.5 2h3l-2 4 2 4h-3l-2-4 2-4z" fill="currentColor" opacity="0.65"/></symbol>`;
+    const roktSymbol = `<symbol id="rDot" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>`;
     function roktDot(x, y, color, size) { size = size || 10; return `<use href="#rDot" x="${x - size/2}" y="${y - size/2}" width="${size}" height="${size}" color="${color}"/>`; }
     svg.innerHTML = `<defs>${roktSymbol}<linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="${chartH}" x2="${w}" y2="${chartH}" stroke="var(--border)" stroke-width="0.5"/><line x1="0" y1="${chartH/2}" x2="${w}" y2="${chartH/2}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/><polygon points="${spendLine} ${n > 1 ? w : w/2},${chartH} 0,${chartH}" fill="url(#reportGrad)"/>${compareSvg}<polyline points="${spendLine}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/><polyline points="${convLine}" fill="none" stroke="var(--positive)" stroke-width="2" stroke-linecap="round" stroke-dasharray="6,3" class="chart-line-animate"/><polyline points="${cpaLine}" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2,3" class="chart-line-animate"/>${data.spend.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxSpend)*(chartH-pad), 'var(--beetroot)', 10)).join('')}${data.conversions.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxConv)*(chartH-pad), 'var(--positive)', 9)).join('')}${data.cpa.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxCPA)*(chartH-pad), 'var(--warning)', 8)).join('')}${data.labels.map((l, i) => `<text x="${n > 1 ? i*w/(n-1) : w/2}" y="${chartH + 18}" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)" ${n === 1 ? 'text-anchor="middle"' : ''}>${l}</text>`).join('')}`;
     renderDimensionBreakdown();
@@ -2504,10 +2869,17 @@ const RoktAds = (() => {
     renderReportTable();
   }
 
-  function renderExperiments() {
+  let experimentFilter = 'all';
+
+  function renderExperiments(filter) {
+    if (filter !== undefined) experimentFilter = filter;
     const grid = document.getElementById('experimentsGrid');
     if (!grid) return;
-    grid.innerHTML = experiments.map(e => `
+    let filtered = experiments;
+    if (experimentFilter === 'running') filtered = experiments.filter(e => e.status === 'running');
+    else if (experimentFilter === 'concluded') filtered = experiments.filter(e => e.status === 'concluded');
+    else if (experimentFilter === 'draft') filtered = experiments.filter(e => e.status === 'draft');
+    grid.innerHTML = filtered.map(e => `
       <div class="experiment-card" onclick="RoktAds.openModal('editExperiment', '${e.id}')">
         <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editExperiment('${e.id}')" title="Edit">✏️</button>
         <div class="experiment-card-header">
@@ -2546,9 +2918,29 @@ const RoktAds = (() => {
   }
 
   // ── Catalog ────────────────────────────────────────────────
+  let catalogProductFilter = 'all';
+
   function initCatalog() {
     renderOffers();
     renderProducts();
+    initCatalogProductFilters();
+  }
+
+  function initCatalogProductFilters() {
+    const productsSection = document.getElementById('catalogProducts');
+    if (!productsSection) return;
+    const pills = productsSection.querySelectorAll('.filter-pills .filter-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const text = pill.textContent.trim();
+        if (text.includes('Low')) catalogProductFilter = 'low';
+        else if (text.includes('In Stock')) catalogProductFilter = 'instock';
+        else catalogProductFilter = 'all';
+        renderProducts();
+      });
+    });
   }
 
   function renderOffers() {
@@ -2578,7 +2970,10 @@ const RoktAds = (() => {
   function renderProducts() {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
-    grid.innerHTML = products.map(p => `
+    let filtered = products;
+    if (catalogProductFilter === 'instock') filtered = products.filter(p => p.stock === 'In Stock');
+    else if (catalogProductFilter === 'low') filtered = products.filter(p => p.stock === 'Low Stock');
+    grid.innerHTML = filtered.map(p => `
       <div class="product-card">
         <div class="product-card-image">${p.icon}</div>
         <div class="product-card-body">
@@ -3115,7 +3510,7 @@ const RoktAds = (() => {
           <div class="modal-body">
             <div class="form-group">
               <label class="form-label">Format</label>
-              <div class="filter-pills" style="gap:8px">
+              <div class="filter-pills" style="gap:8px" onclick="this.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));event.target.closest('.filter-pill')?.classList.add('active')">
                 <button class="filter-pill active" style="padding:8px 20px">CSV</button>
                 <button class="filter-pill" style="padding:8px 20px">PDF</button>
                 <button class="filter-pill" style="padding:8px 20px">Excel</button>
@@ -4651,5 +5046,7 @@ const RoktAds = (() => {
     selectAllPartners,
     deselectAllPartners,
     filterPartners,
+    updatePacingChart,
+    renderPortfolioDashboard,
   };
 })();
