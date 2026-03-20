@@ -851,6 +851,12 @@ const RoktAds = (() => {
     const backBtn = document.getElementById('detailPanelBack');
     if (backBtn) backBtn.addEventListener('click', closeCampaignDetail);
 
+    // Detail panel expand to full view
+    const expandBtn = document.getElementById('detailPanelExpand');
+    if (expandBtn) expandBtn.addEventListener('click', () => {
+      if (selectedCampaign) location.hash = 'campaign/' + selectedCampaign;
+    });
+
     // Search
     const search = document.getElementById('campaignSearch');
     if (search) search.addEventListener('input', () => renderCampaignTable('all', search.value));
@@ -892,7 +898,7 @@ const RoktAds = (() => {
     tbody.innerHTML = filtered.map(c => {
       const detailText = c.statusDetail ? c.statusDetail.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '';
       return `
-      <tr class="clickable ${selectedCampaign === c.id ? 'selected' : ''}" data-id="${c.id}" onclick="location.hash='campaign/${c.id}'">
+      <tr class="clickable ${selectedCampaign === c.id ? 'selected' : ''}" data-id="${c.id}" onclick="RoktAds.openCampaignDetail('${c.id}')">
         <td><input type="checkbox" class="table-checkbox" onclick="event.stopPropagation()"></td>
         <td><span class="campaign-status-dot ${c.status}" ${detailText ? 'title="' + detailText + '"' : ''}></span></td>
         <td class="campaign-name">${c.name}</td>
@@ -920,6 +926,7 @@ const RoktAds = (() => {
         </td>
         <td>
           <div class="row-actions">
+            <button class="row-action-btn" onclick="event.stopPropagation();location.hash='campaign/${c.id}'" title="Full View">⛶</button>
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toggleCampaignStatus('${c.id}')" title="${c.status === 'active' ? 'Pause' : 'Resume'}">${c.status === 'active' ? '⏸' : '▶'}</button>
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.openModal('editCampaign','${c.id}')" title="Edit">✏️</button>
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.duplicateCampaign('${c.id}')" title="Duplicate">⧉</button>
@@ -943,7 +950,6 @@ const RoktAds = (() => {
     const content = document.getElementById('content');
     if (!content) return;
 
-    const aiAnalysis = generateAIAnalysis(c);
     const campaignCreatives = creatives.filter(cr => c.name.toLowerCase().includes(cr.campaign?.toLowerCase?.() || ''));
     const adSetNames = ['Broad — Women 25-45', 'Lookalike — Streaming Subs', 'Retargeting — Site Visitors'];
 
@@ -997,18 +1003,7 @@ const RoktAds = (() => {
           <!-- Left Column: Charts & Performance -->
           <div class="cfull-main">
             <!-- AI Analysis -->
-            <div class="card">
-              <div class="card-header" style="border-bottom:1px solid var(--border)">
-                <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> AI Analysis</h3>
-              </div>
-              <div class="card-body">
-                <div style="font-size:13px;line-height:1.6;color:var(--text-secondary)">${aiAnalysis}</div>
-                <div style="display:flex;gap:8px;margin-top:var(--space-3)">
-                  <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Generating optimization suggestions...','info')">Get Suggestions</button>
-                  <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Opening deep dive analysis...','info')">Deep Dive</button>
-                </div>
-              </div>
-            </div>
+            ${renderAIAnalysisCard(c)}
 
             <!-- Spend Chart -->
             <div class="card">
@@ -1021,9 +1016,9 @@ const RoktAds = (() => {
                 </div>
               </div>
               <div class="card-body" id="cfullSpendChart">
-                <svg width="100%" height="200" viewBox="0 0 700 200" preserveAspectRatio="none">
+                <svg width="100%" height="200" viewBox="0 0 700 200" preserveAspectRatio="xMidYMid meet">
                   <defs>
-                    <symbol id="rDotFull" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>
+                    <symbol id="rDotFull" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></symbol>
                     <linearGradient id="fullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient>
                   </defs>
                   ${(() => {
@@ -1109,12 +1104,28 @@ const RoktAds = (() => {
                 <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Add Ad Set modal coming soon','info')">+ Add</button>
               </div>
               <div class="card-body" style="padding:0">
-                ${Array.from({length: Math.min(c.adSets, 3)}, (_, i) => `
-                  <div style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);font-size:12px">
-                    <div style="font-weight:600;margin-bottom:2px">${adSetNames[i] || 'Ad Set ' + (i+1)}</div>
-                    <div style="color:var(--text-tertiary)">Smart Bidding · ${Math.ceil(c.creatives / 2)} creatives</div>
-                  </div>
-                `).join('')}
+                ${Array.from({length: Math.min(c.adSets, 3)}, (_, i) => {
+                  const audName = adSetNames[i] || 'Ad Set ' + (i+1);
+                  const audId = audiences[i]?.id || 'a1';
+                  const estSpend = Math.round(c.spend / (c.adSets || 1) * (1 + (i === 0 ? 0.2 : -0.1)));
+                  const estConv = Math.round(c.conversions / (c.adSets || 1) * (1 + (i === 0 ? 0.15 : -0.05)));
+                  return `
+                  <div class="cfull-list-item" onclick="location.hash='audience/${audId}'">
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:12px;margin-bottom:3px">${audName}</div>
+                      <div style="display:flex;gap:var(--space-3);font-size:11px;color:var(--text-tertiary)">
+                        <span>Smart Bidding</span>
+                        <span>·</span>
+                        <span>${Math.ceil(c.creatives / 2)} creatives</span>
+                      </div>
+                      <div style="display:flex;gap:var(--space-4);margin-top:6px;font-size:11px">
+                        <span class="mono" style="color:var(--text-secondary)">$${fmtNum(estSpend)} spend</span>
+                        <span class="mono" style="color:var(--positive)">${fmtNum(estConv)} conv.</span>
+                      </div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" style="flex-shrink:0"><path d="M6 3l5 5-5 5"/></svg>
+                  </div>`;
+                }).join('')}
                 ${c.adSets === 0 ? '<div style="padding:var(--space-4);text-align:center;color:var(--text-tertiary);font-size:12px">No ad sets yet</div>' : ''}
               </div>
             </div>
@@ -1127,13 +1138,19 @@ const RoktAds = (() => {
               </div>
               <div class="card-body" style="padding:0">
                 ${campaignCreatives.slice(0, 3).map(cr => `
-                  <div style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);font-size:12px;cursor:pointer" onclick="location.hash='creatives'">
-                    <div style="font-weight:600;margin-bottom:2px">${cr.name}</div>
-                    <div style="display:flex;gap:12px;color:var(--text-tertiary)">
-                      <span>${cr.format}</span>
-                      <span>Ref. Rate: ${cr.ctr}%</span>
-                      <span>CoPI: ${cr.copi}%</span>
+                  <div class="cfull-list-item" onclick="location.hash='creative/${cr.id}'">
+                    <div style="flex:1;min-width:0">
+                      <div style="font-weight:600;font-size:12px;margin-bottom:3px">${cr.name}</div>
+                      <div style="display:flex;gap:var(--space-3);font-size:11px;color:var(--text-tertiary)">
+                        <span class="badge badge-gray" style="font-size:9px;padding:1px 6px">${cr.format}</span>
+                      </div>
+                      <div style="display:flex;gap:var(--space-4);margin-top:6px;font-size:11px">
+                        <span class="mono" style="color:var(--text-secondary)">Ref. ${cr.ctr}%</span>
+                        <span class="mono" style="color:var(--positive)">CoPI ${cr.copi}%</span>
+                        <span class="mono" style="color:var(--text-tertiary)">CVR ${cr.cvr}%</span>
+                      </div>
                     </div>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" style="flex-shrink:0"><path d="M6 3l5 5-5 5"/></svg>
                   </div>
                 `).join('')}
                 ${campaignCreatives.length === 0 ? '<div style="padding:var(--space-4);text-align:center;color:var(--text-tertiary);font-size:12px">No creatives linked</div>' : ''}
@@ -1210,7 +1227,7 @@ const RoktAds = (() => {
         const fill = pts + ` ${w},${h} 0,${h}`;
         const dots = data.map((v, i) => `<use href="#rDotFull" x="${i * w / (n - 1) - 5}" y="${h - (v / maxV) * (h - 20) - 5}" width="10" height="10" color="var(--beetroot)"/>`).join('');
         const svg = chartContainer.querySelector('svg');
-        if (svg) svg.innerHTML = `<defs><symbol id="rDotFull" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol><linearGradient id="fullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fill}" fill="url(#fullGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
+        if (svg) svg.innerHTML = `<defs><symbol id="rDotFull" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></symbol><linearGradient id="fullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fill}" fill="url(#fullGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
       });
     });
 
@@ -1320,24 +1337,122 @@ const RoktAds = (() => {
     return insights.join(' ');
   }
 
+  function generateAISuggestions(c) {
+    const suggestions = [];
+    if (c.creatives <= 2 && c.status === 'active') suggestions.push({ icon: '🎨', text: 'Add 2+ creatives to improve optimization', impact: 'Est. +15% CoPI', action: 'Create Creative', onclick: "location.hash='creatives'" });
+    if (c.cpaTarget && c.cpa > c.cpaTarget) suggestions.push({ icon: '🎯', text: `Lower CPA by ${Math.round((c.cpa/c.cpaTarget - 1) * 100)}% — expand audience or adjust bid`, impact: `Save ~$${fmtNum(Math.round((c.cpa - c.cpaTarget) * c.conversions * 0.1))}/wk`, action: 'Expand Audience', onclick: "location.hash='audiences'" });
+    if (c.spend / c.budget > 0.75 && c.status === 'active') suggestions.push({ icon: '💰', text: 'High pacing rate — increase budget to avoid capping early', impact: `Est. +${Math.round((1 - c.spend/c.budget) * 100)}% more conversions`, action: 'Increase Budget', onclick: `RoktAds.openModal('editCampaign','${c.id}')` });
+    if (c.integrationHealth < 7) suggestions.push({ icon: '🔗', text: 'Improve Integration Health for better signal matching', impact: '+' + (10 - c.integrationHealth).toFixed(1) + ' points possible', action: 'View Details', onclick: "location.hash='measurement'" });
+    if (c.biddingState === 'learning') suggestions.push({ icon: '🧠', text: 'Avoid major changes — Smart Bidding is still learning', impact: '~' + Math.round(50 - c.conversions * 0.005) + ' conversions to exit', action: '' });
+    if (c.trendDir === 'up' && c.status === 'active') suggestions.push({ icon: '📈', text: 'Performance improving — consider scaling budget by 20%', impact: 'Est. +$' + fmtNum(Math.round(c.spend * 0.04)) + ' weekly', action: 'Scale Up', onclick: `RoktAds.openModal('editCampaign','${c.id}')` });
+    if (suggestions.length === 0) suggestions.push({ icon: '✅', text: 'Campaign performing well — no immediate actions needed', impact: 'All metrics healthy', action: '' });
+    return suggestions;
+  }
+
+  function renderAIAnalysisCard(c) {
+    const suggestions = generateAISuggestions(c);
+    return `
+      <div class="ai-analysis-card">
+        <div class="ai-analysis-header">
+          <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+          AI Analysis & Suggestions
+        </div>
+        <div class="ai-suggestions-list">
+          ${suggestions.map(s => `
+            <div class="ai-suggestion-item">
+              <span class="ai-suggestion-icon">${s.icon}</span>
+              <div class="ai-suggestion-body">
+                <div class="ai-suggestion-text">${s.text}</div>
+                <div class="ai-suggestion-impact">${s.impact}</div>
+              </div>
+              ${s.action ? `<button class="btn btn-xs btn-primary btn-pill" onclick="${s.onclick || ''}">${s.action}</button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        <div class="ai-analysis-actions" style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--border)">
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.openDeepDive('${c.id}')">🔍 Deep Dive Analysis</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function openDeepDive(id) {
+    const c = campaigns.find(x => x.id === id);
+    if (!c) return;
+    const analysis = generateAIAnalysis(c);
+    const suggestions = generateAISuggestions(c);
+    openModal('__custom');
+    const content = document.getElementById('modalContent');
+    if (!content) return;
+    content.classList.add('modal-lg');
+    content.innerHTML = `
+      <div class="modal-header">
+        <h2><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-2px;margin-right:6px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>Deep Dive — ${c.name}</h2>
+        <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+        <div style="margin-bottom:var(--space-5)">
+          <h3 style="font-size:14px;margin-bottom:var(--space-3)">Campaign Health Summary</h3>
+          <div style="font-size:13px;line-height:1.7;color:var(--text-secondary)">${analysis}</div>
+        </div>
+
+        <div style="margin-bottom:var(--space-5)">
+          <h3 style="font-size:14px;margin-bottom:var(--space-3)">Performance Breakdown</h3>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3)">
+            ${[
+              { l: 'Spend Efficiency', v: Math.round(c.spend/c.budget*100) + '%', desc: 'Budget utilization', color: c.spend/c.budget > 0.9 ? 'var(--warning)' : 'var(--positive)' },
+              { l: 'CPA vs Target', v: c.cpaTarget ? (c.cpa <= c.cpaTarget ? '✅ On track' : '⚠️ Above') : 'N/A', desc: c.cpaTarget ? '$' + c.cpa.toFixed(2) + ' vs $' + c.cpaTarget.toFixed(2) : 'No target set' },
+              { l: 'Creative Diversity', v: c.creatives + ' active', desc: c.creatives >= 3 ? 'Good variety' : 'Add more for optimization', color: c.creatives >= 3 ? 'var(--positive)' : 'var(--warning)' },
+              { l: 'Audience Health', v: c.adSets + ' ad sets', desc: c.adSets >= 2 ? 'Good segmentation' : 'Consider adding segments' },
+            ].map(m => `
+              <div style="padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border)">
+                <div style="font-size:10px;text-transform:uppercase;color:var(--text-tertiary);letter-spacing:0.05em;margin-bottom:4px">${m.l}</div>
+                <div style="font-size:16px;font-weight:700;margin-bottom:2px" ${m.color ? `class="mono" style="color:${m.color}"` : ''}>${m.v}</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">${m.desc}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div style="margin-bottom:var(--space-5)">
+          <h3 style="font-size:14px;margin-bottom:var(--space-3)">Optimization Opportunities</h3>
+          ${suggestions.map(s => `
+            <div style="display:flex;gap:12px;align-items:flex-start;padding:var(--space-3);border-radius:var(--radius-lg);border:1px solid var(--border);margin-bottom:var(--space-2)">
+              <span style="font-size:18px">${s.icon}</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:500">${s.text}</div>
+                <div style="font-size:11px;color:var(--beetroot);margin-top:2px">${s.impact}</div>
+              </div>
+              ${s.action ? `<button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.closeModal();${s.onclick || ''}">${s.action}</button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <div>
+          <h3 style="font-size:14px;margin-bottom:var(--space-3)">7-Day Trend</h3>
+          <table class="data-table">
+            <thead><tr><th>DAY</th><th>SPEND</th><th>CPA (EST.)</th><th>CONVERSIONS (EST.)</th></tr></thead>
+            <tbody>
+              ${c.dailySpend.map((s, i) => {
+                const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                const estConv = Math.round(s / (c.cpa || 1));
+                return `<tr><td>${days[i]}</td><td class="mono">$${fmtNum(s)}</td><td class="mono">$${(s / (estConv || 1)).toFixed(2)}</td><td class="mono">${estConv}</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    document.getElementById('modalOverlay')?.classList.add('open');
+  }
+
   function renderCampaignTab(tab, c) {
     const container = document.getElementById('detailTabContent');
     if (!container) return;
 
     if (tab === 'overview') {
-      const aiAnalysis = generateAIAnalysis(c);
       container.innerHTML = `
-        <div class="ai-analysis-card">
-          <div class="ai-analysis-header">
-            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
-            AI Analysis
-          </div>
-          <div class="ai-analysis-body">${aiAnalysis}</div>
-          <div class="ai-analysis-actions">
-            <button onclick="RoktAds.toast('Optimization suggestions generated','info')">Get Suggestions</button>
-            <button onclick="RoktAds.toast('Opening detailed report...','info')">Deep Dive</button>
-          </div>
-        </div>
+        ${renderAIAnalysisCard(c)}
         <div class="detail-chart-area">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <span style="font-size:12px;font-weight:600">Daily Spend</span>
@@ -1346,9 +1461,9 @@ const RoktAds = (() => {
               <button class="filter-pill" style="font-size:10px">30D</button>
             </div>
           </div>
-          <svg width="100%" height="120" viewBox="0 0 460 120" preserveAspectRatio="none">
+          <svg width="100%" height="120" viewBox="0 0 460 120" preserveAspectRatio="xMidYMid meet">
             <defs>
-              <symbol id="rDotDetail" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>
+              <symbol id="rDotDetail" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></symbol>
               <linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient>
             </defs>
             <polygon points="${c.dailySpend.map((v,i) => `${i*460/6},${120 - v/60}`).join(' ')} 460,120 0,120" fill="url(#detailGrad)"/>
@@ -1406,7 +1521,7 @@ const RoktAds = (() => {
             const pts = spendData.map((v, i) => `${i * w / (n - 1)},${h - (v / maxV) * (h - 10)}`).join(' ');
             const fillPts = pts + ` ${w},${h} 0,${h}`;
             const dots = spendData.map((v, i) => `<use href="#rDotDetail" x="${i * w / (n - 1) - 5}" y="${h - (v / maxV) * (h - 10) - 5}" width="10" height="10" color="var(--beetroot)"/>`).join('');
-            chartSvg.innerHTML = `<defs><symbol id="rDotDetail" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol><linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fillPts}" fill="url(#detailGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
+            chartSvg.innerHTML = `<defs><symbol id="rDotDetail" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></symbol><linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fillPts}" fill="url(#detailGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
           });
         });
       }, 0);
@@ -1637,6 +1752,18 @@ const RoktAds = (() => {
     } else {
       builderData[field] = value;
     }
+    // Live-refresh projections sidebar if visible
+    refreshProjections();
+  }
+
+  function refreshProjections() {
+    const projEl = document.querySelector('.builder-projections');
+    if (projEl && builderStep >= 2) {
+      const temp = document.createElement('div');
+      temp.innerHTML = renderBuilderProjections();
+      const newProj = temp.firstElementChild;
+      projEl.replaceWith(newProj);
+    }
   }
 
   // Helper: toggle collapsible section
@@ -1745,6 +1872,145 @@ const RoktAds = (() => {
     phone: 'Phone Lead',
   };
 
+  // ── Campaign Builder Projections ──────────────────────────
+  function renderBuilderProjections() {
+    const bd = builderData;
+    // Compute projections from builderData state
+    const budget = parseFloat(bd.lifetimeCap) || 0;
+    const dailyCap = parseFloat(bd.dailyCap) || (budget > 0 ? Math.round(budget / 30) : 0);
+    const objectiveMultipliers = { 'website_traffic': 1.0, 'email': 0.85, 'app_download': 1.2, 'product_sales': 0.7, 'cross_sell': 0.9, 'payment_trigger': 0.95, 'brand_campaign': 1.1, 'add_to_cart': 0.8, 'calendar': 0.9, 'promotion': 0.75, 'customer_feedback': 0.65, 'integrated_app': 1.15, 'shoppable_ad': 0.85, 'phone': 1.05, 'cpa': 1.0, 'roas': 0.8, 'app': 1.2, 'dpa': 0.7, 'leads': 0.85, 'embed': 0.9 };
+    const mult = objectiveMultipliers[bd.objectiveType || bd.objective] || 1.0;
+
+    const estCPA = bd.targetCpa ? parseFloat(bd.targetCpa) : (5.50 * mult);
+    const estReach = bd.objective
+      ? (bd.adSets && bd.adSets.length > 1 ? '12-22M'
+        : bd.adSets && bd.adSets[0]?.audience === 'a1' ? '18-25M'
+        : bd.adSets && bd.adSets[0]?.audience === 'a2' ? '8-14M'
+        : '5-12M')
+      : '\u2014';
+    const estConversions = budget > 0 && estCPA > 0 ? Math.round(budget / estCPA) : 0;
+    const estDays = dailyCap > 0 && budget > 0 ? Math.round(budget / dailyCap) : (budget > 0 ? 30 : 0);
+
+    // Confidence score based on completeness
+    let confidence = 20;
+    if (bd.objective) confidence += 15;
+    if (bd.name && bd.name.length > 3 && bd.name !== 'My New Campaign') confidence += 10;
+    if (budget > 0) confidence += 15;
+    if (bd.adSets && bd.adSets.length >= 1) confidence += 10;
+    if (bd.adSets && bd.adSets.length >= 2) confidence += 5;
+    if (bd.bidStrategy) confidence += 10;
+    if (bd.offerType) confidence += 5;
+    if (bd.creativeTitle && bd.creativeTitle.length > 0) confidence += 5;
+    if (bd.landingPageUrl && bd.landingPageUrl !== 'https://www.example.com/offer') confidence += 5;
+    confidence = Math.min(confidence, 100);
+
+    // Contextual tips based on current step
+    const tips = [];
+    if (campaignMode === 'autopilot') {
+      if (builderStep === 2) {
+        tips.push({ icon: '\uD83D\uDCA1', text: 'Add 3+ headlines and 2+ descriptions for best AI optimization' });
+        if (!bd.autoCta) tips.push({ icon: '\u270F\uFE0F', text: 'Set a clear CTA to improve conversion rates' });
+        if (!bd.autoImage) tips.push({ icon: '\uD83D\uDDBC\uFE0F', text: 'Campaigns with images see 35% higher engagement' });
+      }
+      if (builderStep === 3) {
+        if (confidence >= 80) tips.push({ icon: '\u2705', text: 'Campaign looks well-configured! Ready for launch.' });
+        else tips.push({ icon: '\u26A0\uFE0F', text: 'Consider filling in more fields to improve campaign performance' });
+      }
+    } else {
+      if (builderStep === 2) {
+        tips.push({ icon: '\uD83D\uDCA1', text: 'Setting a daily cap prevents overspending and improves budget efficiency' });
+        if (!bd.name || bd.name.length < 5 || bd.name === 'My New Campaign') tips.push({ icon: '\u270F\uFE0F', text: 'Use a descriptive campaign name for easy tracking' });
+        if (dailyCap > 0 && budget > 0) {
+          const pacing = Math.round((dailyCap * 30 / budget) * 100);
+          if (pacing > 120) tips.push({ icon: '\u26A1', text: `Daily cap is ${pacing}% of monthly budget \u2014 campaign may finish early` });
+        }
+      }
+      if (builderStep === 3) {
+        tips.push({ icon: '\uD83C\uDFAF', text: 'Smart Bidding typically outperforms manual by 15-25% after learning phase' });
+        tips.push({ icon: '\uD83D\uDC65', text: 'Adding 2+ ad sets enables better audience comparison and optimization' });
+        if (bd.bidStrategy === 'manual' && bd.manualBid) {
+          const manualBid = parseFloat(bd.manualBid);
+          if (manualBid > estCPA * 1.5) tips.push({ icon: '\u26A0\uFE0F', text: 'Manual bid is significantly above predicted CPA \u2014 consider lowering' });
+        }
+      }
+      if (builderStep === 4) {
+        tips.push({ icon: '\uD83C\uDFA8', text: 'Campaigns with 3+ creatives see 20% higher CoPI on average' });
+        const combined = (bd.creativeTitle || '').length + (bd.creativeBody || '').length;
+        if (combined > 175) tips.push({ icon: '\uD83D\uDCCA', text: `Title + body is ${combined} chars \u2014 keep under 175 for optimal display` });
+        else tips.push({ icon: '\uD83D\uDCCA', text: 'Keep title + body under 175 characters for optimal display' });
+      }
+      if (builderStep === 5) {
+        if (confidence >= 80) tips.push({ icon: '\u2705', text: 'Campaign looks well-configured! Ready for review.' });
+        else tips.push({ icon: '\u26A0\uFE0F', text: 'Consider filling in more fields to improve campaign performance' });
+        if (estConversions > 0) tips.push({ icon: '\uD83D\uDCC8', text: `At current settings, expect ~${fmtNum(estConversions)} conversions over ${estDays} days` });
+      }
+    }
+
+    return `
+      <div class="builder-projections">
+        <div class="builder-proj-header">
+          <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+          <span>Campaign Projections</span>
+        </div>
+
+        <div class="builder-proj-score">
+          <div class="builder-proj-score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" stroke-width="6"/>
+              <circle cx="40" cy="40" r="34" fill="none" stroke="${confidence >= 70 ? 'var(--positive)' : confidence >= 40 ? 'var(--warning)' : 'var(--negative)'}" stroke-width="6"
+                stroke-dasharray="${(confidence * 2.136).toFixed(1)} 213.6" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 40 40)" style="transition:stroke-dasharray 0.6s ease"/>
+            </svg>
+            <div class="builder-proj-score-value">${confidence}</div>
+          </div>
+          <div class="builder-proj-score-label">AI Readiness</div>
+        </div>
+
+        <div class="builder-proj-metrics">
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Est. Reach</div>
+            <div class="builder-proj-metric-value">${estReach}</div>
+          </div>
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Est. CPA</div>
+            <div class="builder-proj-metric-value">${bd.objective ? '$' + estCPA.toFixed(2) : '\u2014'}</div>
+          </div>
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Est. Conversions</div>
+            <div class="builder-proj-metric-value">${estConversions > 0 ? fmtNum(estConversions) : '\u2014'}</div>
+          </div>
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Est. Duration</div>
+            <div class="builder-proj-metric-value">${estDays > 0 ? estDays + ' days' : '\u2014'}</div>
+          </div>
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Daily Spend</div>
+            <div class="builder-proj-metric-value">${dailyCap > 0 ? '$' + fmtNum(dailyCap) : '\u2014'}</div>
+          </div>
+          <div class="builder-proj-metric">
+            <div class="builder-proj-metric-label">Budget</div>
+            <div class="builder-proj-metric-value">${budget > 0 ? '$' + fmtNum(budget) : '\u2014'}</div>
+          </div>
+        </div>
+
+        ${tips.length > 0 ? `
+          <div class="builder-proj-tips">
+            <div class="builder-proj-tips-label">Tips</div>
+            ${tips.map(t => `
+              <div class="builder-proj-tip">
+                <span>${t.icon}</span>
+                <span>${t.text}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function wrapWithProjections(stepHtml) {
+    return `<div class="builder-step-with-proj">${stepHtml}${renderBuilderProjections()}</div>`;
+  }
+
   function updateBuilderStep() {
     // Clear placeholder cycling
     if (placeholderInterval) { clearInterval(placeholderInterval); placeholderInterval = null; }
@@ -1768,9 +2034,9 @@ const RoktAds = (() => {
         content.innerHTML = renderBuilderStep1();
         initStep1Placeholders();
       } else if (builderStep === 2) {
-        content.innerHTML = renderAutopilotStep2();
+        content.innerHTML = wrapWithProjections(renderAutopilotStep2());
       } else if (builderStep === 3) {
-        content.innerHTML = renderAutopilotStep3();
+        content.innerHTML = wrapWithProjections(renderAutopilotStep3());
       }
     } else {
       // Advanced mode — original 5 steps
@@ -1778,14 +2044,14 @@ const RoktAds = (() => {
         content.innerHTML = renderBuilderStep1();
         initStep1Placeholders();
       } else if (builderStep === 2) {
-        content.innerHTML = renderBuilderStep2();
+        content.innerHTML = wrapWithProjections(renderBuilderStep2());
       } else if (builderStep === 3) {
-        content.innerHTML = renderBuilderStep3();
+        content.innerHTML = wrapWithProjections(renderBuilderStep3());
       } else if (builderStep === 4) {
-        content.innerHTML = renderBuilderStep4();
+        content.innerHTML = wrapWithProjections(renderBuilderStep4());
         initBuilderStep4Preview();
       } else if (builderStep === 5) {
-        content.innerHTML = renderBuilderStep5();
+        content.innerHTML = wrapWithProjections(renderBuilderStep5());
       }
     }
   }
@@ -2776,7 +3042,7 @@ const RoktAds = (() => {
     if (search) filtered = filtered.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
 
     grid.innerHTML = filtered.map(a => `
-      <div class="audience-card" onclick="RoktAds.openModal('editAudience', '${a.id}')">
+      <div class="audience-card" onclick="location.hash='audience/${a.id}'">
         <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editAudience('${a.id}')" title="Edit">✏️</button>
         <div class="audience-card-header">
           <div class="audience-card-icon">${a.icon}</div>
@@ -2806,6 +3072,847 @@ const RoktAds = (() => {
       </div>
     `).join('');
     initCardGlow();
+  }
+
+  // ── Audience Full View ─────────────────────────────────────
+  function renderAudienceFullView(id) {
+    const a = audiences.find(x => x.id === id);
+    if (!a) { location.hash = 'audiences'; return; }
+
+    currentView = 'audience-detail';
+    $$('.nav-item').forEach(item => item.classList.remove('active'));
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    // Mock detailed data for this audience
+    const linkedCampaigns = campaigns.filter(c => c.status !== 'draft').slice(0, a.campaigns || 2);
+    const avgCPA = linkedCampaigns.length ? (linkedCampaigns.reduce((s,c) => s + c.cpa, 0) / linkedCampaigns.length).toFixed(2) : '0.00';
+    const totalConv = linkedCampaigns.reduce((s,c) => s + c.conversions, 0);
+    const totalSpend = linkedCampaigns.reduce((s,c) => s + c.spend, 0);
+
+    // Mock composition data
+    const ageBreakdown = [
+      { range: '18-24', pct: 12 }, { range: '25-34', pct: 34 }, { range: '35-44', pct: 28 },
+      { range: '45-54', pct: 16 }, { range: '55+', pct: 10 }
+    ];
+    const genderBreakdown = [{ label: 'Female', pct: 58 }, { label: 'Male', pct: 38 }, { label: 'Other', pct: 4 }];
+    const deviceBreakdown = [{ label: 'Mobile', pct: 64, icon: '📱' }, { label: 'Desktop', pct: 28, icon: '💻' }, { label: 'Tablet', pct: 8, icon: '📋' }];
+    const geoBreakdown = [
+      { region: 'California', pct: 14 }, { region: 'Texas', pct: 11 }, { region: 'New York', pct: 10 },
+      { region: 'Florida', pct: 9 }, { region: 'Illinois', pct: 7 }, { region: 'Other', pct: 49 }
+    ];
+    const interests = ['Streaming', 'Entertainment', 'Movies', 'Music', 'Gaming', 'Sports', 'Travel', 'Dining'];
+
+    content.innerHTML = `
+      <div class="view view-audience-full" style="padding:0">
+        <div class="cfull-header">
+          <div class="cfull-header-top">
+            <button class="btn btn-xs btn-ghost" onclick="location.hash='audiences'" style="margin-right:var(--space-3)">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+              Back to Audiences
+            </button>
+            <div class="cfull-title-area">
+              <h1 class="cfull-title">${a.name}</h1>
+              <div class="cfull-badges">
+                <span class="badge badge-${a.type === 'Custom' ? 'wine' : a.type === 'LAL' ? 'blue' : 'gray'}">${a.type}</span>
+                <span class="audience-freshness"><span class="freshness-dot ${a.fresh ? 'fresh' : 'stale'}"></span> ${a.fresh ? 'Fresh' : 'Stale'}</span>
+              </div>
+            </div>
+            <div class="cfull-actions">
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.editAudience('${a.id}')">✏️ Edit Rules</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Audience refreshed','success')">🔄 Refresh</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Audience duplicated','success')">⧉ Duplicate</button>
+            </div>
+          </div>
+          <div class="cfull-kpi-strip">
+            ${[
+              { l: 'Audience Size', v: a.size, sub: a.type + ' segment' },
+              { l: 'Match Rate', v: a.matchRate, sub: 'Cross-device match quality', color: parseInt(a.matchRate) >= 70 ? 'var(--positive)' : 'var(--warning)' },
+              { l: 'Linked Campaigns', v: String(a.campaigns), sub: a.campaigns === 1 ? '1 active campaign' : a.campaigns + ' campaigns using this' },
+              { l: 'Avg. CPA', v: '$' + avgCPA, sub: 'Across linked campaigns' },
+              { l: 'Total Conversions', v: fmtNum(totalConv), sub: 'All-time attributed' },
+              { l: 'Total Spend', v: '$' + fmtNum(totalSpend), sub: 'Spend using this audience' },
+            ].map(m => `
+              <div class="cfull-kpi">
+                <div class="cfull-kpi-label">${m.l}</div>
+                <div class="cfull-kpi-value mono" ${m.color ? `style="color:${m.color}"` : ''}>${m.v}</div>
+                <div class="cfull-kpi-sub">${m.sub}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="cfull-grid">
+          <div class="cfull-main">
+            <!-- AI Insights -->
+            <div class="ai-analysis-card">
+              <div class="ai-analysis-header">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+                AI Audience Insights
+              </div>
+              <div class="ai-suggestions-list">
+                ${[
+                  { icon: '📊', text: 'This audience has a ' + (parseInt(a.matchRate) >= 70 ? 'strong' : 'moderate') + ' match rate. ' + (parseInt(a.matchRate) < 70 ? 'Consider adding email SHA-256 identifiers to improve match quality.' : 'Cross-device matching is performing well.'), impact: 'Match Rate: ' + a.matchRate },
+                  { icon: '🎯', text: a.campaigns >= 2 ? 'Used across multiple campaigns — monitor for audience fatigue and frequency capping.' : 'Only used in ' + a.campaigns + ' campaign. Consider testing in additional campaigns for broader reach.', impact: a.campaigns >= 2 ? 'Watch frequency' : 'Expansion opportunity' },
+                  { icon: '📈', text: 'Top-performing age group is 25-34 (34% of audience). Consider creating a focused segment for this cohort.', impact: 'Est. +12% CVR with focused targeting' },
+                  { icon: '📱', text: '64% of this audience is on mobile. Ensure creatives are mobile-optimized for maximum impact.', impact: 'Mobile-first recommendation' },
+                ].map(s => `
+                  <div class="ai-suggestion-item">
+                    <span class="ai-suggestion-icon">${s.icon}</span>
+                    <div class="ai-suggestion-body">
+                      <div class="ai-suggestion-text">${s.text}</div>
+                      <div class="ai-suggestion-impact">${s.impact}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Audience Composition -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Audience Composition</h3></div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+                  <!-- Age Distribution -->
+                  <div>
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:var(--space-3)">Age Distribution</div>
+                    ${ageBreakdown.map(ab => `
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        <span style="font-size:11px;color:var(--text-secondary);width:40px">${ab.range}</span>
+                        <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+                          <div style="width:${ab.pct}%;height:100%;background:var(--beetroot);border-radius:4px;transition:width 0.6s ease"></div>
+                        </div>
+                        <span class="mono" style="font-size:10px;width:30px;text-align:right">${ab.pct}%</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <!-- Gender -->
+                  <div>
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:var(--space-3)">Gender</div>
+                    ${genderBreakdown.map(g => `
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        <span style="font-size:11px;color:var(--text-secondary);width:50px">${g.label}</span>
+                        <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+                          <div style="width:${g.pct}%;height:100%;background:${g.label === 'Female' ? 'var(--beetroot)' : g.label === 'Male' ? 'var(--brand-blue)' : 'var(--warning)'};border-radius:4px"></div>
+                        </div>
+                        <span class="mono" style="font-size:10px;width:30px;text-align:right">${g.pct}%</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Device & Geography -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Device & Geography</h3></div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4)">
+                  <div>
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:var(--space-3)">Device Type</div>
+                    ${deviceBreakdown.map(d => `
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:var(--space-2) var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border)">
+                        <span style="font-size:18px">${d.icon}</span>
+                        <div style="flex:1">
+                          <div style="font-size:12px;font-weight:600">${d.label}</div>
+                          <div class="progress-bar" style="margin-top:4px;height:4px"><div class="progress-bar-fill" style="width:${d.pct}%;background:var(--beetroot)"></div></div>
+                        </div>
+                        <span class="mono" style="font-size:13px;font-weight:700">${d.pct}%</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <div>
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-tertiary);margin-bottom:var(--space-3)">Top Regions</div>
+                    ${geoBreakdown.map(g => `
+                      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border-light);font-size:12px">
+                        <span>${g.region}</span>
+                        <span class="mono" style="font-weight:600">${g.pct}%</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Performance -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Performance by Campaign</h3></div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead><tr><th>CAMPAIGN</th><th>STATUS</th><th>SPEND</th><th>CPA</th><th>CONV.</th><th>REF. RATE</th><th>CVR</th></tr></thead>
+                  <tbody>
+                    ${linkedCampaigns.map(c => `
+                      <tr class="clickable" onclick="location.hash='campaign/${c.id}'">
+                        <td class="campaign-name">${c.name}</td>
+                        <td><span class="badge badge-${c.status === 'active' ? 'positive' : 'gray'}">${capitalize(c.status)}</span></td>
+                        <td class="mono">$${fmtNum(c.spend)}</td>
+                        <td class="mono">$${c.cpa.toFixed(2)}</td>
+                        <td class="mono">${fmtNum(c.conversions)}</td>
+                        <td class="mono">${c.ctr}%</td>
+                        <td class="mono">${c.cvr}%</td>
+                      </tr>
+                    `).join('')}
+                    ${linkedCampaigns.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:var(--space-4)">No campaigns linked</td></tr>' : ''}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="cfull-sidebar">
+            <!-- Audience Details -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Details</h3></div>
+              <div class="card-body">
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:12px">
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Type</span><span class="badge badge-${a.type === 'Custom' ? 'wine' : a.type === 'LAL' ? 'blue' : 'gray'}">${a.type}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Size</span><span class="mono" style="font-weight:700">${a.size}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Match Rate</span><span class="mono" style="color:${parseInt(a.matchRate) >= 70 ? 'var(--positive)' : 'var(--warning)'}">${a.matchRate}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Freshness</span><span>${a.fresh ? '🟢 Fresh' : '🟡 Stale'}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Created</span><span>2026-02-15</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Last Updated</span><span>2026-03-19</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interests -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Interest Signals</h3></div>
+              <div class="card-body">
+                <div style="display:flex;flex-wrap:wrap;gap:6px">
+                  ${interests.map(i => `<span class="badge badge-gray" style="font-size:11px;padding:4px 10px">${i}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Lookalike Expansion -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Expansion Options</h3></div>
+              <div class="card-body">
+                <button class="btn btn-xs btn-primary btn-pill" style="width:100%;margin-bottom:var(--space-2)" onclick="RoktAds.toast('Creating LAL audience...','info')">🔄 Create Lookalike</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%;margin-bottom:var(--space-2)" onclick="RoktAds.toast('Broadening audience...','info')">📊 Broaden Targeting</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%" onclick="RoktAds.toast('Overlap analysis starting...','info')">🔍 Overlap Analysis</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    initAISparkles();
+  }
+
+  // ── Creative Full View ────────────────────────────────────
+  function renderCreativeFullView(id) {
+    const cr = creatives.find(x => x.id === id);
+    if (!cr) { location.hash = 'creatives'; return; }
+
+    currentView = 'creative-detail';
+    $$('.nav-item').forEach(item => item.classList.remove('active'));
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    const detail = creativeDetails[id] || {};
+    // Find linked campaigns
+    const linkedCamps = campaigns.filter(c => c.name.toLowerCase().includes(cr.campaign.toLowerCase()));
+    const totalImpressions = linkedCamps.reduce((s,c) => s + c.impressions, 0);
+    const totalClicks = linkedCamps.reduce((s,c) => s + c.clicks, 0);
+    const totalConversions = linkedCamps.reduce((s,c) => s + c.conversions, 0);
+
+    // Mock audience performance for this creative
+    const audiencePerf = [
+      { audience: 'Women 25-45', impressions: '45.2K', ctr: (cr.ctr * 1.1).toFixed(1), cvr: (cr.cvr * 1.05).toFixed(1), copi: (cr.copi * 1.08).toFixed(2) },
+      { audience: 'Streaming Subs LAL', impressions: '32.8K', ctr: (cr.ctr * 0.95).toFixed(1), cvr: (cr.cvr * 0.92).toFixed(1), copi: (cr.copi * 0.9).toFixed(2) },
+      { audience: 'Cord Cutters', impressions: '18.4K', ctr: (cr.ctr * 0.85).toFixed(1), cvr: (cr.cvr * 0.88).toFixed(1), copi: (cr.copi * 0.82).toFixed(2) },
+    ];
+
+    content.innerHTML = `
+      <div class="view view-creative-full" style="padding:0">
+        <div class="cfull-header">
+          <div class="cfull-header-top">
+            <button class="btn btn-xs btn-ghost" onclick="location.hash='creatives'" style="margin-right:var(--space-3)">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+              Back to Creatives
+            </button>
+            <div class="cfull-title-area">
+              <h1 class="cfull-title">${cr.name}</h1>
+              <div class="cfull-badges">
+                <span class="badge badge-gray">${cr.format}</span>
+                <span class="badge badge-blue">${cr.campaign}</span>
+              </div>
+            </div>
+            <div class="cfull-actions">
+              <button class="btn btn-xs btn-ghost" onclick="location.hash='creatives'">✏️ Edit</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Generating A/B variants...','info')">🧪 A/B Variants</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Creative duplicated','success')">⧉ Duplicate</button>
+            </div>
+          </div>
+          <div class="cfull-kpi-strip">
+            ${[
+              { l: 'Ref. Rate', v: cr.ctr + '%', sub: 'Referral rate', color: cr.ctr >= 7 ? 'var(--positive)' : 'var(--warning)' },
+              { l: 'CVR', v: cr.cvr + '%', sub: 'Conversion rate' },
+              { l: 'CoPI', v: cr.copi + '%', sub: 'Cost of positive interaction', hero: true },
+              { l: 'Impressions', v: fmtNum(totalImpressions), sub: 'Total served' },
+              { l: 'Clicks', v: fmtNum(totalClicks), sub: 'Total referrals' },
+              { l: 'Conversions', v: fmtNum(totalConversions), sub: 'Total converted' },
+            ].map(m => `
+              <div class="cfull-kpi ${m.hero ? 'cfull-kpi--hero' : ''}">
+                <div class="cfull-kpi-label">${m.l}</div>
+                <div class="cfull-kpi-value mono" ${m.color ? `style="color:${m.color}"` : ''}>${m.v}</div>
+                <div class="cfull-kpi-sub">${m.sub}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="cfull-grid">
+          <div class="cfull-main">
+            <!-- AI Creative Insights -->
+            <div class="ai-analysis-card">
+              <div class="ai-analysis-header">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+                AI Creative Insights
+              </div>
+              <div class="ai-suggestions-list">
+                ${[
+                  { icon: '🎨', text: cr.copi >= 4 ? 'This creative is a top performer with strong CoPI. Consider using it as the basis for A/B testing to find even higher-performing variants.' : 'This creative has room for improvement. Try testing a stronger CTA or adding social proof callouts.', impact: cr.copi >= 4 ? 'High performer' : 'Optimization opportunity' },
+                  { icon: '📊', text: 'Best performance with Women 25-45 audience segment. Consider increasing budget allocation for this audience.', impact: '+' + ((cr.ctr * 1.1 - cr.ctr) * 10).toFixed(0) + '% above avg ref. rate' },
+                  { icon: '⏰', text: 'This creative has been running for 32 days. Creative fatigue typically begins around 45 days — plan a refresh soon.', impact: '13 days until recommended refresh' },
+                ].map(s => `
+                  <div class="ai-suggestion-item">
+                    <span class="ai-suggestion-icon">${s.icon}</span>
+                    <div class="ai-suggestion-body">
+                      <div class="ai-suggestion-text">${s.text}</div>
+                      <div class="ai-suggestion-impact">${s.impact}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Performance by Audience -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Performance by Audience</h3></div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead><tr><th>AUDIENCE</th><th>IMPRESSIONS</th><th>REF. RATE</th><th>CVR</th><th>CoPI</th></tr></thead>
+                  <tbody>
+                    ${audiencePerf.map(ap => `
+                      <tr>
+                        <td class="campaign-name">${ap.audience}</td>
+                        <td class="mono">${ap.impressions}</td>
+                        <td class="mono">${ap.ctr}%</td>
+                        <td class="mono">${ap.cvr}%</td>
+                        <td class="mono" style="color:${parseFloat(ap.copi) >= 4 ? 'var(--positive)' : 'var(--text-primary)'}">${ap.copi}%</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Linked Campaigns -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Linked Campaigns</h3></div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead><tr><th>CAMPAIGN</th><th>STATUS</th><th>SPEND</th><th>CPA</th><th>CONVERSIONS</th></tr></thead>
+                  <tbody>
+                    ${linkedCamps.map(c => `
+                      <tr class="clickable" onclick="location.hash='campaign/${c.id}'">
+                        <td class="campaign-name">${c.name}</td>
+                        <td><span class="badge badge-${c.status === 'active' ? 'positive' : 'gray'}">${capitalize(c.status)}</span></td>
+                        <td class="mono">$${fmtNum(c.spend)}</td>
+                        <td class="mono">$${c.cpa.toFixed(2)}</td>
+                        <td class="mono">${fmtNum(c.conversions)}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="cfull-sidebar">
+            <!-- Creative Preview -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Preview</h3></div>
+              <div class="card-body" style="text-align:center">
+                <div style="background:linear-gradient(135deg,var(--surface-dark),var(--surface-light));border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-3)">
+                  <div style="font-size:14px;font-weight:700;margin-bottom:var(--space-2)">${detail.title || cr.name}</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:var(--space-3)">${detail.body || ''}</div>
+                  <div style="display:inline-block;padding:8px 20px;background:var(--beetroot);color:white;border-radius:var(--radius-pill);font-size:12px;font-weight:600">${detail.cta || 'Learn More'}</div>
+                </div>
+                <div style="font-size:10px;color:var(--text-tertiary)">Format: ${cr.format}</div>
+              </div>
+            </div>
+
+            <!-- Details -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Details</h3></div>
+              <div class="card-body">
+                <div style="display:flex;flex-direction:column;gap:10px;font-size:12px">
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Format</span><span>${cr.format}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Campaign</span><span>${cr.campaign}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Created</span><span>2026-02-20</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Last Modified</span><span>2026-03-15</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Status</span><span class="badge badge-positive">Active</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACE Enhancement -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title"><svg width="12" height="12" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>ACE Enhancement</h3></div>
+              <div class="card-body">
+                <button class="btn btn-xs btn-primary btn-pill" style="width:100%;margin-bottom:var(--space-2)" onclick="RoktAds.toast('Generating enhanced variants with ACE...','info')">✨ Generate Variants</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%;margin-bottom:var(--space-2)" onclick="RoktAds.toast('Auto-enhancing creative...','info')">🔧 Auto-Enhance</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%" onclick="RoktAds.toast('Predicting performance...','info')">📈 Predict Performance</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    initAISparkles();
+  }
+
+  // ── Network Analyzer ──────────────────────────────────────
+  function renderNetworkAnalyzer() {
+    currentView = 'network-analyzer';
+    $$('.nav-item').forEach(item => item.classList.remove('active'));
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    const fc = getFilteredCampaigns().filter(c => c.status !== 'draft');
+    const totalSpend = fc.reduce((s,c) => s + c.spend, 0);
+    const totalConv = fc.reduce((s,c) => s + c.conversions, 0);
+    const avgCPA = fc.length ? (fc.reduce((s,c) => s + c.cpa, 0) / fc.length) : 0;
+
+    // Mock forecast data
+    const forecastWeeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'];
+    const spendForecast = fc.length ? forecastWeeks.map((_, i) => Math.round(totalSpend * (1 + i * 0.06) / 4 * (0.95 + Math.random() * 0.1))) : forecastWeeks.map(() => 0);
+    const convForecast = fc.length ? forecastWeeks.map((_, i) => Math.round(totalConv * (1 + i * 0.08) / 4 * (0.9 + Math.random() * 0.2))) : forecastWeeks.map(() => 0);
+    const maxSpend = Math.max(...spendForecast, 1);
+    const maxConv = Math.max(...convForecast, 1);
+
+    // Partner network data
+    const networkData = partners.map(p => ({
+      ...p,
+      matchRate: (55 + Math.random() * 40).toFixed(0) + '%',
+      avgCPA: '$' + (3 + Math.random() * 12).toFixed(2),
+      quality: Math.floor(60 + Math.random() * 40),
+      volume: p.volume,
+      trend: Math.random() > 0.3 ? 'up' : 'down'
+    }));
+
+    content.innerHTML = `
+      <div class="view" style="padding:var(--space-4) var(--space-6)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-5)">
+          <div>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <button class="btn btn-xs btn-ghost" onclick="location.hash='intelligence'">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+                Back
+              </button>
+              <h1 style="font-size:22px;font-weight:800;margin:0">Network Analyzer & Forecaster</h1>
+            </div>
+            <p style="font-size:13px;color:var(--text-tertiary);margin-top:4px">Predict performance, analyze network quality, and optimize partner allocation</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Refreshing forecast model...','info')">🔄 Refresh Forecast</button>
+            <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Exporting forecast data...','info')">📊 Export</button>
+          </div>
+        </div>
+
+        <!-- Forecast KPIs -->
+        <div class="cfull-kpi-strip" style="margin-bottom:var(--space-5)">
+          ${[
+            { l: '8-Week Spend Forecast', v: '$' + fmtNum(spendForecast.reduce((s,v) => s+v, 0)), sub: 'Based on current pacing', hero: true },
+            { l: '8-Week Conv. Forecast', v: fmtNum(convForecast.reduce((s,v) => s+v, 0)), sub: 'Predicted conversions' },
+            { l: 'Predicted Avg. CPA', v: '$' + (avgCPA * (0.92 + Math.random() * 0.16)).toFixed(2), sub: 'Trending ' + (Math.random() > 0.5 ? 'down ↓' : 'stable →') },
+            { l: 'Network Utilization', v: Math.round(55 + Math.random() * 25) + '%', sub: 'Of available inventory' },
+            { l: 'Active Partners', v: String(partners.length), sub: partners.length + ' of 12 available' },
+            { l: 'Confidence', v: Math.round(78 + Math.random() * 15) + '%', sub: 'Model confidence', color: 'var(--positive)' },
+          ].map(m => `
+            <div class="cfull-kpi ${m.hero ? 'cfull-kpi--hero' : ''}">
+              <div class="cfull-kpi-label">${m.l}</div>
+              <div class="cfull-kpi-value mono" ${m.color ? `style="color:${m.color}"` : ''}>${m.v}</div>
+              <div class="cfull-kpi-sub">${m.sub}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-4)">
+          <!-- Spend Forecast Chart -->
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">📈 Spend Forecast (8 Weeks)</h3></div>
+            <div class="card-body">
+              <svg width="100%" height="200" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="forecastGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient>
+                  <linearGradient id="forecastGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand-blue)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--brand-blue)" stop-opacity="0"/></linearGradient>
+                </defs>
+                ${(() => {
+                  const w = 600, h = 180;
+                  const pts = spendForecast.map((v, i) => `${i * w / 7},${h - (v / maxSpend) * (h - 20)}`).join(' ');
+                  const fill = pts + ` ${w},${h} 0,${h}`;
+                  const upper = spendForecast.map((v, i) => `${i * w / 7},${h - (v * 1.1 / maxSpend) * (h - 20)}`).join(' ');
+                  const lower = spendForecast.map((v, i) => `${i * w / 7},${h - (v * 0.9 / maxSpend) * (h - 20)}`).join(' ');
+                  const labels = forecastWeeks.map((wk, i) => `<text x="${i * w / 7}" y="198" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">${wk}</text>`).join('');
+                  const dots = spendForecast.map((v, i) => `<circle cx="${i * w / 7}" cy="${h - (v / maxSpend) * (h - 20)}" r="4" fill="var(--beetroot)"/>`).join('');
+                  return `<polygon points="${fill}" fill="url(#forecastGrad)"/>
+                    <polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+                    <polyline points="${upper}" fill="none" stroke="var(--beetroot)" stroke-width="1" stroke-dasharray="4,4" opacity="0.3"/>
+                    <polyline points="${lower}" fill="none" stroke="var(--beetroot)" stroke-width="1" stroke-dasharray="4,4" opacity="0.3"/>
+                    ${dots}${labels}`;
+                })()}
+              </svg>
+              <div style="display:flex;gap:var(--space-4);margin-top:var(--space-3);font-size:10px;color:var(--text-tertiary)">
+                <span><span style="display:inline-block;width:20px;height:2px;background:var(--beetroot);vertical-align:middle;margin-right:4px"></span>Projected Spend</span>
+                <span><span style="display:inline-block;width:20px;height:2px;background:var(--beetroot);vertical-align:middle;margin-right:4px;opacity:0.3;border-top:2px dashed var(--beetroot)"></span>Confidence Band (±10%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversion Forecast Chart -->
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">🎯 Conversion Forecast (8 Weeks)</h3></div>
+            <div class="card-body">
+              <svg width="100%" height="200" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+                ${(() => {
+                  const w = 600, h = 180;
+                  const pts = convForecast.map((v, i) => `${i * w / 7},${h - (v / maxConv) * (h - 20)}`).join(' ');
+                  const fill = pts + ` ${w},${h} 0,${h}`;
+                  const labels = forecastWeeks.map((wk, i) => `<text x="${i * w / 7}" y="198" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">${wk}</text>`).join('');
+                  const dots = convForecast.map((v, i) => `<circle cx="${i * w / 7}" cy="${h - (v / maxConv) * (h - 20)}" r="4" fill="var(--positive)"/>`).join('');
+                  return `<polygon points="${fill}" fill="url(#forecastGrad2)"/>
+                    <polyline points="${pts}" fill="none" stroke="var(--positive)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+                    ${dots}${labels}`;
+                })()}
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Partner Network Quality -->
+        <div class="card" style="margin-bottom:var(--space-4)">
+          <div class="card-header">
+            <h3 class="card-title">🌐 Partner Network Quality</h3>
+            <div style="font-size:11px;color:var(--text-tertiary)">Click a partner to see detailed performance</div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>PARTNER</th><th>CATEGORY</th><th>VOLUME</th><th>MATCH RATE</th><th>AVG CPA</th><th>QUALITY</th><th>TREND</th></tr></thead>
+              <tbody>
+                ${networkData.map(p => `
+                  <tr class="clickable" onclick="RoktAds.toast('Viewing ${p.name} details...','info')">
+                    <td class="campaign-name">${p.name}</td>
+                    <td><span class="badge badge-gray">${p.category}</span></td>
+                    <td class="mono">${p.volume}</td>
+                    <td class="mono">${p.matchRate}</td>
+                    <td class="mono">${p.avgCPA}</td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:6px">
+                        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;max-width:60px">
+                          <div style="width:${p.quality}%;height:100%;background:${p.quality >= 80 ? 'var(--positive)' : p.quality >= 60 ? 'var(--warning)' : 'var(--negative)'};border-radius:3px"></div>
+                        </div>
+                        <span class="mono" style="font-size:10px">${p.quality}</span>
+                      </div>
+                    </td>
+                    <td style="color:${p.trend === 'up' ? 'var(--positive)' : 'var(--negative)'}">${p.trend === 'up' ? '↑ Improving' : '↓ Declining'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- AI Recommendations for Network -->
+        <div class="ai-analysis-card">
+          <div class="ai-analysis-header">
+            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+            AI Network Recommendations
+          </div>
+          <div class="ai-suggestions-list">
+            <div class="ai-suggestion-item">
+              <span class="ai-suggestion-icon">🎯</span>
+              <div class="ai-suggestion-body">
+                <div class="ai-suggestion-text">Ticketmaster and LiveNation have the highest match rates. Increasing bid allocation by 15% on these partners could yield +22% more conversions at similar CPA.</div>
+                <div class="ai-suggestion-impact">Est. +$12K weekly conversions value</div>
+              </div>
+              <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Adjusting partner allocation...','success')">Apply</button>
+            </div>
+            <div class="ai-suggestion-item">
+              <span class="ai-suggestion-icon">⚠️</span>
+              <div class="ai-suggestion-body">
+                <div class="ai-suggestion-text">Shutterfly quality score is declining. Consider pausing or reducing bids until match rate stabilizes.</div>
+                <div class="ai-suggestion-impact">Current quality: 62 → was 78 last month</div>
+              </div>
+              <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Reducing Shutterfly bids...','success')">Reduce Bids</button>
+            </div>
+            <div class="ai-suggestion-item">
+              <span class="ai-suggestion-icon">📊</span>
+              <div class="ai-suggestion-body">
+                <div class="ai-suggestion-text">Based on 8-week forecast, total spend will reach $${fmtNum(Math.round(spendForecast.reduce((s,v) => s+v, 0)))} with an estimated ${fmtNum(Math.round(convForecast.reduce((s,v) => s+v, 0)))} conversions. Current trajectory meets portfolio CPA targets.</div>
+                <div class="ai-suggestion-impact">On track for quarterly goals</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenario Planner -->
+        <div class="card" style="margin-top:var(--space-4)">
+          <div class="card-header">
+            <h3 class="card-title">🔮 Scenario Planner</h3>
+            <span style="font-size:11px;color:var(--text-tertiary)">Adjust parameters to model outcomes</span>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)">
+              <div class="form-group">
+                <label class="form-label">Budget Change</label>
+                <select class="form-select" onchange="RoktAds.toast('Recalculating forecast...','info')">
+                  <option>No change</option>
+                  <option>+10% increase</option>
+                  <option>+20% increase</option>
+                  <option>+50% increase</option>
+                  <option>-10% decrease</option>
+                  <option>-20% decrease</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audience Expansion</label>
+                <select class="form-select" onchange="RoktAds.toast('Recalculating forecast...','info')">
+                  <option>Current audiences</option>
+                  <option>+LAL expansion (2x reach)</option>
+                  <option>+Behavioral targeting (3x reach)</option>
+                  <option>Broad targeting (5x reach)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">New Partners</label>
+                <select class="form-select" onchange="RoktAds.toast('Recalculating forecast...','info')">
+                  <option>Current partners only</option>
+                  <option>+2 high-quality partners</option>
+                  <option>+5 partners (mixed quality)</option>
+                  <option>Full network (all available)</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4)">
+              <button class="btn btn-primary btn-pill" onclick="RoktAds.toast('Scenario modeled — see updated forecasts above','success')">Run Scenario</button>
+              <button class="btn btn-ghost" onclick="RoktAds.toast('Scenario saved','info')">Save Scenario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    initAISparkles();
+  }
+
+  // ── Advertiser Profile ────────────────────────────────────
+  function renderAdvertiserProfile() {
+    currentView = 'advertiser-profile';
+    $$('.nav-item').forEach(item => item.classList.remove('active'));
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    // Get current advertiser
+    const adv = advertisers.find(a => a.id === selectedAdvertiser) || advertisers[0];
+    const advCampaigns = campaigns.filter(c => adv.campaigns.includes(c.id));
+    const activeCamps = advCampaigns.filter(c => c.status === 'active');
+    const totalSpend = advCampaigns.reduce((s,c) => s + c.spend, 0);
+    const totalConv = advCampaigns.reduce((s,c) => s + c.conversions, 0);
+    const avgCPA = activeCamps.length ? (activeCamps.reduce((s,c) => s + c.cpa, 0) / activeCamps.length) : 0;
+    const avgROAS = activeCamps.length ? (activeCamps.reduce((s,c) => s + c.roas, 0) / activeCamps.length) : 0;
+
+    // Mock industry data
+    const industryMap = { 'Disney+': 'Entertainment & Streaming', 'Capital One': 'Financial Services', 'Hulu': 'Entertainment & Streaming', 'True Classic': 'D2C Retail & Fashion', 'PayPal': 'Fintech & Payments', 'Audible': 'Media & Publishing' };
+    const verticalMap = { 'Disney+': 'OTT Streaming', 'Capital One': 'Credit Cards', 'Hulu': 'OTT Streaming', 'True Classic': 'Apparel', 'PayPal': 'Digital Payments', 'Audible': 'Audiobooks' };
+    const industry = industryMap[adv.name] || 'Technology';
+    const vertical = verticalMap[adv.name] || 'General';
+
+    // Mock industry benchmarks
+    const benchmarks = {
+      avgCPA: { yours: avgCPA, industry: avgCPA * (1.1 + Math.random() * 0.3), label: 'CPA' },
+      avgCVR: { yours: activeCamps.length ? (activeCamps.reduce((s,c) => s + c.cvr, 0) / activeCamps.length) : 0, industry: 42.5, label: 'CVR' },
+      avgRefRate: { yours: activeCamps.length ? (activeCamps.reduce((s,c) => s + c.ctr, 0) / activeCamps.length) : 0, industry: 6.8, label: 'Ref. Rate' },
+    };
+
+    content.innerHTML = `
+      <div class="view" style="padding:var(--space-4) var(--space-6)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-5)">
+          <div style="display:flex;align-items:center;gap:var(--space-4)">
+            <button class="btn btn-xs btn-ghost" onclick="location.hash='dashboard'">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+            </button>
+            <div style="width:56px;height:56px;border-radius:var(--radius-2xl);background:${adv.color};display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:18px">${adv.avatar}</div>
+            <div>
+              <h1 style="font-size:22px;font-weight:800;margin:0">${adv.name}</h1>
+              <div style="display:flex;gap:var(--space-2);margin-top:4px">
+                <span class="badge badge-gray">${industry}</span>
+                <span class="badge badge-blue">${vertical}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Editing advertiser profile...','info')">✏️ Edit Profile</button>
+            <button class="btn btn-xs btn-primary btn-pill" onclick="location.hash='builder'">+ New Campaign</button>
+          </div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="cfull-kpi-strip" style="margin-bottom:var(--space-5)">
+          ${[
+            { l: 'Total Spend', v: '$' + fmtNum(totalSpend), sub: advCampaigns.length + ' campaigns' },
+            { l: 'Active Campaigns', v: String(activeCamps.length), sub: 'of ' + advCampaigns.length + ' total' },
+            { l: 'Total Conversions', v: fmtNum(totalConv), sub: 'All-time' },
+            { l: 'Avg. CPA', v: '$' + avgCPA.toFixed(2), sub: 'Active campaigns', hero: true },
+            { l: 'Avg. ROAS', v: avgROAS.toFixed(1) + 'x', sub: 'Return on ad spend' },
+            { l: 'Account Health', v: Math.round((activeCamps.reduce((s,c) => s + c.aiHealthScore, 0) / (activeCamps.length || 1))) + '/100', sub: 'AI health score', color: 'var(--positive)' },
+          ].map(m => `
+            <div class="cfull-kpi ${m.hero ? 'cfull-kpi--hero' : ''}">
+              <div class="cfull-kpi-label">${m.l}</div>
+              <div class="cfull-kpi-value mono" ${m.color ? `style="color:${m.color}"` : ''}>${m.v}</div>
+              <div class="cfull-kpi-sub">${m.sub}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:var(--space-4)">
+          <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+            <!-- Industry Benchmarks -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">📊 Industry Benchmarks — ${vertical}</h3></div>
+              <div class="card-body">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)">
+                  ${Object.values(benchmarks).map(b => `
+                    <div style="padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border);text-align:center">
+                      <div style="font-size:10px;text-transform:uppercase;color:var(--text-tertiary);letter-spacing:0.05em;margin-bottom:6px">${b.label}</div>
+                      <div style="display:flex;justify-content:center;gap:var(--space-4);margin-bottom:6px">
+                        <div>
+                          <div class="mono" style="font-size:16px;font-weight:700;color:${b.yours <= b.industry ? 'var(--positive)' : 'var(--negative)'}">${b.label === 'CPA' ? '$' + b.yours.toFixed(2) : b.yours.toFixed(1) + '%'}</div>
+                          <div style="font-size:9px;color:var(--text-tertiary)">You</div>
+                        </div>
+                        <div style="width:1px;background:var(--border)"></div>
+                        <div>
+                          <div class="mono" style="font-size:16px;font-weight:700;color:var(--text-tertiary)">${b.label === 'CPA' ? '$' + b.industry.toFixed(2) : b.industry.toFixed(1) + '%'}</div>
+                          <div style="font-size:9px;color:var(--text-tertiary)">Industry</div>
+                        </div>
+                      </div>
+                      <div style="font-size:10px;color:${b.yours <= b.industry ? 'var(--positive)' : 'var(--negative)'}">${b.yours <= b.industry ? '✅ Outperforming' : '⚠️ Below average'}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Performance -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Campaign Performance</h3></div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead><tr><th>CAMPAIGN</th><th>STATUS</th><th>SPEND</th><th>CPA</th><th>CONV.</th><th>ROAS</th><th>AI SCORE</th></tr></thead>
+                  <tbody>
+                    ${advCampaigns.map(c => `
+                      <tr class="clickable" onclick="location.hash='campaign/${c.id}'">
+                        <td class="campaign-name">${c.name}</td>
+                        <td><span class="badge badge-${c.status === 'active' ? 'positive' : c.status === 'paused' ? 'warning' : 'gray'}">${capitalize(c.status)}</span></td>
+                        <td class="mono">$${fmtNum(c.spend)}</td>
+                        <td class="mono">$${c.cpa.toFixed(2)}</td>
+                        <td class="mono">${fmtNum(c.conversions)}</td>
+                        <td class="mono">${c.roas}x</td>
+                        <td><span class="mono" style="color:${c.aiHealthScore >= 80 ? 'var(--positive)' : c.aiHealthScore >= 60 ? 'var(--warning)' : 'var(--negative)'}">${c.aiHealthScore}</span></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="ai-analysis-card">
+              <div class="ai-analysis-header">
+                <svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
+                AI Advertiser Insights
+              </div>
+              <div class="ai-suggestions-list">
+                <div class="ai-suggestion-item">
+                  <span class="ai-suggestion-icon">📈</span>
+                  <div class="ai-suggestion-body">
+                    <div class="ai-suggestion-text">${adv.name}'s CPA is ${benchmarks.avgCPA.yours <= benchmarks.avgCPA.industry ? 'outperforming' : 'underperforming'} the ${vertical} industry average by ${Math.abs(((benchmarks.avgCPA.yours / benchmarks.avgCPA.industry) - 1) * 100).toFixed(0)}%. ${benchmarks.avgCPA.yours <= benchmarks.avgCPA.industry ? 'Excellent performance — consider scaling budget.' : 'Consider creative refresh and audience optimization.'}</div>
+                    <div class="ai-suggestion-impact">Industry benchmark: $${benchmarks.avgCPA.industry.toFixed(2)} CPA</div>
+                  </div>
+                </div>
+                <div class="ai-suggestion-item">
+                  <span class="ai-suggestion-icon">🎯</span>
+                  <div class="ai-suggestion-body">
+                    <div class="ai-suggestion-text">Similar ${vertical} advertisers on Rokt average ${Math.round(3 + Math.random() * 4)} active campaigns. ${activeCamps.length < 3 ? 'You have room to expand your campaign portfolio for better optimization.' : 'Your campaign count is well-positioned for the vertical.'}</div>
+                    <div class="ai-suggestion-impact">Comparable advertisers: ${Math.round(5 + Math.random() * 8)} on platform</div>
+                  </div>
+                </div>
+                <div class="ai-suggestion-item">
+                  <span class="ai-suggestion-icon">🌐</span>
+                  <div class="ai-suggestion-body">
+                    <div class="ai-suggestion-text">Top-performing partners for ${industry}: Ticketmaster (92% quality), Booking.com (88%), and Fanatics (85%). Consider increasing allocation to high-quality entertainment partners.</div>
+                    <div class="ai-suggestion-impact">Network optimization opportunity</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+            <!-- Advertiser Details -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Profile Details</h3></div>
+              <div class="card-body">
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:12px">
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Industry</span><span>${industry}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Vertical</span><span>${vertical}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Account Tier</span><span class="badge badge-wine">Enterprise</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Region</span><span>North America</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Currency</span><span>USD</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Timezone</span><span>America/New_York</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">Onboarded</span><span>2025-08-15</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text-tertiary)">AM</span><span>Sarah Chen</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Quick Actions</h3></div>
+              <div class="card-body">
+                <button class="btn btn-xs btn-primary btn-pill" style="width:100%;margin-bottom:var(--space-2)" onclick="location.hash='builder'">+ New Campaign</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%;margin-bottom:var(--space-2)" onclick="location.hash='network-analyzer'">🔮 Network Analyzer</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%;margin-bottom:var(--space-2)" onclick="location.hash='intelligence'">📊 Intelligence</button>
+                <button class="btn btn-xs btn-ghost" style="width:100%" onclick="RoktAds.toast('Generating account report...','info')">📋 Account Report</button>
+              </div>
+            </div>
+
+            <!-- Integration Status -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Integration Status</h3></div>
+              <div class="card-body">
+                ${[
+                  { name: 'Web SDK', status: true },
+                  { name: 'CAPI', status: true },
+                  { name: 'CDP Integration', status: adv.name === 'Disney+' || adv.name === 'Capital One' },
+                  { name: 'Product Feed', status: adv.name === 'True Classic' },
+                ].map(i => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:12px">
+                    <span>${i.name}</span>
+                    <span style="color:${i.status ? 'var(--positive)' : 'var(--text-tertiary)'}">${i.status ? '✅ Connected' : '⚪ Not connected'}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    initAISparkles();
   }
 
   // ── Creatives ──────────────────────────────────────────────
@@ -2855,8 +3962,11 @@ const RoktAds = (() => {
         const filtered = getFilteredCreatives().filter(cr => cr.name.toLowerCase().includes(query));
         list.innerHTML = filtered.map((cr, i) => `
           <div class="creative-lib-item ${i === 0 ? 'active' : ''}" onclick="RoktAds.selectCreative('${cr.id}')">
-            <div class="creative-lib-name">${cr.name}</div>
-            <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
+            <div style="flex:1;min-width:0">
+              <div class="creative-lib-name">${cr.name}</div>
+              <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
+            </div>
+            <button class="btn btn-xs btn-ghost" style="flex-shrink:0;padding:2px 6px;font-size:10px" onclick="event.stopPropagation();location.hash='creative/${cr.id}'" title="Full view">⛶</button>
           </div>
         `).join('');
       });
@@ -2869,8 +3979,11 @@ const RoktAds = (() => {
     const filtered = getFilteredCreatives();
     list.innerHTML = filtered.map((cr, i) => `
       <div class="creative-lib-item ${i === 0 ? 'active' : ''}" onclick="RoktAds.selectCreative('${cr.id}')">
-        <div class="creative-lib-name">${cr.name}</div>
-        <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
+        <div style="flex:1;min-width:0">
+          <div class="creative-lib-name">${cr.name}</div>
+          <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
+        </div>
+        <button class="btn btn-xs btn-ghost" style="flex-shrink:0;padding:2px 6px;font-size:10px" onclick="event.stopPropagation();location.hash='creative/${cr.id}'" title="Full view">⛶</button>
       </div>
     `).join('');
     // Auto-select first creative if available
@@ -3125,7 +4238,7 @@ const RoktAds = (() => {
     let compareSvg = '';
     if (reportCompare) { compareSvg = `<polyline points="${toLine(data.prevSpend, maxSpend)}" fill="none" stroke="var(--beetroot)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/><polyline points="${toLine(data.prevConversions, maxConv)}" fill="none" stroke="var(--positive)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/>`; }
     // Rokt connector symbol for data points
-    const roktSymbol = `<symbol id="rDot" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>`;
+    const roktSymbol = `<symbol id="rDot" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="currentColor"/></symbol>`;
     function roktDot(x, y, color, size) { size = size || 10; return `<use href="#rDot" x="${x - size/2}" y="${y - size/2}" width="${size}" height="${size}" color="${color}"/>`; }
     svg.innerHTML = `<defs>${roktSymbol}<linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><line x1="0" y1="${chartH}" x2="${w}" y2="${chartH}" stroke="var(--border)" stroke-width="0.5"/><line x1="0" y1="${chartH/2}" x2="${w}" y2="${chartH/2}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/><polygon points="${spendLine} ${n > 1 ? w : w/2},${chartH} 0,${chartH}" fill="url(#reportGrad)"/>${compareSvg}<polyline points="${spendLine}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/><polyline points="${convLine}" fill="none" stroke="var(--positive)" stroke-width="2" stroke-linecap="round" stroke-dasharray="6,3" class="chart-line-animate"/><polyline points="${cpaLine}" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2,3" class="chart-line-animate"/>${data.spend.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxSpend)*(chartH-pad), 'var(--beetroot)', 10)).join('')}${data.conversions.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxConv)*(chartH-pad), 'var(--positive)', 9)).join('')}${data.cpa.map((v, i) => roktDot(n > 1 ? i*w/(n-1) : w/2, chartH - (v/maxCPA)*(chartH-pad), 'var(--warning)', 8)).join('')}${data.labels.map((l, i) => `<text x="${n > 1 ? i*w/(n-1) : w/2}" y="${chartH + 18}" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)" ${n === 1 ? 'text-anchor="middle"' : ''}>${l}</text>`).join('')}`;
     renderDimensionBreakdown();
@@ -4178,43 +5291,118 @@ const RoktAds = (() => {
       case 'editMeasurementGroup': {
         const mg = measurementGroups.find(m => m.name === id);
         if (!mg) return;
+        // Find campaigns that reference this MG
+        const linkedCampaigns = campaigns.filter(c =>
+          c.name.toLowerCase().includes(mg.campaigns.toLowerCase().split(' ')[0])
+        );
+        const events = [
+          { name: mg.event, primary: true, enabled: true },
+          { name: 'Page View', primary: false, enabled: true },
+          { name: 'Add to Cart', primary: false, enabled: mg.event === 'Purchase' },
+          { name: 'Initiate Checkout', primary: false, enabled: mg.event === 'Purchase' },
+          { name: 'Lead Submit', primary: false, enabled: mg.event === 'Application Submit' || mg.event === 'Signup' },
+        ];
+        const identifiers = [
+          { name: 'Email (SHA-256)', active: true, impact: 'High' },
+          { name: 'Phone (SHA-256)', active: mg.integrationHealth > 7, impact: 'Medium' },
+          { name: 'Rokt Click ID', active: true, impact: 'High' },
+          { name: 'IP Address', active: true, impact: 'Low' },
+          { name: 'Transaction ID', active: true, impact: 'Medium' },
+          { name: 'User Agent', active: true, impact: 'Low' },
+        ];
+        content.classList.add('modal-lg');
         html = `
           <div class="modal-header">
-            <h2>Edit Measurement Group</h2>
+            <h2>${mg.name}</h2>
             <button class="modal-close" onclick="RoktAds.closeModal()">✕</button>
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label class="form-label">Group Name</label>
-              <input type="text" class="form-input" value="${mg.name}">
+          <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-5)">
+              <div>
+                <div class="form-group">
+                  <label class="form-label">Group Name</label>
+                  <input type="text" class="form-input" value="${mg.name}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Status</label>
+                  <div><span class="badge badge-${mg.status === 'Live' ? 'positive' : 'gray'}" style="font-size:12px;padding:4px 12px">${mg.status}</span></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--space-4);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border)">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-tertiary);margin-bottom:8px">Integration Health</div>
+                <div style="font-size:42px;font-weight:800;color:${mg.integrationHealth >= 7 ? 'var(--positive)' : mg.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.integrationHealth}</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">out of 10</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Linked Campaigns</label>
-              <input type="text" class="form-input" value="${mg.campaigns}" disabled>
-              <div class="form-hint">Change linked campaigns via the campaign builder</div>
+
+            <div style="margin-bottom:var(--space-5)">
+              <h3 style="font-size:13px;font-weight:600;margin-bottom:var(--space-3)">📋 Applied To (${linkedCampaigns.length} campaign${linkedCampaigns.length !== 1 ? 's' : ''})</h3>
+              <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                ${linkedCampaigns.length > 0 ? linkedCampaigns.map(lc => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border)">
+                    <div>
+                      <div style="font-weight:600;font-size:12px">${lc.name}</div>
+                      <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">CPA: $${lc.cpa.toFixed(2)} · ${fmtNum(lc.conversions)} conversions · ${lc.objective}</div>
+                    </div>
+                    <span class="badge badge-${lc.status === 'active' ? 'positive' : lc.status === 'paused' ? 'warning' : 'gray'}">${capitalize(lc.status)}</span>
+                  </div>
+                `).join('') : '<div style="padding:var(--space-3);color:var(--text-tertiary);font-size:12px">No campaigns linked yet</div>'}
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Optimization Event</label>
-              <select class="form-select">
-                ${['Purchase', 'Signup', 'Application Submit', 'Add to Cart', 'Custom Event'].map(e => `<option ${mg.event === e ? 'selected' : ''}>${e}</option>`).join('')}
-              </select>
+
+            <div style="margin-bottom:var(--space-5)">
+              <h3 style="font-size:13px;font-weight:600;margin-bottom:var(--space-3)">⚡ Conversion Events</h3>
+              <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                ${events.map(ev => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid ${ev.primary ? 'var(--beetroot)' : 'var(--border)'}">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span style="font-size:12px;font-weight:${ev.primary ? '600' : '400'}">${ev.name}</span>
+                      ${ev.primary ? '<span class="badge badge-wine" style="font-size:9px">Primary</span>' : ''}
+                    </div>
+                    <label style="position:relative;display:inline-block;width:36px;height:20px;cursor:pointer">
+                      <input type="checkbox" ${ev.enabled ? 'checked' : ''} style="opacity:0;width:0;height:0" onchange="RoktAds.toast('Event ${ev.enabled ? 'disabled' : 'enabled'}','info')">
+                      <span style="position:absolute;inset:0;background:${ev.enabled ? 'var(--beetroot)' : 'var(--border)'};border-radius:10px;transition:0.2s"><span style="position:absolute;top:2px;left:${ev.enabled ? '18px' : '2px'};width:16px;height:16px;background:white;border-radius:50%;transition:0.2s"></span></span>
+                    </label>
+                  </div>
+                `).join('')}
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Attribution Window</label>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                <div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-5)">
+              <div>
+                <h3 style="font-size:13px;font-weight:600;margin-bottom:var(--space-3)">🔗 Attribution Window</h3>
+                <div class="form-group">
                   <label class="form-label" style="font-size:10px;text-transform:none">Click-through</label>
                   <select class="form-select"><option ${mg.window.includes('7C') ? 'selected' : ''}>7 days</option><option ${mg.window.includes('14C') ? 'selected' : ''}>14 days</option><option ${mg.window.includes('30C') ? 'selected' : ''}>30 days</option></select>
                 </div>
-                <div>
+                <div class="form-group">
                   <label class="form-label" style="font-size:10px;text-transform:none">View-through</label>
                   <select class="form-select"><option ${mg.window.includes('1V') ? 'selected' : ''}>1 day</option><option>None</option></select>
                 </div>
               </div>
+              <div>
+                <h3 style="font-size:13px;font-weight:600;margin-bottom:var(--space-3)">🔑 Identifier Coverage</h3>
+                ${identifiers.map(ident => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:12px">
+                    <span style="display:flex;align-items:center;gap:6px">
+                      <span style="width:6px;height:6px;border-radius:50%;background:${ident.active ? 'var(--positive)' : 'var(--negative)'}"></span>
+                      ${ident.name}
+                    </span>
+                    <span class="badge badge-${ident.impact === 'High' ? 'wine' : ident.impact === 'Medium' ? 'blue' : 'gray'}" style="font-size:9px">${ident.impact}</span>
+                  </div>
+                `).join('')}
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Integration Health</label>
-              <div style="font-size:18px;font-weight:700;color:${mg.integrationHealth >= 7 ? 'var(--positive)' : mg.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${mg.integrationHealth} / 10</div>
+
+            <div>
+              <h3 style="font-size:13px;font-weight:600;margin-bottom:var(--space-3)">💡 Recommendations</h3>
+              ${mg.integrationHealth < 8 ? `
+                <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+                  ${mg.integrationHealth < 7 ? '<div style="display:flex;gap:8px;align-items:flex-start;padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border);font-size:12px"><span>📱</span><div style="flex:1"><div>Add phone number (SHA-256) to integration</div><div style="font-size:11px;color:var(--beetroot);margin-top:2px">+1.5 Health points</div></div><button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast(\'Phone integration guide sent\',\'success\')">Setup Guide</button></div>' : ''}
+                  <div style="display:flex;gap:8px;align-items:flex-start;padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border);font-size:12px"><span>📧</span><div style="flex:1"><div>Increase email coverage from 78% to 90%</div><div style="font-size:11px;color:var(--beetroot);margin-top:2px">+0.3 Health points</div></div><button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast(\'Email coverage guide sent\',\'success\')">Improve</button></div>
+                  <div style="display:flex;gap:8px;align-items:flex-start;padding:var(--space-3);background:var(--surface-dark);border-radius:var(--radius-lg);border:1px solid var(--border);font-size:12px"><span>🔗</span><div style="flex:1"><div>Enable server-side Click ID passback</div><div style="font-size:11px;color:var(--beetroot);margin-top:2px">+0.5 Health points</div></div><button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast(\'Passback configuration guide sent\',\'success\')">Configure</button></div>
+                </div>
+              ` : '<div style="padding:var(--space-3);font-size:12px;color:var(--positive)">✅ Integration is healthy — no immediate actions needed</div>'}
             </div>
           </div>
           <div class="modal-footer">
@@ -4385,6 +5573,8 @@ const RoktAds = (() => {
         { icon: '🏷️', text: 'Offers', action: () => navigate('offers') },
         { icon: '🎯', text: 'Measurement', action: () => navigate('measurement') },
         { icon: '⚙️', text: 'Account', action: () => navigate('account') },
+        { icon: '🔮', text: 'Network Analyzer', action: () => { location.hash = 'network-analyzer'; } },
+        { icon: '👤', text: 'Advertiser Profile', action: () => { location.hash = 'advertiser-profile'; } },
       ]},
       { group: 'Actions', items: [
         { icon: '➕', text: 'New Campaign', shortcut: 'N C', action: () => navigate('builder') },
@@ -4482,6 +5672,40 @@ const RoktAds = (() => {
   function closeCommandPalette() {
     const overlay = document.getElementById('commandPalette');
     if (overlay) overlay.classList.remove('open');
+    if (document.activeElement) document.activeElement.blur();
+  }
+
+  // ── Shortcut Overlay Badges on Nav Items ─────────────────
+  const navShortcutMap = {
+    g: [
+      { view: 'dashboard', key: 'D' },
+      { view: 'campaigns', key: 'C' },
+      { view: 'audiences', key: 'A' },
+      { view: 'intelligence', key: 'R' },
+      { view: 'measurement', key: 'M' },
+      { view: 'offers', key: 'O' },
+      { view: 'creatives', key: 'E' },
+      { view: 'account', key: 'S' },
+    ],
+  };
+
+  function showShortcutOverlay(key) {
+    if (document.querySelector('.shortcut-overlay-badge')) return; // already showing
+    const shortcuts = navShortcutMap[key];
+    if (!shortcuts) return;
+    shortcuts.forEach(s => {
+      const navItem = document.querySelector(`.nav-item[data-view="${s.view}"]`);
+      if (!navItem) return;
+      const badge = document.createElement('span');
+      badge.className = 'shortcut-overlay-badge';
+      badge.innerHTML = `<kbd>${s.key}</kbd>`;
+      navItem.style.position = 'relative';
+      navItem.appendChild(badge);
+    });
+  }
+
+  function hideShortcutOverlay() {
+    document.querySelectorAll('.shortcut-overlay-badge').forEach(b => b.remove());
   }
 
   // ── Keyboard Chord Indicator ──────────────────────────────
@@ -4491,13 +5715,16 @@ const RoktAds = (() => {
     keyChordEl = document.createElement('div');
     keyChordEl.className = 'key-chord-indicator';
     const labels = { g: 'Go to...', n: 'New...' };
-    const hints = { g: [{key:'D',label:'Dashboard'},{key:'C',label:'Campaigns'},{key:'A',label:'Audiences'},{key:'R',label:'Intelligence'}], n: [{key:'C',label:'Campaign'},{key:'A',label:'Audience'}] };
+    const hints = { g: [{key:'D',label:'Dashboard'},{key:'C',label:'Campaigns'},{key:'A',label:'Audiences'},{key:'R',label:'Intelligence'},{key:'M',label:'Measurement'},{key:'O',label:'Offers'},{key:'E',label:'Creatives'},{key:'S',label:'Settings'}], n: [{key:'C',label:'Campaign'},{key:'A',label:'Audience'}] };
     const hintHtml = (hints[key] || []).map(h => `<span><kbd>${h.key}</kbd>${h.label}</span>`).join('');
     keyChordEl.innerHTML = `<kbd>${key.toUpperCase()}</kbd> ${labels[key] || '...'}<div class="chord-hints">${hintHtml}</div>`;
     document.body.appendChild(keyChordEl);
+    // Also show badges on nav items
+    showShortcutOverlay(key);
   }
   function hideKeyChord() {
     if (keyChordEl) { keyChordEl.remove(); keyChordEl = null; }
+    hideShortcutOverlay();
   }
 
   // ── Keyboard Shortcuts ────────────────────────────────────
@@ -4565,6 +5792,10 @@ const RoktAds = (() => {
           'gc': () => { location.hash = 'campaigns'; },
           'ga': () => { location.hash = 'audiences'; },
           'gr': () => { location.hash = 'intelligence'; },
+          'gm': () => { location.hash = 'measurement'; },
+          'go': () => { location.hash = 'offers'; },
+          'ge': () => { location.hash = 'creatives'; },
+          'gs': () => { location.hash = 'account'; },
           'nc': () => { location.hash = 'builder'; },
           'na': () => { navigate('audiences'); setTimeout(() => openModal('buildAudience'), 200); },
         };
@@ -4592,12 +5823,13 @@ const RoktAds = (() => {
       }
 
       if (e.key === 'g' || e.key === 'n') {
+        e.preventDefault();
         pendingKey = e.key;
         showKeyChord(e.key);
         pendingKeyTimer = setTimeout(() => {
           pendingKey = null;
           hideKeyChord();
-        }, 500);
+        }, 1500);
         return;
       }
     });
@@ -4765,6 +5997,24 @@ const RoktAds = (() => {
       if (hash.startsWith('campaign/')) {
         const cId = hash.split('/')[1];
         renderCampaignFullView(cId);
+        return;
+      }
+      if (hash.startsWith('audience/')) {
+        const aId = hash.split('/')[1];
+        renderAudienceFullView(aId);
+        return;
+      }
+      if (hash.startsWith('creative/')) {
+        const crId = hash.split('/')[1];
+        renderCreativeFullView(crId);
+        return;
+      }
+      if (hash === 'advertiser-profile') {
+        renderAdvertiserProfile();
+        return;
+      }
+      if (hash === 'network-analyzer') {
+        renderNetworkAnalyzer();
         return;
       }
       navigate(hash);
@@ -5413,6 +6663,7 @@ const RoktAds = (() => {
     // Phase 3: Visual UI upgrades
     toggleAIDrawer,
     generateAIAnalysis,
+    openDeepDive,
     initAISparkles,
     // Phase 4: Workflow completeness
     switchDetailTab,
@@ -5426,6 +6677,10 @@ const RoktAds = (() => {
     showAdvertiserPicker,
     toggleFavorite,
     renderCampaignFullView,
+    renderAudienceFullView,
+    renderCreativeFullView,
+    renderNetworkAnalyzer,
+    renderAdvertiserProfile,
     // Entity CRUD & utilities
     createAudience,
     createLookalike,
