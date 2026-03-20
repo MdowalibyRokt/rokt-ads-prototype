@@ -379,13 +379,17 @@
             <div class="card-body">
               <div class="pacing-chart">
                 <svg width="100%" height="200" viewBox="0 0 700 200" preserveAspectRatio="none" id="pacingChartSvg">
+                  <defs>
+                    <symbol id="roktDot" viewBox="0 0 12 12"><path d="M1.5 2h3l2 4-2 4h-3l2-4-2-4z" fill="currentColor"/><path d="M5.5 2h3l-2 4 2 4h-3l-2-4 2-4z" fill="currentColor" opacity="0.65"/></symbol>
+                    <symbol id="roktDotGreen" viewBox="0 0 12 12"><path d="M1.5 2h3l2 4-2 4h-3l2-4-2-4z" fill="currentColor"/><path d="M5.5 2h3l-2 4 2 4h-3l-2-4 2-4z" fill="currentColor" opacity="0.65"/></symbol>
+                  </defs>
                   <line x1="0" y1="20" x2="700" y2="20" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
                   <text x="705" y="24" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">$25K</text>
                   <polyline points="0,180 100,155 200,130 300,108 400,85 500,62 600,40 700,18" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
                   <defs><linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0.02"/></linearGradient></defs>
                   <polygon points="0,180 100,160 200,138 300,118 400,90 400,200 0,200" fill="url(#spendGrad)"/>
                   <polyline points="0,180 100,160 200,138 300,118 400,90" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
-                  <circle cx="100" cy="160" r="3" fill="var(--beetroot)"/><circle cx="200" cy="138" r="3" fill="var(--beetroot)"/><circle cx="300" cy="118" r="3" fill="var(--beetroot)"/><circle cx="400" cy="90" r="4" fill="var(--beetroot)" stroke="var(--surface-white)" stroke-width="2"/>
+                  <use href="#roktDot" x="94" y="154" width="12" height="12" color="var(--beetroot)"/><use href="#roktDot" x="194" y="132" width="12" height="12" color="var(--beetroot)"/><use href="#roktDot" x="294" y="112" width="12" height="12" color="var(--beetroot)"/><use href="#roktDot" x="394" y="84" width="14" height="14" color="var(--beetroot)"/>
                   <text x="0" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Mon</text>
                   <text x="100" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Tue</text>
                   <text x="200" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Wed</text>
