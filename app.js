@@ -155,17 +155,43 @@ const RoktAds = (() => {
   let reportGroupBy = 'none';
   let reportFilters = { campaign: null, adset: null, creative: null, status: null };
   let placeholderInterval = null;
-  let selectedAdvertiser = 'all'; // 'all' or advertiser name
+  let selectedAdvertiser = null; // null = picker shown, 'all' = portfolio, or advertiser id
   let accountSwitcherOpen = false;
 
   const advertisers = [
-    { name: 'Disney+', initials: 'D+', campaigns: ['c1'] },
-    { name: 'Capital One', initials: 'CO', campaigns: ['c2'] },
-    { name: 'Hulu', initials: 'Hu', campaigns: ['c3'] },
-    { name: 'True Classic', initials: 'TC', campaigns: ['c4'] },
-    { name: 'PayPal', initials: 'PP', campaigns: ['c5'] },
-    { name: 'Audible', initials: 'Au', campaigns: ['c6'] },
+    { id: 'adv1', name: 'Disney+', avatar: 'D+', color: '#1A3B8F', campaigns: ['c1'], spend: 42150, activeCampaigns: 2, favorited: true, lastAccessed: '2026-03-20' },
+    { id: 'adv2', name: 'Capital One', avatar: 'CO', color: '#C41230', campaigns: ['c2'], spend: 31200, activeCampaigns: 1, favorited: true, lastAccessed: '2026-03-19' },
+    { id: 'adv3', name: 'Hulu', avatar: 'Hu', color: '#1CE783', campaigns: ['c3'], spend: 18700, activeCampaigns: 1, favorited: false, lastAccessed: '2026-03-18' },
+    { id: 'adv4', name: 'True Classic', avatar: 'TC', color: '#2D3748', campaigns: ['c4'], spend: 22400, activeCampaigns: 1, favorited: false, lastAccessed: '2026-03-17' },
+    { id: 'adv5', name: 'PayPal', avatar: 'PP', color: '#003087', campaigns: ['c5'], spend: 8900, activeCampaigns: 0, favorited: false, lastAccessed: '2026-03-15' },
+    { id: 'adv6', name: 'Audible', avatar: 'Au', color: '#F7991C', campaigns: ['c6'], spend: 0, activeCampaigns: 0, favorited: false, lastAccessed: '2026-03-10' },
   ];
+
+  // Advertiser ↔ creative/audience/offer mappings
+  const advertiserCreatives = {
+    adv1: ['cr1', 'cr2', 'cr3'],
+    adv2: ['cr4'],
+    adv3: ['cr5'],
+    adv4: ['cr6'],
+    adv5: ['cr7'],
+    adv6: ['cr8'],
+  };
+  const advertiserOffers = {
+    adv1: ['o1', 'o2'],
+    adv2: ['o3'],
+    adv3: ['o4'],
+    adv4: ['o5'],
+    adv5: ['o6'],
+    adv6: [],
+  };
+  const advertiserAudiences = {
+    adv1: ['a1', 'a2', 'a3', 'a10'],
+    adv2: ['a5', 'a6'],
+    adv3: ['a2', 'a3'],
+    adv4: ['a4', 'a6', 'a8'],
+    adv5: ['a6', 'a7'],
+    adv6: ['a9', 'a11', 'a12'],
+  };
 
   const defaultBuilderData = {
     // Mode
@@ -249,6 +275,8 @@ const RoktAds = (() => {
 
   // ── Router ─────────────────────────────────────────────────
   function navigate(view) {
+    // Don't navigate if no advertiser is selected (picker is showing)
+    if (!selectedAdvertiser) return;
     if (view === currentView && view !== 'builder') return;
     currentView = view;
 
@@ -302,6 +330,9 @@ const RoktAds = (() => {
 
       // Show context alert for certain views
       showContextAlert(view);
+
+      // Update status bar with filtered data
+      updateStatusBar();
 
       // Init AI sparkles on relevant views
       initAISparkles();
@@ -384,7 +415,7 @@ const RoktAds = (() => {
   function renderDashboardHealth() {
     const grid = document.getElementById('campaignHealthGrid');
     if (!grid) return;
-    grid.innerHTML = campaigns.filter(c => c.status !== 'draft').map(c => `
+    grid.innerHTML = getFilteredCampaigns().filter(c => c.status !== 'draft').map(c => `
       <div class="health-card" onclick="location.hash='campaigns';setTimeout(()=>RoktAds.openCampaignDetail('${c.id}'),200)">
         <div class="health-card-header">
           <div class="health-card-name">
@@ -2086,6 +2117,7 @@ const RoktAds = (() => {
   // ── Audiences ──────────────────────────────────────────────
   function initAudiences() {
     renderAudienceGrid();
+    updateAudienceCounts();
 
     // Type filters
     $$('#audienceTypeFilters .filter-pill').forEach(pill => {
@@ -2104,8 +2136,8 @@ const RoktAds = (() => {
   function renderAudienceGrid(type = 'all', search = '') {
     const grid = document.getElementById('audienceGrid');
     if (!grid) return;
-    let filtered = audiences;
-    if (type && type !== 'all') filtered = audiences.filter(a => a.type === type);
+    let filtered = getFilteredAudiences();
+    if (type && type !== 'all') filtered = filtered.filter(a => a.type === type);
     if (search) filtered = filtered.filter(a => a.name.toLowerCase().includes(search.toLowerCase()));
 
     grid.innerHTML = filtered.map(a => `
@@ -2150,12 +2182,15 @@ const RoktAds = (() => {
   function renderCreativeLibrary() {
     const list = document.getElementById('creativeLibraryList');
     if (!list) return;
-    list.innerHTML = creatives.map((cr, i) => `
+    const filtered = getFilteredCreatives();
+    list.innerHTML = filtered.map((cr, i) => `
       <div class="creative-lib-item ${i === 0 ? 'active' : ''}" onclick="RoktAds.selectCreative('${cr.id}')">
         <div class="creative-lib-name">${cr.name}</div>
         <div class="creative-lib-meta">${cr.format} · CoPI: ${cr.copi}%</div>
       </div>
     `).join('');
+    // Auto-select first creative if available
+    if (filtered.length > 0) selectCreative(filtered[0].id);
   }
 
   const creativeDetails = {
@@ -2512,7 +2547,8 @@ const RoktAds = (() => {
   function renderOffers() {
     const grid = document.getElementById('offerGrid');
     if (!grid) return;
-    grid.innerHTML = offers.map(o => `
+    const filteredOffers = getFilteredOffers();
+    grid.innerHTML = filteredOffers.map(o => `
       <div class="offer-card" onclick="RoktAds.openModal('editOffer', '${o.id}')">
         <button class="hover-edit-btn" onclick="event.stopPropagation();RoktAds.editOffer('${o.id}')" title="Edit">✏️</button>
         <div class="offer-card-header">
@@ -4048,14 +4084,31 @@ const RoktAds = (() => {
       toggleAccountSwitcher();
     });
 
+    // Sidebar Switch Advertiser button
+    const switchAdvBtn = document.getElementById('sidebarSwitchAdv');
+    if (switchAdvBtn) switchAdvBtn.addEventListener('click', () => showAdvertiserPicker());
+
     // Init subsystems
     initKeyboardShortcuts();
     initAICopilot();
     initSearchPlaceholder();
 
-    // Initial route
-    handleRoute();
-    updateNavBadges();
+    // Show advertiser picker on boot (no advertiser selected yet)
+    if (!selectedAdvertiser) {
+      renderAdvertiserPicker();
+      // Wire picker search
+      const pickerSearch = document.getElementById('pickerSearch');
+      if (pickerSearch) {
+        pickerSearch.oninput = () => renderAdvertiserPicker(pickerSearch.value);
+      }
+    } else {
+      // If advertiser already set (e.g. reload), go directly to app
+      document.getElementById('advertiserPicker')?.classList.add('picker-hidden');
+      document.getElementById('app')?.classList.remove('app-hidden');
+      handleRoute();
+      updateNavBadges();
+      updateStatusBar();
+    }
   }
 
   // Boot
@@ -4124,30 +4177,44 @@ const RoktAds = (() => {
     const switcher = document.querySelector('.account-switcher');
     if (!switcher) return;
 
+    const currentAdv = getSelectedAdvertiserData();
     const dropdown = document.createElement('div');
     dropdown.className = 'account-switcher-dropdown';
+
+    // Current advertiser header
+    const headerName = currentAdv ? currentAdv.name : 'All Advertisers';
+    const headerAvatar = currentAdv ? currentAdv.avatar : 'RA';
+    const headerColor = currentAdv ? currentAdv.color : 'var(--beetroot)';
+
     dropdown.innerHTML = `
       <div class="account-switcher-header">
-        <div class="account-avatar-lg">RA</div>
+        <div class="account-avatar-lg" style="background:${headerColor}">${headerAvatar}</div>
         <div class="account-switcher-info">
-          <div class="account-name-lg">Rokt Ads Demo</div>
+          <div class="account-name-lg">${headerName}</div>
           <div class="account-id">ACC-2847291</div>
         </div>
       </div>
       <div class="account-switcher-section">
-        <div class="account-switcher-section-label">Advertisers</div>
-        <div class="advertiser-item ${selectedAdvertiser === 'all' ? 'active' : ''}" data-adv="all">
-          <div class="advertiser-avatar">All</div>
-          <span class="advertiser-name">All Advertisers</span>
-          ${selectedAdvertiser === 'all' ? '<span class="advertiser-check">&#10003;</span>' : ''}
-        </div>
-        ${advertisers.map(a => `
-          <div class="advertiser-item ${selectedAdvertiser === a.name ? 'active' : ''}" data-adv="${a.name}">
-            <div class="advertiser-avatar">${a.initials}</div>
+        <div class="account-switcher-section-label">Quick Switch</div>
+        ${selectedAdvertiser && selectedAdvertiser !== 'all' ? `
+          <div class="advertiser-item active" data-adv="${selectedAdvertiser}">
+            <div class="advertiser-avatar" style="background:${currentAdv ? currentAdv.color : ''}">${currentAdv ? currentAdv.avatar : ''}</div>
+            <span class="advertiser-name">${currentAdv ? currentAdv.name : ''}</span>
+            <span class="advertiser-check">&#10003;</span>
+          </div>
+          <div class="adv-divider"></div>
+        ` : ''}
+        ${advertisers.filter(a => a.id !== selectedAdvertiser).map(a => `
+          <div class="advertiser-item" data-adv="${a.id}">
+            <div class="advertiser-avatar" style="background:${a.color}">${a.avatar}</div>
             <span class="advertiser-name">${a.name}</span>
-            ${selectedAdvertiser === a.name ? '<span class="advertiser-check">&#10003;</span>' : ''}
+            ${a.favorited ? '<span class="adv-fav-star">&#9733;</span>' : ''}
           </div>
         `).join('')}
+        <div class="adv-divider"></div>
+        <div class="adv-view-all" data-adv="picker">
+          &#8592; View All Advertisers
+        </div>
       </div>
     `;
 
@@ -4156,22 +4223,20 @@ const RoktAds = (() => {
     // Wire click handlers
     dropdown.querySelectorAll('.advertiser-item').forEach(item => {
       item.addEventListener('click', () => {
-        const adv = item.dataset.adv;
-        selectedAdvertiser = adv;
+        const advId = item.dataset.adv;
         closeAccountSwitcher();
-        if (adv === 'all') {
-          toast('Showing all advertisers', 'info');
-        } else {
-          toast(`Switched to ${adv}`, 'success');
-        }
-        // Update account name in topbar
-        const nameEl = document.querySelector('.account-switcher-btn .account-name');
-        if (nameEl) nameEl.textContent = adv === 'all' ? 'Rokt Ads Demo' : adv;
-        // Re-render campaigns if on that view
-        if (currentView === 'campaigns') renderCampaignTable();
-        updateNavBadges();
+        switchAdvertiser(advId);
       });
     });
+
+    // View all advertisers -> show picker
+    const viewAllBtn = dropdown.querySelector('.adv-view-all');
+    if (viewAllBtn) {
+      viewAllBtn.addEventListener('click', () => {
+        closeAccountSwitcher();
+        showAdvertiserPicker();
+      });
+    }
 
     // Close on outside click
     setTimeout(() => {
@@ -4196,10 +4261,36 @@ const RoktAds = (() => {
   }
 
   function getFilteredCampaigns() {
-    if (selectedAdvertiser === 'all') return campaigns;
-    const advData = advertisers.find(a => a.name === selectedAdvertiser);
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') return campaigns;
+    const advData = advertisers.find(a => a.id === selectedAdvertiser);
     if (!advData) return campaigns;
     return campaigns.filter(c => advData.campaigns.includes(c.id));
+  }
+
+  function getFilteredAudiences() {
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') return audiences;
+    const ids = advertiserAudiences[selectedAdvertiser];
+    if (!ids) return audiences;
+    return audiences.filter(a => ids.includes(a.id));
+  }
+
+  function getFilteredCreatives() {
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') return creatives;
+    const ids = advertiserCreatives[selectedAdvertiser];
+    if (!ids) return creatives;
+    return creatives.filter(c => ids.includes(c.id));
+  }
+
+  function getFilteredOffers() {
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') return offers;
+    const ids = advertiserOffers[selectedAdvertiser];
+    if (!ids) return offers;
+    return offers.filter(o => ids.includes(o.id));
+  }
+
+  function getSelectedAdvertiserData() {
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') return null;
+    return advertisers.find(a => a.id === selectedAdvertiser) || null;
   }
 
 
@@ -4287,7 +4378,205 @@ const RoktAds = (() => {
   }
 
   function updateAudienceCounts() {
-    const cb = document.getElementById('audienceCount'); if (cb) cb.textContent = audiences.length;
+    const filtered = getFilteredAudiences();
+    const cb = document.getElementById('audienceCount'); if (cb) cb.textContent = filtered.length;
+  }
+
+  // ── Advertiser Picker ──────────────────────────────────────
+
+  function renderPickerCard(adv, showFav) {
+    const activeCamps = adv.campaigns.filter(cid => {
+      const c = campaigns.find(x => x.id === cid);
+      return c && c.status === 'active';
+    }).length;
+    const spendStr = adv.spend >= 1000 ? '$' + (adv.spend / 1000).toFixed(0) + 'K' : '$' + adv.spend;
+    const lastDate = adv.lastAccessed ? new Date(adv.lastAccessed) : null;
+    const lastStr = lastDate ? lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    return `
+      <div class="picker-card" data-adv-id="${adv.id}" onclick="RoktAds.switchAdvertiser('${adv.id}')">
+        <button class="picker-card-fav ${adv.favorited ? 'favorited' : ''}" onclick="event.stopPropagation();RoktAds.toggleFavorite('${adv.id}')" title="${adv.favorited ? 'Unfavorite' : 'Favorite'}">
+          ${adv.favorited ? '&#9733;' : '&#9734;'}
+        </button>
+        <div class="picker-card-header">
+          <div class="picker-card-avatar" style="background:${adv.color}">${adv.avatar}</div>
+          <div>
+            <div class="picker-card-name">${adv.name}</div>
+            <div class="picker-card-last-accessed">${lastStr ? 'Last accessed ' + lastStr : ''}</div>
+          </div>
+        </div>
+        <div class="picker-card-metrics">
+          <div class="picker-card-metric">
+            <span class="picker-card-metric-label">Active Campaigns</span>
+            <span class="picker-card-metric-value">${activeCamps}</span>
+          </div>
+          <div class="picker-card-metric">
+            <span class="picker-card-metric-label">Spend (MTD)</span>
+            <span class="picker-card-metric-value">${spendStr}</span>
+          </div>
+        </div>
+        <div class="picker-card-footer">
+          <div class="picker-card-status">
+            <span class="picker-card-status-dot ${activeCamps > 0 ? '' : 'inactive'}"></span>
+            ${activeCamps > 0 ? activeCamps + ' active' : 'No active campaigns'}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAdvertiserPicker(searchQuery) {
+    const picker = document.getElementById('advertiserPicker');
+    if (!picker) return;
+
+    const query = (searchQuery || '').toLowerCase();
+    const favGrid = document.getElementById('pickerFavGrid');
+    const recentGrid = document.getElementById('pickerRecentGrid');
+    const allGrid = document.getElementById('pickerAllGrid');
+    const favSection = document.getElementById('pickerFavorites');
+    const recentSection = document.getElementById('pickerRecent');
+
+    let all = [...advertisers];
+    if (query) all = all.filter(a => a.name.toLowerCase().includes(query));
+
+    // Portfolio card (first item in All section)
+    const portfolioCard = query ? '' : `
+      <div class="picker-card picker-card-portfolio" onclick="RoktAds.switchAdvertiser('all')">
+        <div class="picker-card-header">
+          <div class="picker-card-portfolio-icon">&#128202;</div>
+          <div>
+            <div class="picker-card-name">Portfolio Dashboard</div>
+            <div class="picker-card-last-accessed">View all advertisers at once</div>
+          </div>
+        </div>
+        <div class="picker-card-metrics">
+          <div class="picker-card-metric">
+            <span class="picker-card-metric-label">Advertisers</span>
+            <span class="picker-card-metric-value">${advertisers.length}</span>
+          </div>
+          <div class="picker-card-metric">
+            <span class="picker-card-metric-label">Total Spend</span>
+            <span class="picker-card-metric-value">$${Math.round(advertisers.reduce((s, a) => s + a.spend, 0) / 1000)}K</span>
+          </div>
+        </div>
+        <div class="picker-card-footer">
+          <div class="picker-card-status" style="color:var(--beetroot-light)">Internal multi-advertiser view</div>
+        </div>
+      </div>
+    `;
+
+    // Favorites
+    const favs = all.filter(a => a.favorited);
+    if (favSection) favSection.style.display = favs.length ? '' : 'none';
+    if (favGrid) favGrid.innerHTML = favs.map(a => renderPickerCard(a, true)).join('');
+
+    // Recent (sorted by lastAccessed, exclude favorites, top 3)
+    const recent = all.filter(a => !a.favorited).sort((a, b) => new Date(b.lastAccessed) - new Date(a.lastAccessed)).slice(0, 3);
+    if (recentSection) recentSection.style.display = recent.length ? '' : 'none';
+    if (recentGrid) recentGrid.innerHTML = recent.map(a => renderPickerCard(a)).join('');
+
+    // All
+    if (allGrid) allGrid.innerHTML = portfolioCard + all.map(a => renderPickerCard(a)).join('');
+  }
+
+  function showAdvertiserPicker() {
+    selectedAdvertiser = null;
+    const picker = document.getElementById('advertiserPicker');
+    const app = document.getElementById('app');
+    if (picker) {
+      picker.classList.remove('picker-hidden', 'picker-exit');
+      picker.style.display = '';
+    }
+    if (app) {
+      app.classList.add('app-hidden');
+      app.classList.remove('app-entering');
+    }
+    renderAdvertiserPicker();
+
+    // Wire search
+    const search = document.getElementById('pickerSearch');
+    if (search) {
+      search.value = '';
+      search.focus();
+      search.oninput = () => renderAdvertiserPicker(search.value);
+    }
+  }
+
+  function switchAdvertiser(advId) {
+    selectedAdvertiser = advId;
+    const adv = advertisers.find(a => a.id === advId);
+
+    // Update lastAccessed
+    if (adv) adv.lastAccessed = '2026-03-20';
+
+    // Animate picker out, app in
+    const picker = document.getElementById('advertiserPicker');
+    const app = document.getElementById('app');
+
+    if (picker) {
+      picker.classList.add('picker-exit');
+      setTimeout(() => {
+        picker.classList.add('picker-hidden');
+        picker.style.display = 'none';
+        picker.classList.remove('picker-exit');
+      }, 350);
+    }
+
+    // Update topbar immediately
+    updateTopbarAdvertiser();
+
+    if (app) {
+      setTimeout(() => {
+        app.classList.remove('app-hidden');
+        app.classList.add('app-entering');
+        setTimeout(() => app.classList.remove('app-entering'), 400);
+
+        // Re-render current view AFTER app is visible (force by resetting currentView)
+        const hash = location.hash.slice(1) || 'dashboard';
+        currentView = ''; // force re-render
+        navigate(hash);
+        updateNavBadges();
+        updateStatusBar();
+      }, 200);
+    }
+
+    if (advId === 'all') {
+      toast('Portfolio Dashboard — viewing all advertisers', 'info');
+    } else if (adv) {
+      toast(`Switched to ${adv.name}`, 'success');
+    }
+  }
+
+  function toggleFavorite(advId) {
+    const adv = advertisers.find(a => a.id === advId);
+    if (!adv) return;
+    adv.favorited = !adv.favorited;
+    renderAdvertiserPicker(document.getElementById('pickerSearch')?.value || '');
+    toast(adv.favorited ? `${adv.name} added to favorites` : `${adv.name} removed from favorites`, 'info');
+  }
+
+  function updateTopbarAdvertiser() {
+    const nameEl = document.querySelector('.account-switcher-btn .account-name');
+    const avatarEl = document.querySelector('.account-switcher-btn .account-avatar');
+    if (!selectedAdvertiser || selectedAdvertiser === 'all') {
+      if (nameEl) nameEl.textContent = 'Rokt Ads Demo';
+      if (avatarEl) { avatarEl.textContent = 'RA'; avatarEl.style.background = ''; }
+    } else {
+      const adv = advertisers.find(a => a.id === selectedAdvertiser);
+      if (adv) {
+        if (nameEl) nameEl.textContent = adv.name;
+        if (avatarEl) { avatarEl.textContent = adv.avatar; avatarEl.style.background = adv.color; }
+      }
+    }
+  }
+
+  function updateStatusBar() {
+    const fc = getFilteredCampaigns();
+    const active = fc.filter(c => c.status === 'active' || c.status === 'requires_action').length;
+    const spend = fc.reduce((s, c) => s + c.spend, 0);
+    const acEl = document.getElementById('activeCampaignCount');
+    const spEl = document.getElementById('todaySpend');
+    if (acEl) acEl.textContent = active;
+    if (spEl) spEl.textContent = spend.toLocaleString();
   }
 
   // ── Public API ─────────────────────────────────────────────
@@ -4329,11 +4618,14 @@ const RoktAds = (() => {
     // Phase 4: Workflow completeness
     switchDetailTab,
     selectSmartStrategy,
-    // Phase 5: Account switcher
+    // Phase 5: Account switcher & Advertiser picker
     toggleAccountSwitcher,
     closeAccountSwitcher,
     updateNavBadges,
     getFilteredCampaigns,
+    switchAdvertiser,
+    showAdvertiserPicker,
+    toggleFavorite,
     // Entity CRUD & utilities
     createAudience,
     createLookalike,

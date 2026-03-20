@@ -7,10 +7,43 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
-  <div class="app" id="app">
+  <!-- ========== ADVERTISER PICKER GATE ========== -->
+  <div class="advertiser-picker" id="advertiserPicker">
+    <div class="advertiser-picker-header">
+      <div class="picker-logo">
+        <svg width="36" height="36" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="6" fill="var(--beetroot)"/>
+          <path d="M7 9h6l4 5-4 5H7l4-5L7 9z" fill="white"/>
+          <path d="M15 9h6l-4 5 4 5h-6l-4-5 4-5z" fill="white" opacity="0.6"/>
+        </svg>
+        <span class="picker-logo-text">Rokt Ads</span>
+      </div>
+      <h1 class="picker-title">Select an Advertiser</h1>
+      <p class="picker-subtitle">Choose an advertiser account to manage</p>
+    </div>
+
+    <input type="text" class="picker-search" id="pickerSearch" placeholder="Search advertisers..." autocomplete="off">
+
+    <div class="picker-section" id="pickerFavorites">
+      <h3 class="picker-section-title"><span class="picker-star-icon">&#9733;</span> Favorites</h3>
+      <div class="picker-grid" id="pickerFavGrid"></div>
+    </div>
+
+    <div class="picker-section" id="pickerRecent">
+      <h3 class="picker-section-title">Recent</h3>
+      <div class="picker-grid" id="pickerRecentGrid"></div>
+    </div>
+
+    <div class="picker-section" id="pickerAll">
+      <h3 class="picker-section-title">All Advertisers</h3>
+      <div class="picker-grid" id="pickerAllGrid"></div>
+    </div>
+  </div>
+
+  <div class="app app-hidden" id="app">
     <!-- ========== SIDEBAR ========== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
@@ -71,6 +104,10 @@
         </a>
       </nav>
       <div class="sidebar-footer">
+        <button class="sidebar-switch-adv" id="sidebarSwitchAdv" title="Switch Advertiser">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4h14M1 8h14M1 12h14"/><circle cx="12" cy="4" r="2" fill="var(--beetroot)" stroke="var(--beetroot)"/></svg>
+          <span class="sidebar-switch-label">Switch Advertiser</span>
+        </button>
         <button class="theme-toggle" id="themeToggle" title="Toggle theme">
           <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"/></svg>
           <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none"><path d="M13.4 10.3A6 6 0 015.7 2.6 7 7 0 1013.4 10.3z"/></svg>
@@ -854,6 +891,6 @@
     </div>
   </template>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
