@@ -6,8 +6,8 @@
   <title>Rokt Ads — Media Buying Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <div class="app" id="app">
@@ -16,7 +16,7 @@
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect width="28" height="28" rx="6" fill="var(--wine)"/>
+            <rect width="28" height="28" rx="6" fill="var(--beetroot)"/>
             <path d="M7 9h6l4 5-4 5H7l4-5L7 9z" fill="white"/>
             <path d="M15 9h6l-4 5 4 5h-6l-4-5 4-5z" fill="white" opacity="0.6"/>
           </svg>
@@ -233,7 +233,7 @@
   <!-- AI Drawer -->
   <div class="ai-drawer" id="aiDrawer">
     <div class="ai-drawer-header">
-      <h3><svg width="18" height="18" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> AI Copilot</h3>
+      <h3><svg width="18" height="18" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> AI Copilot</h3>
       <button class="ai-drawer-close" id="aiDrawerClose"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
     </div>
     <div class="ai-messages" id="aiMessages">
@@ -288,7 +288,7 @@
           <div class="kpi-label">AVG CoPI <span class="kpi-badge">North Star</span></div>
           <div class="kpi-value"><span class="kpi-number" data-target="3.25">0</span><span class="kpi-suffix">%</span></div>
           <div class="kpi-meta">
-            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,10 6,9 12,11 18,8 24,7 30,6 36,5 42,5 48,4" fill="none" stroke="var(--wine)" stroke-width="1.5"/></svg>
+            <svg class="kpi-spark" width="48" height="16" viewBox="0 0 48 16"><polyline points="0,10 6,9 12,11 18,8 24,7 30,6 36,5 42,5 48,4" fill="none" stroke="var(--beetroot)" stroke-width="1.5"/></svg>
             <span class="trend-up">↑ 0.18pp</span>
             <span class="kpi-period">vs last 7d</span>
           </div>
@@ -332,10 +332,10 @@
                   <line x1="0" y1="20" x2="700" y2="20" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
                   <text x="705" y="24" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">$25K</text>
                   <polyline points="0,180 100,155 200,130 300,108 400,85 500,62 600,40 700,18" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
-                  <defs><linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--wine)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--wine)" stop-opacity="0.02"/></linearGradient></defs>
+                  <defs><linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.25"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0.02"/></linearGradient></defs>
                   <polygon points="0,180 100,160 200,138 300,118 400,90 400,200 0,200" fill="url(#spendGrad)"/>
-                  <polyline points="0,180 100,160 200,138 300,118 400,90" fill="none" stroke="var(--wine)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
-                  <circle cx="100" cy="160" r="3" fill="var(--wine)"/><circle cx="200" cy="138" r="3" fill="var(--wine)"/><circle cx="300" cy="118" r="3" fill="var(--wine)"/><circle cx="400" cy="90" r="4" fill="var(--wine)" stroke="var(--surface-white)" stroke-width="2"/>
+                  <polyline points="0,180 100,160 200,138 300,118 400,90" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+                  <circle cx="100" cy="160" r="3" fill="var(--beetroot)"/><circle cx="200" cy="138" r="3" fill="var(--beetroot)"/><circle cx="300" cy="118" r="3" fill="var(--beetroot)"/><circle cx="400" cy="90" r="4" fill="var(--beetroot)" stroke="var(--surface-white)" stroke-width="2"/>
                   <text x="0" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Mon</text>
                   <text x="100" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Tue</text>
                   <text x="200" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Wed</text>
@@ -345,7 +345,7 @@
                   <text x="600" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">Sun</text>
                 </svg>
                 <div class="pacing-legend">
-                  <span class="legend-item"><span class="legend-dot" style="background:var(--wine)"></span>Actual Spend</span>
+                  <span class="legend-item"><span class="legend-dot" style="background:var(--beetroot)"></span>Actual Spend</span>
                   <span class="legend-item"><span class="legend-dot" style="background:var(--text-tertiary);opacity:0.5"></span>Projected</span>
                   <span class="legend-item"><span class="legend-dot" style="background:var(--border)"></span>Budget Ceiling</span>
                 </div>
@@ -370,7 +370,7 @@
           <!-- AI Recommendations -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5" style="margin-right:6px;vertical-align:-2px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>AI Recommendations</h3>
+              <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="margin-right:6px;vertical-align:-2px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>AI Recommendations</h3>
               <span class="ai-badge">AI</span>
             </div>
             <div class="card-body" style="padding:var(--space-3)" id="aiRecsContainer"></div>
@@ -813,7 +813,7 @@
             <div class="billing-hero">
               <span class="form-label">March 2026 Spend</span>
               <div class="billing-amount mono">$89,421</div>
-              <div class="billing-bar"><div class="progress-bar" style="margin:var(--space-2) 0"><div class="progress-bar-fill" style="width:59%;background:var(--wine)"></div></div><span class="text-secondary" style="font-size:11px">$89K / $150K credit limit</span></div>
+              <div class="billing-bar"><div class="progress-bar" style="margin:var(--space-2) 0"><div class="progress-bar-fill" style="width:59%;background:var(--beetroot)"></div></div><span class="text-secondary" style="font-size:11px">$89K / $150K credit limit</span></div>
               <span class="badge badge-positive" style="margin-top:var(--space-2)">Current</span>
             </div>
           </div>
@@ -838,6 +838,6 @@
     </div>
   </template>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

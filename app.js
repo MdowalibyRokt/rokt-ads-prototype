@@ -332,7 +332,7 @@ const RoktAds = (() => {
           </div>
         </div>
         <div class="progress-bar" style="margin-top:8px">
-          <div class="progress-bar-fill" style="width:${Math.round(c.spend/c.budget*100)}%;background:${c.spend/c.budget > 0.85 ? 'var(--warning)' : 'var(--wine)'}"></div>
+          <div class="progress-bar-fill" style="width:${Math.round(c.spend/c.budget*100)}%;background:${c.spend/c.budget > 0.85 ? 'var(--warning)' : 'var(--beetroot)'}"></div>
         </div>
       </div>
     `).join('');
@@ -476,7 +476,7 @@ const RoktAds = (() => {
         <td>
           <div class="spend-bar-cell">
             <div class="spend-bar-text">$${fmtNum(c.spend)} / $${fmtNum(c.budget)}</div>
-            <div class="progress-bar"><div class="progress-bar-fill" style="width:${c.budget ? Math.round(c.spend/c.budget*100) : 0}%;background:${c.spend/c.budget > 0.85 ? 'var(--warning)' : 'var(--wine)'}"></div></div>
+            <div class="progress-bar"><div class="progress-bar-fill" style="width:${c.budget ? Math.round(c.spend/c.budget*100) : 0}%;background:${c.spend/c.budget > 0.85 ? 'var(--warning)' : 'var(--beetroot)'}"></div></div>
           </div>
         </td>
         <td>
@@ -584,16 +584,16 @@ const RoktAds = (() => {
             </div>
           </div>
           <svg width="100%" height="120" viewBox="0 0 460 120" preserveAspectRatio="none">
-            <defs><linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--wine)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--wine)" stop-opacity="0"/></linearGradient></defs>
+            <defs><linearGradient id="detailGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs>
             <polygon points="${c.dailySpend.map((v,i) => `${i*460/6},${120 - v/60}`).join(' ')} 460,120 0,120" fill="url(#detailGrad)"/>
-            <polyline points="${c.dailySpend.map((v,i) => `${i*460/6},${120 - v/60}`).join(' ')}" fill="none" stroke="var(--wine)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>
+            <polyline points="${c.dailySpend.map((v,i) => `${i*460/6},${120 - v/60}`).join(' ')}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>
           </svg>
         </div>
         <div class="detail-stats-grid">
           <div class="detail-stat-card">
             <div class="detail-stat-label">Budget Pacing</div>
             <div class="detail-stat-value">${Math.round(c.spend/c.budget*100)}%</div>
-            <div class="progress-bar" style="margin-top:8px"><div class="progress-bar-fill" style="width:${Math.round(c.spend/c.budget*100)}%;background:var(--wine)"></div></div>
+            <div class="progress-bar" style="margin-top:8px"><div class="progress-bar-fill" style="width:${Math.round(c.spend/c.budget*100)}%;background:var(--beetroot)"></div></div>
           </div>
           <div class="detail-stat-card">
             <div class="detail-stat-label">Smart Bidding</div>
@@ -876,7 +876,7 @@ const RoktAds = (() => {
     ];
     return `<div class="builder-content-inner">
       <div class="ai-hero-section">
-        <div class="ai-hero-label"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--wine)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> Describe your campaign</div>
+        <div class="ai-hero-label"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> Describe your campaign</div>
         <div class="ai-hero-input-wrap">
           <textarea id="aiCampaignPrompt" class="ai-hero-textarea" rows="2" placeholder="Acquire Disney+ subscribers at $7 CPA targeting women 25-45..." oninput="RoktAds.persistField('aiPrompt', this.value)">${builderData.aiPrompt}</textarea>
           <button class="ai-hero-generate-btn" onclick="RoktAds.generateAICampaign()">
@@ -1396,7 +1396,7 @@ const RoktAds = (() => {
     const overlay = document.createElement('div');
     overlay.className = 'confetti-overlay';
     document.body.appendChild(overlay);
-    const colors = ['#C43B52', '#E04D66', '#4D9AFF', '#34D399', '#FBBF24', '#E879F9'];
+    const colors = ['#C20075', '#D4338F', '#4D9AFF', '#34D399', '#FBBF24', '#D4338F'];
     for (let i = 0; i < 60; i++) {
       const piece = document.createElement('div');
       piece.className = 'confetti-piece';
@@ -1609,7 +1609,7 @@ const RoktAds = (() => {
     if (!legend || !svg) return;
 
     legend.innerHTML = [
-      { label: 'Spend', color: 'var(--wine)' },
+      { label: 'Spend', color: 'var(--beetroot)' },
       { label: 'Conversions', color: 'var(--positive)' },
       { label: 'CPA', color: 'var(--brand-blue)' },
     ].map(l => `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${l.color}"></span>${l.label}</span>`).join('');
@@ -1627,13 +1627,13 @@ const RoktAds = (() => {
       <line x1="0" y1="85" x2="700" y2="85" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
       <defs>
         <linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--wine)" stop-opacity="0.2"/>
-          <stop offset="100%" stop-color="var(--wine)" stop-opacity="0"/>
+          <stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/>
         </linearGradient>
       </defs>
       <polygon points="${spendLine} 700,170 0,170" fill="url(#reportGrad)"/>
-      <polyline points="${spendLine}" fill="none" stroke="var(--wine)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>
-      ${spendPoints.map((v, i) => `<circle cx="${i*700/6}" cy="${170 - (v/maxSpend)*150}" r="3" fill="var(--wine)"/>`).join('')}
+      <polyline points="${spendLine}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>
+      ${spendPoints.map((v, i) => `<circle cx="${i*700/6}" cy="${170 - (v/maxSpend)*150}" r="3" fill="var(--beetroot)"/>`).join('')}
       <text x="0" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Mon</text>
       <text x="${700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Tue</text>
       <text x="${2*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Wed</text>
@@ -2025,7 +2025,7 @@ const RoktAds = (() => {
             <div class="form-group">
               <label class="form-label">Lookalike Tier</label>
               <div class="lal-tiers">
-                <div class="lal-circle selected" style="width:100px;height:100px;background:var(--wine-subtle)" onclick="this.parentElement.querySelectorAll('.lal-circle').forEach(c=>c.classList.remove('selected'));this.classList.add('selected')">
+                <div class="lal-circle selected" style="width:100px;height:100px;background:var(--beetroot-subtle)" onclick="this.parentElement.querySelectorAll('.lal-circle').forEach(c=>c.classList.remove('selected'));this.classList.add('selected')">
                   <div><div class="lal-circle-label">Default</div><div class="lal-circle-size">~10M</div></div>
                 </div>
                 <div class="lal-circle" style="width:140px;height:140px;background:rgba(196,59,82,0.06)" onclick="this.parentElement.querySelectorAll('.lal-circle').forEach(c=>c.classList.remove('selected'));this.classList.add('selected')">

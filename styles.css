@@ -6,19 +6,16 @@
 
 /* --- Design Tokens --- */
 :root {
-  /* Brand Colors — Dramatic dark-first palette */
-  --wine: #C43B52;
-  --wine-light: #E04D66;
-  --wine-dark: #8B2635;
-  --wine-subtle: rgba(196, 59, 82, 0.12);
-  --wine-hover: rgba(196, 59, 82, 0.18);
-  --wine-glow: rgba(196, 59, 82, 0.25);
+  /* Brand Colors — Rokt official palette */
+  --beetroot: #C20075;
+  --beetroot-light: #D4338F;
+  --wine: #480029;
+  --beetroot-subtle: rgba(194, 0, 117, 0.12);
+  --beetroot-hover: rgba(194, 0, 117, 0.18);
+  --beetroot-glow: rgba(194, 0, 117, 0.25);
   --brand-blue: #4D9AFF;
   --brand-blue-light: #6BB3FF;
   --brand-blue-subtle: rgba(77, 154, 255, 0.12);
-  --accent-cyan: #22D3EE;
-  --accent-cyan-subtle: rgba(34, 211, 238, 0.12);
-  --accent-magenta: #E879F9;
 
   /* Dark-first Neutrals */
   --black: #000000;
@@ -54,8 +51,9 @@
   --glass-blur: blur(12px);
 
   /* Typography */
-  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --font-ui: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Roboto Mono', 'SF Mono', 'Fira Code', monospace;
+  --letter-spacing-tight: -0.02em;
   --font-size-xs: 0.6875rem;
   --font-size-sm: 0.75rem;
   --font-size-base: 0.8125rem;
@@ -99,7 +97,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  --shadow-glow-wine: 0 0 0 3px rgba(196, 59, 82, 0.25), 0 0 20px rgba(196, 59, 82, 0.1);
+  --shadow-glow-beetroot: 0 0 0 3px rgba(194, 0, 117, 0.25), 0 0 20px rgba(194, 0, 117, 0.1);
   --shadow-glow-blue: 0 0 0 3px rgba(77, 154, 255, 0.25), 0 0 20px rgba(77, 154, 255, 0.1);
 
   /* Animation */
@@ -122,12 +120,12 @@
 /* --- Light Mode --- */
 [data-theme="light"] {
   --surface-white: #FFFFFF;
-  --surface-light: #F7F8FA;
-  --surface-dark: #F0F2F5;
-  --surface-dark-hover: #E5E7EB;
-  --text-primary: #1A1A2E;
-  --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
+  --surface-light: #F8F8FA;
+  --surface-dark: #E0E0E4;
+  --surface-dark-hover: #D4D4D8;
+  --text-primary: #000000;
+  --text-secondary: #6E6E73;
+  --text-tertiary: #86868B;
   --border: rgba(0, 0, 0, 0.08);
   --border-light: rgba(0, 0, 0, 0.04);
   --glass-bg: rgba(255, 255, 255, 0.85);
@@ -159,7 +157,7 @@ a { color: var(--brand-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; font-size: inherit; color: inherit; }
 input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
-::selection { background: var(--wine-subtle); color: var(--wine-light); }
+::selection { background: var(--beetroot-subtle); color: var(--beetroot-light); }
 .mono { font-family: var(--font-mono); }
 .text-secondary { color: var(--text-secondary); }
 .text-tertiary { color: var(--text-tertiary); }
@@ -251,7 +249,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   text-decoration: none;
 }
 .nav-item.active {
-  background: rgba(196, 59, 82, 0.15);
+  background: rgba(194, 0, 117, 0.15);
   color: #FFFFFF;
 }
 .nav-item.active::before {
@@ -262,7 +260,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transform: translateY(-50%);
   width: 3px;
   height: 20px;
-  background: var(--wine);
+  background: var(--beetroot);
   border-radius: 0 3px 3px 0;
 }
 .nav-icon {
@@ -326,7 +324,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   width: 24px;
   height: 24px;
   border-radius: var(--radius-md);
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
   display: flex;
   align-items: center;
@@ -446,7 +444,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--wine), var(--wine-light));
+  background: linear-gradient(135deg, var(--beetroot), var(--beetroot-light));
   color: white;
   display: flex;
   align-items: center;
@@ -559,12 +557,12 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .btn-pill { border-radius: var(--radius-pill); }
 .btn-primary {
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
   border: 1px solid transparent;
 }
 .btn-primary:hover {
-  background: var(--wine-light);
+  background: var(--beetroot-light);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md), 0 0 0 1px rgba(196,59,82,0.2);
 }
@@ -604,7 +602,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .badge-warning { background: var(--warning-light); color: var(--warning); }
 .badge-negative { background: var(--negative-light); color: var(--negative); }
 .badge-info { background: var(--info-light); color: var(--info); }
-.badge-wine { background: var(--wine-subtle); color: var(--wine-light); }
+.badge-wine { background: var(--beetroot-subtle); color: var(--beetroot-light); }
 .badge-gray { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
 .badge-green { background: var(--positive-light); color: var(--positive); }
 .badge-amber { background: var(--warning-light); color: var(--warning); }
@@ -652,10 +650,10 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .kpi-card:hover { border-color: rgba(255,255,255,0.12); box-shadow: var(--shadow-sm); }
 .kpi-card--hero {
-  border-color: rgba(196, 59, 82, 0.2);
-  background: linear-gradient(135deg, var(--surface-white), rgba(196, 59, 82, 0.06));
+  border-color: rgba(194, 0, 117, 0.2);
+  background: linear-gradient(135deg, var(--surface-white), rgba(194, 0, 117, 0.06));
 }
-.kpi-card--hero:hover { border-color: rgba(196, 59, 82, 0.35); box-shadow: var(--shadow-glow-wine); }
+.kpi-card--hero:hover { border-color: rgba(194, 0, 117, 0.35); box-shadow: var(--shadow-glow-beetroot); }
 .kpi-label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -669,8 +667,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .kpi-badge {
   font-size: 9px;
-  background: var(--wine-subtle);
-  color: var(--wine-light);
+  background: var(--beetroot-subtle);
+  color: var(--beetroot-light);
   padding: 1px 6px;
   border-radius: var(--radius-pill);
   text-transform: none;
@@ -761,9 +759,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   border-color: var(--text-tertiary);
 }
 .filter-pill.active {
-  background: var(--wine-subtle);
-  color: var(--wine-light);
-  border-color: rgba(196, 59, 82, 0.3);
+  background: var(--beetroot-subtle);
+  color: var(--beetroot-light);
+  border-color: rgba(194, 0, 117, 0.3);
 }
 .filter-count {
   font-size: 10px;
@@ -796,8 +794,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .search-input::placeholder { color: var(--text-tertiary); }
 .search-input:focus {
-  border-color: var(--wine);
-  box-shadow: 0 0 0 2px rgba(196, 59, 82, 0.15);
+  border-color: var(--beetroot);
+  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
   background: var(--surface-white);
 }
 
@@ -840,8 +838,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .form-input::placeholder { color: var(--text-tertiary); }
 .form-input:focus {
-  border-color: var(--wine);
-  box-shadow: 0 0 0 2px rgba(196, 59, 82, 0.15);
+  border-color: var(--beetroot);
+  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
   background: var(--surface-white);
 }
 .form-textarea {
@@ -858,8 +856,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   line-height: var(--line-height-relaxed);
 }
 .form-textarea:focus {
-  border-color: var(--wine);
-  box-shadow: 0 0 0 2px rgba(196, 59, 82, 0.15);
+  border-color: var(--beetroot);
+  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
   background: var(--surface-white);
 }
 .form-select {
@@ -879,8 +877,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
 }
 .form-select:focus {
-  border-color: var(--wine);
-  box-shadow: 0 0 0 2px rgba(196, 59, 82, 0.15);
+  border-color: var(--beetroot);
+  box-shadow: 0 0 0 2px rgba(194, 0, 117, 0.15);
 }
 .form-select-sm {
   padding: 4px 28px 4px 10px;
@@ -899,8 +897,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   flex-shrink: 0;
 }
 .form-checkbox:checked {
-  background: var(--wine);
-  border-color: var(--wine);
+  background: var(--beetroot);
+  border-color: var(--beetroot);
 }
 .form-checkbox:checked::after {
   content: '';
@@ -924,8 +922,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
 }
 .table-checkbox:checked {
-  background: var(--wine);
-  border-color: var(--wine);
+  background: var(--beetroot);
+  border-color: var(--beetroot);
 }
 .form-hint {
   font-size: var(--font-size-xs);
@@ -954,7 +952,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .data-table th.sortable { cursor: pointer; }
 .data-table th.sortable:hover { color: var(--text-primary); }
 .data-table th .sort-arrow { font-size: 10px; margin-left: 2px; opacity: 0.5; }
-.data-table th.sorted .sort-arrow { opacity: 1; color: var(--wine); }
+.data-table th.sorted .sort-arrow { opacity: 1; color: var(--beetroot); }
 .data-table td {
   padding: 10px var(--space-3);
   border-bottom: 1px solid var(--border-light);
@@ -963,7 +961,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .data-table tr { transition: background var(--duration-fast); }
 .data-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
-.data-table tbody tr.selected { background: var(--wine-subtle); border-left: 2px solid var(--wine); }
+.data-table tbody tr.selected { background: var(--beetroot-subtle); border-left: 2px solid var(--beetroot); }
 .data-table tbody tr.clickable { cursor: pointer; }
 
 /* --- Progress Bar --- */
@@ -1073,7 +1071,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   flex-shrink: 0;
 }
 .command-item:hover .command-item-icon,
-.command-item.selected .command-item-icon { background: var(--wine-subtle); }
+.command-item.selected .command-item-icon { background: var(--beetroot-subtle); }
 .command-item-text { flex: 1; }
 .command-item-shortcut {
   font-family: var(--font-mono);
@@ -1233,7 +1231,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   right: var(--space-5);
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, var(--wine), var(--wine-light));
+  background: linear-gradient(135deg, var(--beetroot), var(--beetroot-light));
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1249,8 +1247,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   box-shadow: var(--shadow-xl);
 }
 @keyframes breathe {
-  0%, 100% { box-shadow: var(--shadow-lg), 0 0 0 0 rgba(196, 59, 82, 0.25); }
-  50% { box-shadow: var(--shadow-lg), 0 0 0 10px rgba(196, 59, 82, 0); }
+  0%, 100% { box-shadow: var(--shadow-lg), 0 0 0 0 rgba(194, 0, 117, 0.25); }
+  50% { box-shadow: var(--shadow-lg), 0 0 0 10px rgba(194, 0, 117, 0); }
 }
 
 .ai-drawer {
@@ -1308,7 +1306,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   border-top-left-radius: var(--radius-sm);
 }
 .ai-message.user {
-  background: var(--wine-subtle);
+  background: var(--beetroot-subtle);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-sm);
@@ -1337,11 +1335,11 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   font-size: var(--font-size-sm);
   outline: none;
 }
-.ai-input:focus { border-color: var(--wine); }
+.ai-input:focus { border-color: var(--beetroot); }
 .ai-send-btn {
   width: 32px;
   height: 32px;
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -1350,7 +1348,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   flex-shrink: 0;
   transition: background var(--duration-fast);
 }
-.ai-send-btn:hover { background: var(--wine-light); }
+.ai-send-btn:hover { background: var(--beetroot-light); }
 
 /* ============================================================
    MODAL SYSTEM
@@ -1450,7 +1448,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
 }
 .rule-group-logic button.active {
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
 }
 .rule-row {
@@ -1471,7 +1469,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   appearance: none;
 }
 .rule-row select { cursor: pointer; }
-.rule-row select:focus, .rule-row input:focus { border-color: var(--wine); }
+.rule-row select:focus, .rule-row input:focus { border-color: var(--beetroot); }
 .rule-remove {
   width: 28px;
   height: 28px;
@@ -1512,7 +1510,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .reach-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--wine), var(--positive));
+  background: linear-gradient(90deg, var(--beetroot), var(--positive));
   border-radius: 3px;
   transition: width var(--duration-slow) var(--ease-out);
 }
@@ -1576,7 +1574,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .health-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: var(--wine);
+  border-color: var(--beetroot);
 }
 .health-card-header {
   display: flex;
@@ -1704,7 +1702,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   align-items: flex-start;
   transition: all var(--duration-fast);
 }
-.insight-strip-card:hover { border-color: var(--wine); }
+.insight-strip-card:hover { border-color: var(--beetroot); }
 
 /* ============================================================
    CAMPAIGNS VIEW
@@ -1847,7 +1845,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
   cursor: pointer;
 }
-.metric-chip:hover { border-color: var(--wine); }
+.metric-chip:hover { border-color: var(--beetroot); }
 .metric-chip-label {
   font-size: 9px;
   color: var(--text-tertiary);
@@ -1879,8 +1877,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .detail-tab:hover { color: var(--text-primary); }
 .detail-tab.active {
-  color: var(--wine-light);
-  border-bottom-color: var(--wine);
+  color: var(--beetroot-light);
+  border-bottom-color: var(--beetroot);
 }
 .detail-tab-content {
   flex: 1;
@@ -1964,7 +1962,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   cursor: pointer;
   transition: all var(--duration-fast);
 }
-.creative-mini-card:hover { border-color: var(--wine); }
+.creative-mini-card:hover { border-color: var(--beetroot); }
 .creative-mini-name {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -2017,7 +2015,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
 }
 .builder-step.active {
-  color: var(--wine-light);
+  color: var(--beetroot-light);
 }
 .builder-step.completed {
   color: var(--positive);
@@ -2036,8 +2034,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-fast);
 }
 .builder-step.active .step-number {
-  background: var(--wine);
-  border-color: var(--wine);
+  background: var(--beetroot);
+  border-color: var(--beetroot);
   color: white;
 }
 .builder-step.completed .step-number {
@@ -2092,14 +2090,14 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all var(--duration-normal) var(--ease-out);
 }
 .objective-card:hover {
-  border-color: var(--wine);
+  border-color: var(--beetroot);
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
 }
 .objective-card.selected {
-  border-color: var(--wine);
-  background: rgba(196, 59, 82, 0.08);
-  box-shadow: var(--shadow-glow-wine);
+  border-color: var(--beetroot);
+  background: rgba(194, 0, 117, 0.08);
+  box-shadow: var(--shadow-glow-beetroot);
 }
 .objective-icon {
   font-size: 32px;
@@ -2148,8 +2146,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   color: white;
   border-radius: var(--radius-md);
 }
-.budget-bar-daily { background: var(--wine); }
-.budget-bar-lifetime { background: var(--wine-dark); opacity: 0.6; }
+.budget-bar-daily { background: var(--beetroot); }
+.budget-bar-lifetime { background: var(--wine); opacity: 0.6; }
 
 /* Strategy cards */
 .strategy-card {
@@ -2336,8 +2334,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   cursor: pointer;
   border: 2px solid transparent;
 }
-.lal-circle:hover { border-color: var(--wine); }
-.lal-circle.selected { border-color: var(--wine); box-shadow: var(--shadow-glow-wine); }
+.lal-circle:hover { border-color: var(--beetroot); }
+.lal-circle.selected { border-color: var(--beetroot); box-shadow: var(--shadow-glow-beetroot); }
 .lal-circle-label {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
@@ -2391,7 +2389,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   margin-bottom: 1px;
 }
 .creative-lib-item:hover { background: var(--surface-light); }
-.creative-lib-item.active { background: var(--wine-subtle); }
+.creative-lib-item.active { background: var(--beetroot-subtle); }
 .creative-lib-name {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -2545,7 +2543,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .preview-cta {
   width: 100%;
   padding: 10px;
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
   border-radius: var(--radius-pill);
   font-size: var(--font-size-sm);
@@ -2554,7 +2552,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   margin-bottom: var(--space-2);
   transition: background var(--duration-fast);
 }
-.preview-cta:hover { background: var(--wine-light); }
+.preview-cta:hover { background: var(--beetroot-light); }
 .preview-dismiss {
   width: 100%;
   padding: 6px;
@@ -2989,7 +2987,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   gap: 6px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  color: var(--wine);
+  color: var(--beetroot);
   margin-bottom: var(--space-3);
 }
 .ai-hero-input-wrap {
@@ -2998,7 +2996,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   margin: 0 auto;
   border-radius: var(--radius-xl);
   padding: 2px;
-  background: linear-gradient(135deg, var(--wine), var(--brand-blue), var(--wine));
+  background: linear-gradient(135deg, var(--beetroot), var(--brand-blue), var(--beetroot));
   background-size: 200% 200%;
   animation: glowShift 3s ease-in-out infinite;
 }
@@ -3033,13 +3031,13 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   font-size: 13px;
   font-weight: 600;
   color: white;
-  background: var(--wine);
+  background: var(--beetroot);
   border: none;
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 150ms;
 }
-.ai-hero-generate-btn:hover { background: var(--wine-dark); }
+.ai-hero-generate-btn:hover { background: var(--wine); }
 .ai-hero-hint {
   font-size: 11px;
   color: var(--text-tertiary);
@@ -3072,7 +3070,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 @keyframes cardPulse {
   0% { transform: scale(1); }
-  50% { transform: scale(1.04); box-shadow: 0 0 20px rgba(196, 59, 82, 0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 0 20px rgba(194, 0, 117, 0.3); }
   100% { transform: scale(1); }
 }
 
@@ -3139,8 +3137,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 }
 .bid-strategy-card:hover { border-color: var(--text-tertiary); }
 .bid-strategy-card.selected {
-  border-color: var(--wine);
-  background: var(--wine-subtle);
+  border-color: var(--beetroot);
+  background: var(--beetroot-subtle);
 }
 .bid-strategy-card-header {
   display: flex;
@@ -3152,7 +3150,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   font-size: 16px;
   color: var(--text-tertiary);
 }
-.bid-strategy-card.selected .bid-strategy-radio { color: var(--wine); }
+.bid-strategy-card.selected .bid-strategy-radio { color: var(--beetroot); }
 
 /* Targeting panel */
 .targeting-panel {
@@ -3219,8 +3217,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: border-color 150ms, background 150ms;
 }
 .image-upload-zone:hover {
-  border-color: var(--wine);
-  background: var(--wine-subtle);
+  border-color: var(--beetroot);
+  background: var(--beetroot-subtle);
 }
 .image-upload-zone.has-image {
   border-style: solid;
@@ -3239,16 +3237,16 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   margin-top: var(--space-4);
   font-size: 14px;
   font-weight: 600;
-  color: var(--wine);
-  background: var(--wine-subtle);
-  border: 1px solid rgba(196, 59, 82, 0.2);
+  color: var(--beetroot);
+  background: var(--beetroot-subtle);
+  border: 1px solid rgba(194, 0, 117, 0.2);
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all 150ms;
 }
 .ai-generate-btn-large:hover {
-  background: rgba(196, 59, 82, 0.15);
-  border-color: var(--wine);
+  background: rgba(194, 0, 117, 0.15);
+  border-color: var(--beetroot);
 }
 
 /* Preview phone frame */
@@ -3292,8 +3290,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   padding: 2px 8px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--wine);
-  background: var(--wine-subtle);
+  color: var(--beetroot);
+  background: var(--beetroot-subtle);
   border-radius: var(--radius-pill);
   margin-bottom: 8px;
 }
@@ -3322,7 +3320,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   font-size: 13px;
   font-weight: 700;
   color: white;
-  background: var(--wine);
+  background: var(--beetroot);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -3389,7 +3387,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   position: fixed;
   top: 0; left: var(--sidebar-width); right: 0; bottom: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(196, 59, 82, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(194, 0, 117, 0.06) 0%, transparent 50%),
     radial-gradient(ellipse 60% 40% at 80% 20%, rgba(77, 154, 255, 0.04) 0%, transparent 50%),
     radial-gradient(ellipse 50% 60% at 60% 80%, rgba(34, 211, 238, 0.03) 0%, transparent 50%);
   pointer-events: none;
@@ -3407,7 +3405,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .view-title,
 .detail-panel-title,
 .kpi-card--hero .kpi-value {
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--wine-light) 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--beetroot-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -3422,7 +3420,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(196, 59, 82, 0.08) 0%, transparent 60%);
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(194, 0, 117, 0.08) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 300ms;
   pointer-events: none;
@@ -3436,7 +3434,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(196, 59, 82, 0.06) 0%, transparent 60%);
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(194, 0, 117, 0.06) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 300ms;
   pointer-events: none;
@@ -3465,14 +3463,14 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 
 /* ── Sidebar Active Glow ── */
 .nav-item.active {
-  box-shadow: inset 3px 0 12px rgba(196, 59, 82, 0.08);
+  box-shadow: inset 3px 0 12px rgba(194, 0, 117, 0.08);
 }
 .nav-item.active::after {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 40px;
-  background: linear-gradient(90deg, rgba(196, 59, 82, 0.1), transparent);
+  background: linear-gradient(90deg, rgba(194, 0, 117, 0.1), transparent);
   pointer-events: none;
 }
 
@@ -3485,7 +3483,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   position: absolute;
   left: 0; right: 0; bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(196, 59, 82, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(194, 0, 117, 0.3), transparent);
   opacity: 0;
   transition: opacity 200ms;
 }
@@ -3515,8 +3513,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all 150ms;
 }
 .row-action-btn:hover {
-  background: var(--wine-subtle);
-  color: var(--wine-light);
+  background: var(--beetroot-subtle);
+  color: var(--beetroot-light);
 }
 .row-action-btn.danger:hover {
   background: var(--negative-light);
@@ -3573,10 +3571,10 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .key-chord-indicator kbd {
   display: inline-block;
   padding: 1px 6px;
-  background: var(--wine-subtle);
-  border: 1px solid rgba(196, 59, 82, 0.2);
+  background: var(--beetroot-subtle);
+  border: 1px solid rgba(194, 0, 117, 0.2);
   border-radius: 3px;
-  color: var(--wine-light);
+  color: var(--beetroot-light);
   font-size: var(--font-size-xs);
   margin-right: 4px;
 }
@@ -3629,8 +3627,8 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   background: var(--surface-white);
 }
 .ai-rec-card:hover {
-  border-color: var(--wine);
-  background: rgba(196, 59, 82, 0.03);
+  border-color: var(--beetroot);
+  background: rgba(194, 0, 117, 0.03);
 }
 .ai-rec-icon {
   width: 32px; height: 32px;
@@ -3751,12 +3749,12 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 /* ── Floating Label Animation ── */
 .form-input:focus + .form-hint,
 .form-select:focus + .form-hint {
-  color: var(--wine-light);
+  color: var(--beetroot-light);
 }
 
 /* ── Scrollbar Thumb Hover ── */
-.content::-webkit-scrollbar-thumb:hover { background: rgba(196, 59, 82, 0.25); }
-.content::-webkit-scrollbar-thumb:active { background: rgba(196, 59, 82, 0.35); }
+.content::-webkit-scrollbar-thumb:hover { background: rgba(194, 0, 117, 0.25); }
+.content::-webkit-scrollbar-thumb:active { background: rgba(194, 0, 117, 0.35); }
 
 /* ── Empty State Animations ── */
 .empty-state-icon {
@@ -3780,7 +3778,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .health-card:hover,
 .audience-card:hover,
 .experiment-card:hover {
-  border-image: linear-gradient(135deg, var(--wine), var(--brand-blue)) 1;
+  border-image: linear-gradient(135deg, var(--beetroot), var(--brand-blue)) 1;
   border-image-slice: 1;
   border-radius: var(--radius-xl);
 }
@@ -3789,7 +3787,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
 .health-card:hover,
 .audience-card:hover,
 .experiment-card:hover {
-  border-color: var(--wine);
+  border-color: var(--beetroot);
   outline: 1px solid rgba(77, 154, 255, 0.15);
   outline-offset: -1px;
 }
@@ -3805,7 +3803,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: fill 200ms;
 }
 .sidebar-logo:hover svg rect {
-  fill: var(--wine-light);
+  fill: var(--beetroot-light);
 }
 
 /* ── Metric Chip Hover Micro-interaction ── */
@@ -3848,13 +3846,13 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transition: all 150ms;
 }
 .ai-action-card:hover {
-  border-color: var(--wine);
-  background: var(--wine-subtle);
+  border-color: var(--beetroot);
+  background: var(--beetroot-subtle);
 }
 .ai-action-card .action-apply {
   margin-left: auto;
   padding: 2px 10px;
-  background: var(--wine);
+  background: var(--beetroot);
   color: white;
   border-radius: var(--radius-pill);
   font-size: 10px;
@@ -3940,9 +3938,9 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   transform: scale(1);
 }
 .hover-edit-btn:hover {
-  background: var(--wine-subtle);
-  border-color: var(--wine);
-  color: var(--wine-light);
+  background: var(--beetroot-subtle);
+  border-color: var(--beetroot);
+  color: var(--beetroot-light);
 }
 
 /* ── AI Creative Studio Badge ── */
@@ -3951,12 +3949,12 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: linear-gradient(135deg, rgba(196, 59, 82, 0.12), rgba(77, 154, 255, 0.12));
-  border: 1px solid rgba(196, 59, 82, 0.15);
+  background: linear-gradient(135deg, rgba(194, 0, 117, 0.12), rgba(77, 154, 255, 0.12));
+  border: 1px solid rgba(194, 0, 117, 0.15);
   border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: var(--font-weight-semibold);
-  color: var(--wine-light);
+  color: var(--beetroot-light);
 }
 
 /* ── Enhanced Command Palette ── */
@@ -4044,7 +4042,7 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   left: -100%;
   top: 0; bottom: 0;
   width: 200%;
-  background: linear-gradient(90deg, transparent, rgba(196, 59, 82, 0.04), transparent);
+  background: linear-gradient(90deg, transparent, rgba(194, 0, 117, 0.04), transparent);
   transition: left 400ms;
 }
 .nav-item:hover::before {
@@ -4066,13 +4064,13 @@ input, select, textarea { font-family: inherit; font-size: inherit; color: inher
   backdrop-filter: blur(24px);
 }
 .ai-drawer-header {
-  background: linear-gradient(180deg, rgba(196, 59, 82, 0.06), transparent);
+  background: linear-gradient(180deg, rgba(194, 0, 117, 0.06), transparent);
 }
 
 /* ── Search Trigger Focus Ring ── */
 .search-trigger:focus-within {
-  border-color: var(--wine);
-  box-shadow: var(--shadow-glow-wine);
+  border-color: var(--beetroot);
+  box-shadow: var(--shadow-glow-beetroot);
 }
 
 /* ============================================================
