@@ -130,13 +130,30 @@ const RoktAds = (() => {
     { name: 'True Classic DPA MG', campaigns: 'True Classic DPA', status: 'Live', event: 'Purchase', window: '7C', emq: 4.8 },
   ];
 
+  // ── Partners (Inventory) ──────────────────────────────────
+  const partners = [
+    { id: 'ptr1', name: 'Ticketmaster', category: 'Entertainment', volume: '2.4M txns/mo' },
+    { id: 'ptr2', name: 'Fanatics', category: 'Sports', volume: '1.8M txns/mo' },
+    { id: 'ptr3', name: 'Booking.com', category: 'Travel', volume: '3.1M txns/mo' },
+    { id: 'ptr4', name: 'StubHub', category: 'Entertainment', volume: '890K txns/mo' },
+    { id: 'ptr5', name: 'Grubhub', category: 'Food & Delivery', volume: '2.1M txns/mo' },
+    { id: 'ptr6', name: 'Shutterfly', category: 'Retail', volume: '650K txns/mo' },
+    { id: 'ptr7', name: 'Chewy', category: 'Pet & Retail', volume: '1.2M txns/mo' },
+    { id: 'ptr8', name: 'LiveNation', category: 'Entertainment', volume: '1.5M txns/mo' },
+  ];
+
   // ── State ──────────────────────────────────────────────────
   let currentView = '';
   let selectedCampaign = null;
+  let campaignMode = 'autopilot';
   let builderStep = 1;
   let pendingKey = null;
   let pendingKeyTimer = null;
   let reportSort = { col: null, dir: 'desc' };
+  let reportDateRange = '7d';
+  let reportCompare = false;
+  let reportGroupBy = 'none';
+  let reportFilters = { campaign: null, adset: null, creative: null, status: null };
   let placeholderInterval = null;
   let selectedAdvertiser = 'all'; // 'all' or advertiser name
   let accountSwitcherOpen = false;
@@ -151,6 +168,8 @@ const RoktAds = (() => {
   ];
 
   const defaultBuilderData = {
+    // Mode
+    mode: 'autopilot',
     // Step 1
     objective: '',
     aiPrompt: '',
@@ -201,6 +220,20 @@ const RoktAds = (() => {
     objectiveType: '',
     industryVerticals: [],
     placementType: '',
+    // Autopilot asset group fields
+    headlines: ['', '', ''],
+    descriptions: ['', ''],
+    autoCta: '',
+    autoImage: false,
+    conversionGoal: 'purchase',
+    audienceSignals: [],
+    interestKeywords: '',
+    // Inventory targeting (Advanced)
+    placementTypes: [],
+    selectedPartners: [],
+    positionTargeting: 'any',
+    freqCapDaily: 3,
+    freqCapLifetime: '',
   };
   let builderData = { ...defaultBuilderData };
 
@@ -550,7 +583,7 @@ const RoktAds = (() => {
           <div class="row-actions">
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toggleCampaignStatus('${c.id}')" title="${c.status === 'active' ? 'Pause' : 'Resume'}">${c.status === 'active' ? '⏸' : '▶'}</button>
             <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.openModal('editCampaign','${c.id}')" title="Edit">✏️</button>
-            <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.toast('Duplicated as draft','success')" title="Duplicate">⧉</button>
+            <button class="row-action-btn" onclick="event.stopPropagation();RoktAds.duplicateCampaign('${c.id}')" title="Duplicate">⧉</button>
           </div>
         </td>
       </tr>`;
@@ -598,7 +631,7 @@ const RoktAds = (() => {
         actionsDiv.innerHTML = `
           <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Opening resolution workflow...','info')">Resolve</button>
           <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">⏸ Pause</button>
-          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign archived','info')">Archive</button>`;
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.archiveCampaign('${c.id}')">Archive</button>`;
       } else if (c.status === 'draft') {
         actionsDiv.innerHTML = `
           <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Campaign published!','success')">Publish</button>
@@ -608,7 +641,7 @@ const RoktAds = (() => {
         actionsDiv.innerHTML = `
           <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">${c.status === 'active' ? '⏸ Pause' : c.status === 'paused' ? '▶ Resume' : '✏️ Edit'}</button>
           <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign', '${c.id}')">✏️ Edit</button>
-          <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Campaign archived','info')">Archive</button>`;
+          <button class="btn btn-xs btn-ghost" onclick="RoktAds.archiveCampaign('${c.id}')">Archive</button>`;
       }
       headerWrap.appendChild(actionsDiv);
     }
@@ -827,13 +860,17 @@ const RoktAds = (() => {
   // ── Campaign Builder ──────────────────────────────────────
   function initBuilder() {
     builderStep = 1;
-    builderData = { ...defaultBuilderData };
+    builderData = { ...defaultBuilderData, headlines: ['', '', ''], descriptions: ['', ''], audienceSignals: [], selectedPartners: [], placementTypes: [] };
+    campaignMode = 'autopilot';
+    builderData.mode = 'autopilot';
+    renderBuilderStepIndicator();
     updateBuilderStep();
 
     const nextBtn = document.getElementById('builderNext');
     const prevBtn = document.getElementById('builderPrev');
     if (nextBtn) nextBtn.addEventListener('click', () => {
-      if (builderStep < 5) {
+      const maxSteps = campaignMode === 'autopilot' ? 3 : 5;
+      if (builderStep < maxSteps) {
         builderStep++;
         updateBuilderStep();
       } else {
@@ -846,6 +883,80 @@ const RoktAds = (() => {
         updateBuilderStep();
       }
     });
+  }
+
+  function setCampaignMode(mode) {
+    campaignMode = mode;
+    builderData.mode = mode;
+    builderStep = 1;
+    renderBuilderStepIndicator();
+    updateBuilderStep();
+  }
+
+  function renderBuilderStepIndicator() {
+    const container = document.getElementById('builderSteps');
+    if (!container) return;
+    const steps = campaignMode === 'autopilot'
+      ? [{ n: 1, label: 'Goal' }, { n: 2, label: 'Assets' }, { n: 3, label: 'Launch' }]
+      : [{ n: 1, label: 'Goal' }, { n: 2, label: 'Setup' }, { n: 3, label: 'Strategy' }, { n: 4, label: 'Creative' }, { n: 5, label: 'Review' }];
+    container.innerHTML = steps.map((s, i) => {
+      let html = `<div class="builder-step ${s.n === builderStep ? 'active' : ''} ${s.n < builderStep ? 'completed' : ''}" data-step="${s.n}"><span class="step-number">${s.n}</span><span class="step-label">${s.label}</span></div>`;
+      if (i < steps.length - 1) html += '<div class="builder-step-line"></div>';
+      return html;
+    }).join('');
+  }
+
+  function calculateAdStrength() {
+    let score = 0;
+    // Headlines (25 pts for 3+)
+    const filledHeadlines = (builderData.headlines || []).filter(h => h.trim().length > 0).length;
+    if (filledHeadlines >= 3) score += 25;
+    else if (filledHeadlines >= 2) score += 15;
+    else if (filledHeadlines >= 1) score += 8;
+    // Descriptions (25 pts for 2+)
+    const filledDescs = (builderData.descriptions || []).filter(d => d.trim().length > 0).length;
+    if (filledDescs >= 2) score += 25;
+    else if (filledDescs >= 1) score += 12;
+    // CTA (25 pts)
+    if (campaignMode === 'autopilot') {
+      if ((builderData.autoCta || '').trim().length > 0) score += 25;
+    } else {
+      if ((builderData.creativeCta || '').trim().length > 0) score += 25;
+    }
+    // Image (25 pts)
+    if (builderData.autoImage) score += 25;
+    return Math.min(score, 100);
+  }
+
+  function renderAdStrengthGauge() {
+    const score = calculateAdStrength();
+    let level, cls;
+    if (score <= 25) { level = 'Poor'; cls = 'strength-poor'; }
+    else if (score <= 50) { level = 'Average'; cls = 'strength-average'; }
+    else if (score <= 75) { level = 'Good'; cls = 'strength-good'; }
+    else { level = 'Excellent'; cls = 'strength-excellent'; }
+
+    const filledHeadlines = (builderData.headlines || []).filter(h => h.trim().length > 0).length;
+    const filledDescs = (builderData.descriptions || []).filter(d => d.trim().length > 0).length;
+    const hasCta = campaignMode === 'autopilot' ? (builderData.autoCta || '').trim().length > 0 : (builderData.creativeCta || '').trim().length > 0;
+    const hasImage = builderData.autoImage;
+
+    return `
+      <div class="ad-strength-gauge">
+        <div class="ad-strength-header">
+          <span class="ad-strength-label">Ad Strength</span>
+          <span class="ad-strength-score" style="color:${score <= 25 ? 'var(--negative)' : score <= 50 ? 'var(--warning)' : score <= 75 ? '#EAB308' : 'var(--positive)'}">${level}</span>
+        </div>
+        <div class="ad-strength-bar">
+          <div class="ad-strength-bar-fill ${cls}" style="width:${score}%"></div>
+        </div>
+        <div class="ad-strength-tips">
+          <span class="ad-strength-tip ${filledHeadlines >= 3 ? 'filled' : ''}">${filledHeadlines >= 3 ? '&#10003;' : '+'} 3 Headlines</span>
+          <span class="ad-strength-tip ${filledDescs >= 2 ? 'filled' : ''}">${filledDescs >= 2 ? '&#10003;' : '+'} 2 Descriptions</span>
+          <span class="ad-strength-tip ${hasCta ? 'filled' : ''}">${hasCta ? '&#10003;' : '+'} CTA</span>
+          <span class="ad-strength-tip ${hasImage ? 'filled' : ''}">${hasImage ? '&#10003;' : '+'} Image</span>
+        </div>
+      </div>`;
   }
 
   // Helper: persist form field to builderData
@@ -973,53 +1084,66 @@ const RoktAds = (() => {
     if (placeholderInterval) { clearInterval(placeholderInterval); placeholderInterval = null; }
 
     // Update step indicators
-    $$('.builder-step').forEach(step => {
-      const s = parseInt(step.dataset.step);
-      step.classList.toggle('active', s === builderStep);
-      step.classList.toggle('completed', s < builderStep);
-    });
+    renderBuilderStepIndicator();
+
+    const maxSteps = campaignMode === 'autopilot' ? 3 : 5;
 
     // Update buttons
     const prevBtn = document.getElementById('builderPrev');
     const nextBtn = document.getElementById('builderNext');
     if (prevBtn) prevBtn.style.visibility = builderStep > 1 ? 'visible' : 'hidden';
-    if (nextBtn) nextBtn.innerHTML = builderStep === 5 ? '🚀 Launch Campaign' : 'Next →';
+    if (nextBtn) nextBtn.innerHTML = builderStep === maxSteps ? '🚀 Launch Campaign' : 'Next →';
 
     const content = document.getElementById('builderContent');
     if (!content) return;
 
-    if (builderStep === 1) {
-      content.innerHTML = renderBuilderStep1();
-      // Start cycling placeholder
-      const promptEl = document.getElementById('aiCampaignPrompt');
-      if (promptEl) {
-        const placeholders = [
-          'Acquire Disney+ subscribers at $7 CPA targeting women 25-45...',
-          'Drive app installs for my fintech app, $3 per install...',
-          'Maximize ROAS on my product catalog with dynamic ads...',
-          'Get email signups for our newsletter at scale, US only...',
-          'Promote free shipping offer to mobile users under $5 CPA...',
-        ];
-        let pIdx = 0;
-        placeholderInterval = setInterval(() => {
-          pIdx = (pIdx + 1) % placeholders.length;
-          promptEl.style.opacity = '0';
-          setTimeout(() => {
-            promptEl.placeholder = placeholders[pIdx];
-            promptEl.style.opacity = '1';
-          }, 200);
-        }, 3000);
-        promptEl.style.transition = 'opacity 200ms';
+    if (campaignMode === 'autopilot') {
+      if (builderStep === 1) {
+        content.innerHTML = renderBuilderStep1();
+        initStep1Placeholders();
+      } else if (builderStep === 2) {
+        content.innerHTML = renderAutopilotStep2();
+      } else if (builderStep === 3) {
+        content.innerHTML = renderAutopilotStep3();
       }
-    } else if (builderStep === 2) {
-      content.innerHTML = renderBuilderStep2();
-    } else if (builderStep === 3) {
-      content.innerHTML = renderBuilderStep3();
-    } else if (builderStep === 4) {
-      content.innerHTML = renderBuilderStep4();
-      initBuilderStep4Preview();
-    } else if (builderStep === 5) {
-      content.innerHTML = renderBuilderStep5();
+    } else {
+      // Advanced mode — original 5 steps
+      if (builderStep === 1) {
+        content.innerHTML = renderBuilderStep1();
+        initStep1Placeholders();
+      } else if (builderStep === 2) {
+        content.innerHTML = renderBuilderStep2();
+      } else if (builderStep === 3) {
+        content.innerHTML = renderBuilderStep3();
+      } else if (builderStep === 4) {
+        content.innerHTML = renderBuilderStep4();
+        initBuilderStep4Preview();
+      } else if (builderStep === 5) {
+        content.innerHTML = renderBuilderStep5();
+      }
+    }
+  }
+
+  function initStep1Placeholders() {
+    const promptEl = document.getElementById('aiCampaignPrompt');
+    if (promptEl) {
+      const placeholders = [
+        'Acquire Disney+ subscribers at $7 CPA targeting women 25-45...',
+        'Drive app installs for my fintech app, $3 per install...',
+        'Maximize ROAS on my product catalog with dynamic ads...',
+        'Get email signups for our newsletter at scale, US only...',
+        'Promote free shipping offer to mobile users under $5 CPA...',
+      ];
+      let pIdx = 0;
+      placeholderInterval = setInterval(() => {
+        pIdx = (pIdx + 1) % placeholders.length;
+        promptEl.style.opacity = '0';
+        setTimeout(() => {
+          promptEl.placeholder = placeholders[pIdx];
+          promptEl.style.opacity = '1';
+        }, 200);
+      }, 3000);
+      promptEl.style.transition = 'opacity 200ms';
     }
   }
 
@@ -1045,6 +1169,20 @@ const RoktAds = (() => {
       { id: 'phone', icon: '📞', title: 'Phone Lead', desc: 'Collect phone number leads' },
     ];
     return `<div class="builder-content-inner">
+      <div class="mode-selector">
+        <div class="mode-card ${campaignMode === 'autopilot' ? 'selected' : ''}" data-mode="autopilot" onclick="RoktAds.setCampaignMode('autopilot')">
+          <div class="mode-icon">&#10024;</div>
+          <div class="mode-title">Autopilot</div>
+          <div class="mode-desc">AI handles targeting, bidding, and placements. You provide creative assets and budget.</div>
+          <div class="mode-badge">Recommended</div>
+        </div>
+        <div class="mode-card ${campaignMode === 'advanced' ? 'selected' : ''}" data-mode="advanced" onclick="RoktAds.setCampaignMode('advanced')">
+          <div class="mode-icon">&#9889;</div>
+          <div class="mode-title">Advanced</div>
+          <div class="mode-desc">Full control over every setting. For experienced media buyers.</div>
+        </div>
+      </div>
+
       <div class="ai-hero-section">
         <div class="ai-hero-label"><svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> Describe your campaign</div>
         <div class="ai-hero-input-wrap">
@@ -1392,6 +1530,8 @@ const RoktAds = (() => {
         }).join('')}
         <button class="btn btn-ghost" onclick="RoktAds.addAdSet()" style="margin-top:8px">+ Add Another Ad Set</button>
       </div>
+
+      ${renderInventorySection()}
     </div>`;
   }
 
@@ -1504,6 +1644,8 @@ const RoktAds = (() => {
             <svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
             AI Generate 4 Variations
           </button>
+
+          ${renderAdStrengthGauge()}
         </div>
       </div>
 
@@ -1553,6 +1695,276 @@ const RoktAds = (() => {
       charCount.textContent = `${combined}/175`;
       charCount.className = 'char-counter' + (combined > 160 ? ' warning' : combined > 175 ? ' danger' : '');
     }
+  }
+
+  // ── Autopilot Step Renderers ──────────────────────────────
+
+  function renderAutopilotStep2() {
+    const hl = builderData.headlines || ['', '', ''];
+    const desc = builderData.descriptions || ['', ''];
+    return `<div class="builder-content-inner">
+      <h3 style="margin-bottom:4px">Asset Group</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Provide your creative assets, budget, and optional audience signals. AI will optimize everything else.</p>
+
+      <div class="asset-group">
+        <div class="builder-section">
+          <div class="builder-section-label">Budget & Goal</div>
+          <div class="form-row" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label class="form-label">Daily Budget</label>
+              <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${builderData.dailyCap}" placeholder="0" oninput="RoktAds.persistField('dailyCap', Number(this.value))"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Lifetime Budget</label>
+              <div class="input-prefix-wrap"><span class="input-prefix">$</span><input type="number" class="form-input mono" value="${builderData.lifetimeCap}" placeholder="0" oninput="RoktAds.persistField('lifetimeCap', Number(this.value))"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Conversion Goal</label>
+            <select class="form-select" onchange="RoktAds.persistField('conversionGoal', this.value)">
+              ${['purchase', 'signup', 'app_install', 'lead'].map(g => `<option value="${g}" ${builderData.conversionGoal === g ? 'selected' : ''}>${g === 'app_install' ? 'App Install' : g.charAt(0).toUpperCase() + g.slice(1)}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Creative Assets</div>
+          <div class="form-group">
+            <label class="form-label">Headlines (up to 3)</label>
+            <div class="headline-input-row">
+              ${hl.map((h, i) => `
+                <div class="headline-input-wrap">
+                  <input type="text" class="form-input" value="${h}" maxlength="30" placeholder="Headline ${i+1}${i === 0 ? ' (required)' : ' (optional)'}" oninput="RoktAds.persistField('headlines.${i}', this.value); document.getElementById('autoStrengthGauge').innerHTML = RoktAds.renderAdStrengthGaugeHTML()">
+                  <span class="char-counter-inline ${h.length > 25 ? 'warning' : ''}">${h.length}/30</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descriptions (up to 2)</label>
+            <div class="headline-input-row">
+              ${desc.map((d, i) => `
+                <div class="headline-input-wrap">
+                  <textarea class="form-textarea" rows="2" maxlength="90" placeholder="Description ${i+1}${i === 0 ? ' (required)' : ' (optional)'}" oninput="RoktAds.persistField('descriptions.${i}', this.value); document.getElementById('autoStrengthGauge').innerHTML = RoktAds.renderAdStrengthGaugeHTML()">${d}</textarea>
+                  <span class="char-counter-inline" style="top:12px;transform:none">${d.length}/90</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Call to Action</label>
+            <input type="text" class="form-input" value="${builderData.autoCta}" maxlength="20" placeholder="e.g. Start Free Trial" oninput="RoktAds.persistField('autoCta', this.value); document.getElementById('autoStrengthGauge').innerHTML = RoktAds.renderAdStrengthGaugeHTML()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Image</label>
+            <div class="image-upload-zone" id="imageUploadZone" onclick="RoktAds.simulateAutoImageUpload()">
+              ${builderData.autoImage
+                ? '<div style="font-size:48px">&#128444;&#65039;</div><div style="font-size:12px;color:var(--text-secondary)">brand-logo.png &middot; 1080x565px</div>'
+                : '<div style="font-size:28px;margin-bottom:8px">&#128193;</div><div style="font-size:12px;color:var(--text-secondary)">Click to upload brand logo or product image</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">PNG/JPG &middot; Max 2MB &middot; Min 400x400px</div>'
+              }
+            </div>
+          </div>
+
+          <div id="autoStrengthGauge">${renderAdStrengthGauge()}</div>
+        </div>
+
+        <div class="builder-section">
+          <div class="builder-section-label">Audience Signals <span style="font-weight:400;font-size:11px;color:var(--text-tertiary);margin-left:4px">Optional</span></div>
+          <div class="audience-signals-hint">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="6"/><path d="M7 5v0M7 7v3"/></svg>
+            These are suggestions to help AI learn faster — not hard targeting constraints.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Audience Suggestions</label>
+            <select class="form-select" multiple style="height:100px" onchange="builderData.audienceSignals = Array.from(this.selectedOptions, o => o.value)">
+              ${audiences.map(a => `<option value="${a.id}" ${(builderData.audienceSignals || []).includes(a.id) ? 'selected' : ''}>${a.icon} ${a.name} (${a.size})</option>`).join('')}
+            </select>
+            <div class="form-hint">Hold Cmd/Ctrl to select multiple. These hint the AI — it may expand beyond these.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Interest Keywords</label>
+            <input type="text" class="form-input" value="${builderData.interestKeywords || ''}" placeholder="e.g. streaming, entertainment, sports" oninput="RoktAds.persistField('interestKeywords', this.value)">
+            <div class="form-hint">Comma-separated keywords to guide AI targeting</div>
+          </div>
+        </div>
+
+        <div class="ai-managed-card">
+          <span class="ai-badge">&#10024; AI Managed</span>
+          <p>Rokt AI will automatically select the best placements, partners, and positions to maximize your campaign performance.</p>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function simulateAutoImageUpload() {
+    builderData.autoImage = true;
+    toast('Image uploaded (simulated)', 'success');
+    updateBuilderStep();
+  }
+
+  function renderAdStrengthGaugeHTML() {
+    return renderAdStrengthGauge();
+  }
+
+  function renderAutopilotStep3() {
+    const objLabel = objectiveLabels[builderData.objective] || builderData.objective || 'Not selected';
+    const filledHeadlines = (builderData.headlines || []).filter(h => h.trim().length > 0);
+    const filledDescs = (builderData.descriptions || []).filter(d => d.trim().length > 0);
+
+    return `<div class="builder-content-inner">
+      <h3 style="margin-bottom:4px">Review & Launch</h3>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:24px">Review what you provided and what AI will handle.</p>
+
+      <div class="autopilot-review-section">
+        <h4><span style="font-size:16px">&#128220;</span> You provided:</h4>
+        <div class="autopilot-review-list">
+          <div class="autopilot-review-item"><span class="check-icon">&#10003;</span> Objective: <strong>${objLabel}</strong></div>
+          <div class="autopilot-review-item"><span class="check-icon">&#10003;</span> Budget: $${fmtNum(builderData.dailyCap)}/day &middot; $${fmtNum(builderData.lifetimeCap)} lifetime</div>
+          <div class="autopilot-review-item"><span class="check-icon">&#10003;</span> Conversion Goal: <strong>${(builderData.conversionGoal || 'purchase').charAt(0).toUpperCase() + (builderData.conversionGoal || 'purchase').slice(1)}</strong></div>
+          <div class="autopilot-review-item"><span class="check-icon">${filledHeadlines.length > 0 ? '&#10003;' : '&#9888;'}</span> Headlines: ${filledHeadlines.length} provided${filledHeadlines.length > 0 ? ' — "' + filledHeadlines[0] + '"' + (filledHeadlines.length > 1 ? ' + ' + (filledHeadlines.length - 1) + ' more' : '') : ''}</div>
+          <div class="autopilot-review-item"><span class="check-icon">${filledDescs.length > 0 ? '&#10003;' : '&#9888;'}</span> Descriptions: ${filledDescs.length} provided</div>
+          <div class="autopilot-review-item"><span class="check-icon">${builderData.autoCta ? '&#10003;' : '&#9888;'}</span> CTA: ${builderData.autoCta || 'Not set'}</div>
+          <div class="autopilot-review-item"><span class="check-icon">${builderData.autoImage ? '&#10003;' : '&#9888;'}</span> Image: ${builderData.autoImage ? 'Uploaded' : 'Not uploaded'}</div>
+          ${(builderData.audienceSignals || []).length > 0 ? `<div class="autopilot-review-item"><span class="check-icon">&#10003;</span> Audience signals: ${builderData.audienceSignals.length} audiences hinted</div>` : ''}
+          ${builderData.interestKeywords ? `<div class="autopilot-review-item"><span class="check-icon">&#10003;</span> Interest keywords: ${builderData.interestKeywords}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="autopilot-review-section ai-will-handle">
+        <h4><span style="font-size:16px">&#10024;</span> AI will optimize:</h4>
+        <div class="autopilot-review-list">
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Targeting</strong> — Audience selection, demographics, geography</div>
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Bidding</strong> — Smart bidding strategy, bid amounts, pacing</div>
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Placements</strong> — Partner selection, placement types, positions</div>
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Budget Allocation</strong> — Daily pacing and cross-partner distribution</div>
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Creative Optimization</strong> — Headline/description combinations, A/B testing</div>
+          <div class="autopilot-review-item"><span class="ai-icon">&#9679;</span> <strong>Frequency Capping</strong> — Optimal exposure per user</div>
+        </div>
+      </div>
+
+      ${renderAdStrengthGauge()}
+
+      <div class="approval-banner" style="margin-top:var(--space-4)">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--brand-blue)" stroke-width="1.5"><circle cx="9" cy="9" r="7"/><path d="M9 6v0M9 9v4"/></svg>
+        <div>
+          <strong>Pending Rokt Approval</strong>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Your campaign will be reviewed by Rokt before going live. This typically takes 1-2 business days.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Inventory Targeting Section (Advanced Step 3) ─────────
+
+  function renderInventorySection() {
+    const selectedPlacements = builderData.placementTypes || [];
+    const selectedPartnerIds = builderData.selectedPartners || [];
+
+    return `
+      <div class="inventory-section">
+        <div class="builder-section" style="margin-top:20px">
+          <div class="builder-section-label">Inventory</div>
+
+          <div class="form-group">
+            <label class="form-label">Placement Type</label>
+            <div class="placement-type-grid">
+              ${[
+                { id: 'overlay', icon: '&#128301;', name: 'Overlay', desc: 'Full-screen or modal overlay' },
+                { id: 'embedded', icon: '&#128203;', name: 'Embedded', desc: 'Inline within page content' },
+                { id: 'post_transaction', icon: '&#9989;', name: 'Post-Transaction', desc: 'After checkout completion' },
+              ].map(p => `
+                <div class="placement-card ${selectedPlacements.includes(p.id) ? 'selected' : ''}" onclick="RoktAds.togglePlacement('${p.id}')">
+                  <div class="placement-card-icon">${p.icon}</div>
+                  <div class="placement-card-name">${p.name}</div>
+                  <div class="placement-card-desc">${p.desc}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Partner Selection</label>
+            <div class="partner-controls">
+              <input type="text" class="partner-search-input" placeholder="Search partners..." oninput="RoktAds.filterPartners(this.value)">
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.selectAllPartners()">Select All</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.deselectAllPartners()">Deselect All</button>
+              <span class="partner-selected-count">${selectedPartnerIds.length}/${partners.length} selected</span>
+            </div>
+            <div class="partner-checklist" id="partnerChecklist">
+              ${partners.map(p => `
+                <div class="partner-item" onclick="RoktAds.togglePartner('${p.id}')">
+                  <input type="checkbox" ${selectedPartnerIds.includes(p.id) ? 'checked' : ''} onclick="event.stopPropagation(); RoktAds.togglePartner('${p.id}')">
+                  <div class="partner-item-info">
+                    <div class="partner-item-name">${p.name}</div>
+                    <div class="partner-item-meta">${p.category} &middot; ${p.volume}</div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Position Targeting</label>
+            <div class="position-radio-group">
+              <label><input type="radio" name="positionTarget" value="any" ${builderData.positionTargeting === 'any' ? 'checked' : ''} onchange="RoktAds.persistField('positionTargeting', 'any')"> Any Position (recommended)</label>
+              <label><input type="radio" name="positionTarget" value="first" ${builderData.positionTargeting === 'first' ? 'checked' : ''} onchange="RoktAds.persistField('positionTargeting', 'first')"> 1st Position Only</label>
+              <label><input type="radio" name="positionTarget" value="first_second" ${builderData.positionTargeting === 'first_second' ? 'checked' : ''} onchange="RoktAds.persistField('positionTargeting', 'first_second')"> 1st or 2nd Position</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Frequency Caps</label>
+            <div class="freq-cap-row">
+              <div class="form-group">
+                <label class="form-label" style="font-size:11px">Per user per day</label>
+                <input type="number" class="form-input mono" value="${builderData.freqCapDaily}" min="1" placeholder="3" oninput="RoktAds.persistField('freqCapDaily', Number(this.value))">
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:11px">Per user lifetime</label>
+                <input type="number" class="form-input mono" value="${builderData.freqCapLifetime || ''}" min="1" placeholder="Unlimited" oninput="RoktAds.persistField('freqCapLifetime', this.value ? Number(this.value) : '')">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function togglePlacement(id) {
+    const arr = builderData.placementTypes || [];
+    const idx = arr.indexOf(id);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(id);
+    builderData.placementTypes = arr;
+    updateBuilderStep();
+  }
+
+  function togglePartner(id) {
+    const arr = builderData.selectedPartners || [];
+    const idx = arr.indexOf(id);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(id);
+    builderData.selectedPartners = arr;
+    updateBuilderStep();
+  }
+
+  function selectAllPartners() {
+    builderData.selectedPartners = partners.map(p => p.id);
+    updateBuilderStep();
+  }
+
+  function deselectAllPartners() {
+    builderData.selectedPartners = [];
+    updateBuilderStep();
+  }
+
+  function filterPartners(query) {
+    const items = document.querySelectorAll('.partner-item');
+    const q = query.toLowerCase();
+    items.forEach(item => {
+      const name = item.querySelector('.partner-item-name')?.textContent.toLowerCase() || '';
+      const meta = item.querySelector('.partner-item-meta')?.textContent.toLowerCase() || '';
+      item.style.display = (name.includes(q) || meta.includes(q)) ? '' : 'none';
+    });
   }
 
   function renderBuilderStep5() {
@@ -1746,24 +2158,53 @@ const RoktAds = (() => {
     `).join('');
   }
 
+  const creativeDetails = {
+    cr1: { title: 'Stream Disney+ for Less!', body: 'Get 30% off your first month of Disney+. Stream thousands of movies, shows, and originals.', cta: 'Start Streaming', offer: 'o1', format: 'Text' },
+    cr2: { title: 'Why Disney+ is Worth It', body: '10,000+ titles. 4K streaming. Download & watch offline. Family-friendly content.', cta: 'See Plans', offer: 'o2', format: 'Benefits' },
+    cr3: { title: 'Disney+ Spring Special', body: 'Unlock a world of entertainment. Stream now with 30% off.', cta: 'Get the Deal', offer: 'o1', format: 'Hero Image' },
+    cr4: { title: 'Save $50 on Capital One', body: 'Apply now and earn a $50 statement credit. No annual fee.', cta: 'Apply Now', offer: 'o3', format: 'Savings' },
+    cr5: { title: 'Hulu \u2014 First Month Free', body: 'Try Hulu free for 30 days. Cancel anytime.', cta: 'Start Free Trial', offer: 'o4', format: 'Text' },
+    cr6: { title: 'True Classic Bestsellers', body: 'Shop our top-rated essentials. Free shipping on first order.', cta: 'Shop Now', offer: 'o5', format: 'Carousel' },
+    cr7: { title: 'Get $5 Back with PayPal', body: 'Use Pay+ at checkout and earn $5 cashback.', cta: 'Activate Now', offer: 'o6', format: 'Savings' },
+    cr8: { title: 'Audible \u2014 3 Months Free', body: 'Listen to thousands of audiobooks free for 3 months.', cta: 'Start Listening', offer: 'o2', format: 'Text' },
+  };
+
   function selectCreative(id) {
     const cr = creatives.find(c => c.id === id);
     if (!cr) return;
     $$('.creative-lib-item').forEach(item => item.classList.remove('active'));
-    // Find and mark active
     const items = $$('.creative-lib-item');
     const idx = creatives.findIndex(c => c.id === id);
     if (items[idx]) items[idx].classList.add('active');
-
-    // Update editor fields
+    const detail = creativeDetails[id] || {};
     const titleInput = document.getElementById('creativeTitle');
-    if (titleInput) titleInput.value = cr.name;
-    const titleCount = document.getElementById('titleCharCount');
-    if (titleCount) titleCount.textContent = `${cr.name.length}/40`;
+    if (titleInput) { titleInput.value = detail.title || cr.name; titleInput.dispatchEvent(new Event('input')); }
+    const bodyInput = document.getElementById('creativeBody');
+    if (bodyInput) { bodyInput.value = detail.body || ''; bodyInput.dispatchEvent(new Event('input')); }
+    const ctaInput = document.getElementById('creativeCta');
+    if (ctaInput) { ctaInput.value = detail.cta || ''; ctaInput.dispatchEvent(new Event('input')); }
+    const offerSelect = document.getElementById('creativeOffer');
+    if (offerSelect && detail.offer) offerSelect.value = detail.offer;
+    if (detail.format) {
+      $$('#creativeFormatTabs .filter-pill').forEach(t => t.classList.toggle('active', t.dataset.format === detail.format));
+      updateCreativePreviewFormat(detail.format);
+    }
+  }
 
-    // Update preview
-    const previewTitle = document.getElementById('previewTitle');
-    if (previewTitle) previewTitle.textContent = cr.name;
+  function updateCreativePreviewFormat(format) {
+    const card = document.getElementById('creativePreviewCard'); if (!card) return;
+    const body = document.getElementById('previewBody');
+    const offer = document.getElementById('previewOffer');
+    const title = document.getElementById('previewTitle');
+    card.querySelectorAll('.preview-format-extra').forEach(el => el.remove());
+    if (title) title.style.display = ''; if (body) body.style.display = '';
+    if (offer) offer.style.display = '';
+    switch (format) {
+      case 'Benefits': { if (body) body.style.display = 'none'; const list = document.createElement('ul'); list.className = 'preview-benefits-list preview-format-extra'; ['10,000+ titles','4K streaming','Download & watch offline','Family-friendly'].forEach(b => { const li = document.createElement('li'); li.innerHTML = '<span style="color:var(--positive)">\u2713</span> ' + b; list.appendChild(li); }); if (offer) offer.parentElement.insertBefore(list, offer); break; }
+      case 'Savings': { const badge = document.createElement('div'); badge.className = 'preview-savings-badge preview-format-extra'; badge.textContent = 'SAVE 30%'; if (offer) offer.parentElement.insertBefore(badge, offer); break; }
+      case 'Hero Image': { const hero = document.createElement('div'); hero.className = 'preview-hero-image preview-format-extra'; hero.textContent = '\ud83c\udfa5'; if (title) title.parentElement.insertBefore(hero, title.nextSibling); break; }
+      case 'Carousel': { if (body) body.style.display = 'none'; const carousel = document.createElement('div'); carousel.className = 'preview-carousel preview-format-extra'; ['\ud83d\udc55','\ud83d\udc54','\ud83e\ude73','\ud83e\udde5','\ud83d\udc56'].forEach(icon => { const item = document.createElement('div'); item.className = 'preview-carousel-item'; item.textContent = icon; carousel.appendChild(item); }); if (offer) offer.parentElement.insertBefore(carousel, offer); break; }
+    }
   }
 
   function initCreativeEditor() {
@@ -1806,7 +2247,7 @@ const RoktAds = (() => {
       tab.addEventListener('click', () => {
         $$('#creativeFormatTabs .filter-pill').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        toast(`Switched to ${tab.dataset.format} format`, 'info');
+        updateCreativePreviewFormat(tab.dataset.format);
       });
     });
 
@@ -1840,6 +2281,60 @@ const RoktAds = (() => {
     renderReportChart();
     renderReportTable();
     renderExperiments();
+    initIntelligenceControls();
+  }
+
+  function initIntelligenceControls() {
+    // Date range pills
+    $$('#reportDateRange .filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        $$('#reportDateRange .filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        reportDateRange = pill.dataset.range;
+        renderReportChart();
+        renderReportTable();
+      });
+    });
+
+    // Compare toggle — inject after date range pills
+    const dateRangeContainer = document.querySelector('.report-controls-left');
+    if (dateRangeContainer && !dateRangeContainer.querySelector('.compare-toggle')) {
+      const btn = document.createElement('button');
+      btn.className = 'compare-toggle' + (reportCompare ? ' active' : '');
+      btn.innerHTML = `<svg class="compare-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10V4M5 10V6M8 10V3M11 10V7"/><line x1="1" y1="12" x2="13" y2="12" stroke-dasharray="2,2"/></svg> Compare`;
+      btn.addEventListener('click', () => {
+        reportCompare = !reportCompare;
+        btn.classList.toggle('active', reportCompare);
+        renderReportChart();
+      });
+      dateRangeContainer.appendChild(btn);
+    }
+
+    // Group By dropdown — inject into report filters area
+    const filtersArea = document.getElementById('reportFilters');
+    if (filtersArea && !filtersArea.querySelector('.dimension-controls')) {
+      const groupByWrap = document.createElement('div');
+      groupByWrap.style.cssText = 'margin-left:auto;display:flex;align-items:center;gap:6px;';
+      groupByWrap.innerHTML = `
+        <label style="font-size:11px;color:var(--text-tertiary);font-weight:500">Group By:</label>
+        <select class="form-select form-select-sm" id="reportGroupBy" style="width:auto;padding:3px 8px;font-size:11px">
+          <option value="none">None</option>
+          <option value="device">Device</option>
+          <option value="geography">Geography</option>
+          <option value="audience">Audience</option>
+          <option value="creative">Creative</option>
+        </select>
+      `;
+      filtersArea.appendChild(groupByWrap);
+      const sel = document.getElementById('reportGroupBy');
+      if (sel) {
+        sel.value = reportGroupBy;
+        sel.addEventListener('change', () => {
+          reportGroupBy = sel.value;
+          renderDimensionBreakdown();
+        });
+      }
+    }
   }
 
   function renderIntelInsights() {
@@ -1859,45 +2354,46 @@ const RoktAds = (() => {
     `).join('');
   }
 
+  function getReportData() {
+    const active = campaigns.filter(c => c.status !== 'draft');
+    const baseSpend = active.reduce((acc, c) => { c.dailySpend.forEach((v, i) => { acc[i] = (acc[i] || 0) + v; }); return acc; }, []);
+    const baseConversions = baseSpend.map(s => Math.round(s / 7.5 + 150));
+    const rangeScalers = { 'today': { points: 1, labels: ['Today'], scale: 0.15 }, '7d': { points: 7, labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], scale: 1 }, '30d': { points: 5, labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], scale: 4.2 }, 'mtd': { points: 4, labels: ['Mar 1-7','Mar 8-14','Mar 15-20','Projected'], scale: 2.8 }, 'custom': { points: 7, labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], scale: 1 } };
+    const config = rangeScalers[reportDateRange] || rangeScalers['7d'];
+    let spend = [], conversions = [], cpa = [];
+    for (let i = 0; i < config.points; i++) { const srcIdx = i % baseSpend.length; const jitter = 0.9 + (Math.sin(i * 2.1) * 0.1 + 0.1); spend.push(Math.round(baseSpend[srcIdx] * config.scale * jitter)); conversions.push(Math.round(baseConversions[srcIdx] * config.scale * jitter)); cpa.push(conversions[i] ? +(spend[i] / conversions[i]).toFixed(2) : 0); }
+    return { spend, conversions, cpa, prevSpend: spend.map(v => Math.round(v * 0.85)), prevConversions: conversions.map(v => Math.round(v * 0.78)), labels: config.labels };
+  }
+
   function renderReportChart() {
     const legend = document.getElementById('reportChartLegend');
     const svg = document.getElementById('reportChartSvg');
     if (!legend || !svg) return;
+    const legendItems = [{ label: 'Spend', color: 'var(--beetroot)' },{ label: 'Conversions', color: 'var(--positive)' },{ label: 'CPA', color: 'var(--warning)' }];
+    if (reportCompare) { legendItems.push({ label: 'Prev. Spend', color: 'var(--beetroot)', prev: true }); legendItems.push({ label: 'Prev. Conv.', color: 'var(--positive)', prev: true }); }
+    legend.innerHTML = legendItems.map(l => `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${l.color};${l.prev ? 'opacity:0.4' : ''}"></span>${l.label}</span>`).join('');
+    const data = getReportData(); const n = data.spend.length; const w = 700, chartH = 150, pad = 10;
+    const maxSpend = Math.max(...data.spend, ...(reportCompare ? data.prevSpend : [1]));
+    const maxConv = Math.max(...data.conversions, ...(reportCompare ? data.prevConversions : [1]));
+    const maxCPA = Math.max(...data.cpa, 1);
+    function toLine(vals, maxV) { return vals.map((v, i) => `${n > 1 ? i * w / (n - 1) : w/2},${chartH - (v / maxV) * (chartH - pad)}`).join(' '); }
+    const spendLine = toLine(data.spend, maxSpend); const convLine = toLine(data.conversions, maxConv); const cpaLine = toLine(data.cpa, maxCPA);
+    let compareSvg = '';
+    if (reportCompare) { compareSvg = `<polyline points="${toLine(data.prevSpend, maxSpend)}" fill="none" stroke="var(--beetroot)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/><polyline points="${toLine(data.prevConversions, maxConv)}" fill="none" stroke="var(--positive)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.35"/>`; }
+    svg.innerHTML = `<line x1="0" y1="${chartH}" x2="${w}" y2="${chartH}" stroke="var(--border)" stroke-width="0.5"/><line x1="0" y1="${chartH/2}" x2="${w}" y2="${chartH/2}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/><defs><linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.15"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${spendLine} ${n > 1 ? w : w/2},${chartH} 0,${chartH}" fill="url(#reportGrad)"/>${compareSvg}<polyline points="${spendLine}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/><polyline points="${convLine}" fill="none" stroke="var(--positive)" stroke-width="2" stroke-linecap="round" stroke-dasharray="6,3" class="chart-line-animate"/><polyline points="${cpaLine}" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-dasharray="2,3" class="chart-line-animate"/>${data.spend.map((v, i) => `<circle cx="${n > 1 ? i*w/(n-1) : w/2}" cy="${chartH - (v/maxSpend)*(chartH-pad)}" r="3" fill="var(--beetroot)"/>`).join('')}${data.conversions.map((v, i) => `<circle cx="${n > 1 ? i*w/(n-1) : w/2}" cy="${chartH - (v/maxConv)*(chartH-pad)}" r="2.5" fill="var(--positive)"/>`).join('')}${data.cpa.map((v, i) => `<circle cx="${n > 1 ? i*w/(n-1) : w/2}" cy="${chartH - (v/maxCPA)*(chartH-pad)}" r="2" fill="var(--warning)"/>`).join('')}${data.labels.map((l, i) => `<text x="${n > 1 ? i*w/(n-1) : w/2}" y="${chartH + 18}" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)" ${n === 1 ? 'text-anchor="middle"' : ''}>${l}</text>`).join('')}`;
+    renderDimensionBreakdown();
+  }
 
-    legend.innerHTML = [
-      { label: 'Spend', color: 'var(--beetroot)' },
-      { label: 'Conversions', color: 'var(--positive)' },
-      { label: 'CPA', color: 'var(--brand-blue)' },
-    ].map(l => `<span class="chart-legend-item"><span class="chart-legend-dot" style="background:${l.color}"></span>${l.label}</span>`).join('');
-
-    // Simple multi-line chart
-    const spendPoints = campaigns.filter(c => c.status === 'active').reduce((acc, c) => {
-      c.dailySpend.forEach((v, i) => { acc[i] = (acc[i] || 0) + v; });
-      return acc;
-    }, []);
-    const maxSpend = Math.max(...spendPoints);
-    const spendLine = spendPoints.map((v, i) => `${i * 700 / 6},${170 - (v / maxSpend) * 150}`).join(' ');
-
-    svg.innerHTML = `
-      <line x1="0" y1="170" x2="700" y2="170" stroke="var(--border)" stroke-width="0.5"/>
-      <line x1="0" y1="85" x2="700" y2="85" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
-      <defs>
-        <linearGradient id="reportGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.2"/>
-          <stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <polygon points="${spendLine} 700,170 0,170" fill="url(#reportGrad)"/>
-      <polyline points="${spendLine}" fill="none" stroke="var(--beetroot)" stroke-width="2" stroke-linecap="round" class="chart-line-animate"/>
-      ${spendPoints.map((v, i) => `<circle cx="${i*700/6}" cy="${170 - (v/maxSpend)*150}" r="3" fill="var(--beetroot)"/>`).join('')}
-      <text x="0" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Mon</text>
-      <text x="${700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Tue</text>
-      <text x="${2*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Wed</text>
-      <text x="${3*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Thu</text>
-      <text x="${4*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Fri</text>
-      <text x="${5*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Sat</text>
-      <text x="${6*700/6}" y="180" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">Sun</text>
-    `;
+  function renderDimensionBreakdown() {
+    const existing = document.querySelector('.dimension-breakdown'); if (existing) existing.remove();
+    if (reportGroupBy === 'none') return;
+    const chartContainer = document.getElementById('reportChart'); if (!chartContainer) return;
+    const bd = { device: [{label:'Desktop',pct:55},{label:'Mobile',pct:38},{label:'Tablet',pct:7}], geography: [{label:'US-East',pct:35},{label:'US-West',pct:28},{label:'US-Central',pct:22},{label:'US-South',pct:15}], audience: [{label:'Women 25-45',pct:32},{label:'Streaming LAL',pct:25},{label:'Cord Cutters',pct:18},{label:'Finance DMs',pct:15},{label:'Other',pct:10}], creative: [{label:'Hero Banner',pct:30},{label:'Text Offer',pct:28},{label:'Benefits List',pct:22},{label:'Savings',pct:12},{label:'Carousel',pct:8}] };
+    const items = bd[reportGroupBy]; if (!items) return;
+    const colors = ['var(--beetroot)','var(--positive)','var(--brand-blue)','var(--warning)','var(--text-tertiary)'];
+    const el = document.createElement('div'); el.className = 'dimension-breakdown';
+    el.innerHTML = `<div class="dimension-breakdown-title">Breakdown by ${capitalize(reportGroupBy)}</div>${items.map((item, idx) => `<div class="dimension-bar-row"><div class="dimension-bar-label">${item.label}</div><div class="dimension-bar-track"><div class="dimension-bar-segment" style="width:${item.pct}%;background:${colors[idx % colors.length]}"></div></div><div class="dimension-bar-value">${item.pct}%</div></div>`).join('')}<div class="dimension-legend">${items.map((item, idx) => `<div class="dimension-legend-item"><div class="dimension-legend-dot" style="background:${colors[idx % colors.length]}"></div>${item.label}</div>`).join('')}</div>`;
+    chartContainer.parentElement.insertBefore(el, chartContainer.nextElementSibling);
   }
 
   function renderReportTable() {
@@ -1909,6 +2405,8 @@ const RoktAds = (() => {
     thead.innerHTML = `<tr>${cols.map(c => `<th class="sortable" onclick="RoktAds.sortReport('${c}')">${c} <span class="sort-arrow">${reportSort.col === c ? (reportSort.dir === 'asc' ? '↑' : '↓') : '↕'}</span></th>`).join('')}</tr>`;
 
     let data = campaigns.filter(c => c.status !== 'draft');
+    if (reportFilters.campaign) data = data.filter(c => c.name === reportFilters.campaign);
+    if (reportFilters.status) data = data.filter(c => capitalize(c.status) === reportFilters.status);
 
     // Sort
     if (reportSort.col) {
@@ -2245,7 +2743,7 @@ const RoktAds = (() => {
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
-            <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Audience created successfully','success')">Create Audience</button>
+            <button class="btn btn-primary btn-pill" onclick="RoktAds.createAudience()">Create Audience</button>
           </div>
         `;
         break;
@@ -2313,7 +2811,7 @@ const RoktAds = (() => {
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
-            <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Lookalike audience generating...','success')">Generate Lookalike</button>
+            <button class="btn btn-primary btn-pill" onclick="RoktAds.createLookalike()">Generate Lookalike</button>
           </div>
         `;
         break;
@@ -2450,7 +2948,7 @@ const RoktAds = (() => {
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
-            <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Offer created','success')">Create Offer</button>
+            <button class="btn btn-primary btn-pill" onclick="RoktAds.createOffer()">Create Offer</button>
           </div>
         `;
         break;
@@ -2489,7 +2987,7 @@ const RoktAds = (() => {
           </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
-            <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Experiment created as draft','success')">Create Experiment</button>
+            <button class="btn btn-primary btn-pill" onclick="RoktAds.createExperiment()">Create Experiment</button>
           </div>
         `;
         break;
@@ -2670,7 +3168,7 @@ const RoktAds = (() => {
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Campaign archived','info')">Archive</button>
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.archiveCampaign('${c.id}')">Archive</button>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
               <button class="btn btn-primary btn-pill" onclick="
@@ -2742,7 +3240,7 @@ const RoktAds = (() => {
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Audience deleted','info')">Delete</button>
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.confirmDelete('audience','${aud2.id}')">Delete</button>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
               <button class="btn btn-ghost" onclick="RoktAds.closeModal();RoktAds.toast('Audience duplicated','success')">Duplicate</button>
@@ -2788,7 +3286,7 @@ const RoktAds = (() => {
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.closeModal();RoktAds.toast('Offer archived','info')">Archive</button>
+            <button class="btn btn-ghost" style="color:var(--negative)" onclick="RoktAds.confirmDelete('offer','${off.id}')">Delete</button>
             <div style="display:flex;gap:8px">
               <button class="btn btn-ghost" onclick="RoktAds.closeModal()">Cancel</button>
               <button class="btn btn-primary btn-pill" onclick="RoktAds.closeModal();RoktAds.toast('Offer updated','success')">Save Changes</button>
@@ -3017,9 +3515,12 @@ const RoktAds = (() => {
   }
 
   function applyFilter(type, value) {
-    toast(`Filter: ${type} = ${value}`, 'info');
+    if (reportFilters[type] === value) { reportFilters[type] = null; const btn = document.getElementById('filter' + capitalize(type)); if (btn) btn.classList.remove('filter-active'); toast('Filter cleared: ' + type, 'info'); }
+    else { reportFilters[type] = value; const btn = document.getElementById('filter' + capitalize(type)); if (btn) btn.classList.add('filter-active'); toast('Filtered by ' + type + ': ' + value, 'info'); }
     const dropdown = document.getElementById('filterDropdown');
     if (dropdown) dropdown.style.display = 'none';
+    renderReportTable();
+    renderReportChart();
   }
 
   // ── Toast ──────────────────────────────────────────────────
@@ -3065,6 +3566,14 @@ const RoktAds = (() => {
         icon: c.status === 'active' ? '🟢' : c.status === 'paused' ? '🟡' : '⚪',
         text: c.name,
         action: () => { navigate('campaigns'); setTimeout(() => openCampaignDetail(c.id), 200); },
+      }))},
+      { group: 'Audiences', items: audiences.slice(0, 6).map(a => ({
+        icon: a.icon, text: a.name,
+        action: () => { navigate('audiences'); setTimeout(() => openModal('viewAudience', a.id), 200); },
+      }))},
+      { group: 'Offers', items: offers.map(o => ({
+        icon: o.icon, text: o.name + ' (' + o.type + ')',
+        action: () => { navigate('catalog'); setTimeout(() => openModal('editOffer', o.id), 200); },
       }))},
     ];
 
@@ -3152,7 +3661,9 @@ const RoktAds = (() => {
     keyChordEl = document.createElement('div');
     keyChordEl.className = 'key-chord-indicator';
     const labels = { g: 'Go to...', n: 'New...' };
-    keyChordEl.innerHTML = `<kbd>${key.toUpperCase()}</kbd> ${labels[key] || '...'}`;
+    const hints = { g: [{key:'D',label:'Dashboard'},{key:'C',label:'Campaigns'},{key:'A',label:'Audiences'},{key:'R',label:'Intelligence'}], n: [{key:'C',label:'Campaign'},{key:'A',label:'Audience'}] };
+    const hintHtml = (hints[key] || []).map(h => `<span><kbd>${h.key}</kbd>${h.label}</span>`).join('');
+    keyChordEl.innerHTML = `<kbd>${key.toUpperCase()}</kbd> ${labels[key] || '...'}<div class="chord-hints">${hintHtml}</div>`;
     document.body.appendChild(keyChordEl);
   }
   function hideKeyChord() {
@@ -3488,8 +3999,17 @@ const RoktAds = (() => {
     });
     const alertAction = document.getElementById('contextAlertAction');
     if (alertAction) alertAction.addEventListener('click', () => {
-      location.hash = 'measurement';
-      toast('Navigated to Measurement — check EMQ dashboard', 'info');
+      const alertText = (document.getElementById('contextAlertText') || {}).textContent || '';
+      if (alertText.includes('EMQ') || alertText.includes('conversion tracking') || alertText.includes('CAPI')) {
+        location.hash = 'measurement';
+        toast('Navigated to Measurement \u2014 check EMQ dashboard', 'info');
+      } else if (alertText.includes('Creative refresh') || alertText.includes('creative')) {
+        location.hash = 'creatives';
+        toast('Navigated to Creative Studio \u2014 review overdue creatives', 'info');
+      } else {
+        location.hash = 'intelligence';
+        toast('Navigated to Intelligence', 'info');
+      }
     });
 
     // Notification dropdown toggle
@@ -3502,6 +4022,15 @@ const RoktAds = (() => {
       });
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.notif-wrap')) notifDrop.style.display = 'none';
+      });
+      notifDrop.querySelectorAll('.notif-item').forEach((item, idx) => {
+        item.addEventListener('click', () => {
+          notifDrop.style.display = 'none';
+          if (idx === 0) { location.hash = 'measurement'; toast('Navigated to Measurement \u2014 check EMQ', 'info'); }
+          else if (idx === 1) { location.hash = 'campaigns'; setTimeout(() => openCampaignDetail('c2'), 300); }
+          else if (idx === 2) { location.hash = 'intelligence'; setTimeout(() => switchIntelTab('experiments'), 300); }
+          else { location.hash = 'intelligence'; }
+        });
       });
     }
 
@@ -3673,6 +4202,94 @@ const RoktAds = (() => {
     return campaigns.filter(c => advData.campaigns.includes(c.id));
   }
 
+
+  // \u2500\u2500 CRUD Operations \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+  function createAudience() {
+    const nameInput = document.querySelector('#modalContent .form-input');
+    const name = nameInput ? nameInput.value : 'New Custom Audience';
+    audiences.push({ id: 'a' + (audiences.length + 1), name, type: 'Custom', icon: '\ud83d\udc65', size: (Math.random() * 20 + 1).toFixed(1) + 'M', campaigns: 0, fresh: true, matchRate: (Math.random() * 30 + 60).toFixed(0) + '%' });
+    closeModal(); toast('Audience created successfully', 'success');
+    if (currentView === 'audiences') { renderAudienceGrid(); updateAudienceCounts(); }
+  }
+
+  function createLookalike() {
+    const sel = document.querySelector('#modalContent .form-select');
+    const seedName = sel ? sel.options[sel.selectedIndex].text : 'Seed';
+    const tierEl = document.querySelector('#modalContent .lal-circle.selected .lal-circle-label');
+    const tier = tierEl ? tierEl.textContent : 'Default';
+    const sizeMap = { Default: '10.1M', Broad: '20.4M', Broader: '30.8M' };
+    audiences.push({ id: 'a' + (audiences.length + 1), name: seedName.split(' (')[0] + ' LAL (' + tier + ')', type: 'LAL', icon: '\ud83d\udd04', size: sizeMap[tier] || '10.1M', campaigns: 0, fresh: true, matchRate: (Math.random() * 20 + 55).toFixed(0) + '%' });
+    closeModal(); toast('Lookalike audience generating...', 'success');
+    if (currentView === 'audiences') { renderAudienceGrid(); updateAudienceCounts(); }
+  }
+
+  function createOffer() {
+    const inputs = document.querySelectorAll('#modalContent .form-input');
+    const value = inputs[0] ? inputs[0].value : 'New Offer';
+    const cost = inputs[1] ? inputs[1].value : '$0.00';
+    const ap = document.querySelector('#modalContent .filter-pills .filter-pill.active');
+    const tl = ap ? ap.textContent.trim() : 'Discount';
+    const tm = { Discount: 'discount', Trial: 'trial', Cashback: 'cashback', Shipping: 'shipping', Product: 'product' };
+    const type = Object.entries(tm).find(([k]) => tl.includes(k))?.[1] || 'discount';
+    const im = { discount: '\ud83c\udff7\ufe0f', trial: '\ud83c\udd93', cashback: '\ud83d\udcb0', shipping: '\ud83d\udce6', product: '\ud83d\udecd\ufe0f' };
+    offers.push({ id: 'o' + (offers.length + 1), type, icon: im[type] || '\ud83c\udff7\ufe0f', name: value || 'New Offer', value: value || 'New Offer', cost: cost || '$0.00', campaigns: 0, copi: 0, cvr: 0 });
+    closeModal(); toast('Offer created', 'success');
+    if (currentView === 'catalog') renderOffers();
+  }
+
+  function createExperiment() {
+    const ni = document.querySelector('#modalContent .form-input[placeholder]');
+    const name = ni ? ni.value : 'New Experiment';
+    const cs = document.querySelector('#modalContent .form-select');
+    const campName = cs ? cs.options[cs.selectedIndex].text : 'Disney+';
+    const di = document.querySelector('#modalContent input[type="number"]');
+    const duration = di ? di.value : '14';
+    const tp = document.querySelector('#modalContent .filter-pills .filter-pill.active');
+    const type = tp && tp.textContent.includes('MAB') ? 'MAB' : 'A/B';
+    experiments.push({ id: 'e' + (experiments.length + 1), name: name || 'New Experiment', type, campaign: campName.split(' ').slice(0, 2).join(' '), status: 'draft', days: '0/' + duration, leader: '\u2014', lift: '\u2014', significance: 0 });
+    closeModal(); toast('Experiment created as draft', 'success');
+    if (currentView === 'intelligence') renderExperiments();
+  }
+
+  function duplicateCampaign(id) {
+    const c = campaigns.find(x => x.id === id); if (!c) return;
+    const clone = JSON.parse(JSON.stringify(c));
+    clone.id = 'c' + (campaigns.length + 1); clone.name = c.name + ' (Copy)'; clone.status = 'draft'; clone.biddingState = 'draft'; clone.spend = 0; clone.conversions = 0; clone.impressions = 0; clone.clicks = 0;
+    campaigns.push(clone); toast(c.name + ' duplicated as draft', 'success');
+    if (currentView === 'campaigns') renderCampaignTable(); updateNavBadges();
+  }
+
+  function archiveCampaign(id) {
+    showConfirm('Archive Campaign', 'Are you sure you want to archive this campaign?', () => {
+      const c = campaigns.find(x => x.id === id); if (!c) return;
+      c.status = 'archived'; c.biddingState = 'draft'; closeModal();
+      toast(c.name + ' archived', 'info');
+      if (currentView === 'campaigns') { renderCampaignTable(); closeCampaignDetail(); } updateNavBadges();
+    });
+  }
+
+  function confirmDelete(entityType, id) {
+    showConfirm('Delete ' + capitalize(entityType), 'Are you sure? This cannot be undone.', () => {
+      if (entityType === 'audience') { const idx = audiences.findIndex(a => a.id === id); if (idx >= 0) audiences.splice(idx, 1); closeModal(); toast('Audience deleted', 'info'); if (currentView === 'audiences') { renderAudienceGrid(); updateAudienceCounts(); } }
+      else if (entityType === 'offer') { const idx = offers.findIndex(o => o.id === id); if (idx >= 0) offers.splice(idx, 1); closeModal(); toast('Offer deleted', 'info'); if (currentView === 'catalog') renderOffers(); }
+      else if (entityType === 'experiment') { const idx = experiments.findIndex(e => e.id === id); if (idx >= 0) experiments.splice(idx, 1); closeModal(); toast('Experiment deleted', 'info'); if (currentView === 'intelligence') renderExperiments(); }
+    });
+  }
+
+  function showConfirm(title, message, onConfirm) {
+    const ov = document.createElement('div'); ov.className = 'confirm-dialog-overlay';
+    ov.innerHTML = '<div class="confirm-dialog"><h3>' + title + '</h3><p>' + message + '</p><div class="confirm-dialog-actions"><button class="btn btn-ghost confirm-cancel">Cancel</button><button class="btn btn-primary btn-pill confirm-ok">Confirm</button></div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('.confirm-cancel').addEventListener('click', () => ov.remove());
+    ov.querySelector('.confirm-ok').addEventListener('click', () => { ov.remove(); onConfirm(); });
+    ov.addEventListener('click', (e) => { if (e.target === ov) ov.remove(); });
+  }
+
+  function updateAudienceCounts() {
+    const cb = document.getElementById('audienceCount'); if (cb) cb.textContent = audiences.length;
+  }
+
   // ── Public API ─────────────────────────────────────────────
   return {
     navigate,
@@ -3717,5 +4334,23 @@ const RoktAds = (() => {
     closeAccountSwitcher,
     updateNavBadges,
     getFilteredCampaigns,
+    // Entity CRUD & utilities
+    createAudience,
+    createLookalike,
+    createOffer,
+    createExperiment,
+    duplicateCampaign,
+    archiveCampaign,
+    confirmDelete,
+    updateCreativePreviewFormat,
+    // Phase 6: Dual-mode & Inventory
+    setCampaignMode,
+    simulateAutoImageUpload,
+    renderAdStrengthGaugeHTML: renderAdStrengthGauge,
+    togglePlacement,
+    togglePartner,
+    selectAllPartners,
+    deselectAllPartners,
+    filterPartners,
   };
 })();
