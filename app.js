@@ -667,7 +667,7 @@ const RoktAds = (() => {
     const grid = document.getElementById('campaignHealthGrid');
     if (!grid) return;
     grid.innerHTML = getFilteredCampaigns().filter(c => c.status !== 'draft').map(c => `
-      <div class="health-card" onclick="location.hash='campaigns';setTimeout(()=>RoktAds.openCampaignDetail('${c.id}'),200)">
+      <div class="health-card" onclick="location.hash='campaign/${c.id}'">
         <div class="health-card-header">
           <div class="health-card-name">
             <span class="campaign-status-dot ${c.status}"></span>
@@ -892,7 +892,7 @@ const RoktAds = (() => {
     tbody.innerHTML = filtered.map(c => {
       const detailText = c.statusDetail ? c.statusDetail.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '';
       return `
-      <tr class="clickable ${selectedCampaign === c.id ? 'selected' : ''}" data-id="${c.id}" onclick="RoktAds.openCampaignDetail('${c.id}')">
+      <tr class="clickable ${selectedCampaign === c.id ? 'selected' : ''}" data-id="${c.id}" onclick="location.hash='campaign/${c.id}'">
         <td><input type="checkbox" class="table-checkbox" onclick="event.stopPropagation()"></td>
         <td><span class="campaign-status-dot ${c.status}" ${detailText ? 'title="' + detailText + '"' : ''}></span></td>
         <td class="campaign-name">${c.name}</td>
@@ -927,6 +927,296 @@ const RoktAds = (() => {
         </td>
       </tr>`;
     }).join('');
+  }
+
+  // ── Full-Screen Campaign View ──────────────────────────────
+  function renderCampaignFullView(id) {
+    const c = campaigns.find(x => x.id === id);
+    if (!c) { location.hash = 'campaigns'; return; }
+
+    currentView = 'campaign-detail';
+    selectedCampaign = id;
+
+    // Deselect sidebar
+    $$('.nav-item').forEach(item => item.classList.remove('active'));
+
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    const aiAnalysis = generateAIAnalysis(c);
+    const campaignCreatives = creatives.filter(cr => c.name.toLowerCase().includes(cr.campaign?.toLowerCase?.() || ''));
+    const adSetNames = ['Broad — Women 25-45', 'Lookalike — Streaming Subs', 'Retargeting — Site Visitors'];
+
+    content.innerHTML = `
+      <div class="view view-campaign-full" style="padding:0">
+        <!-- Campaign Header -->
+        <div class="cfull-header">
+          <div class="cfull-header-top">
+            <button class="btn btn-xs btn-ghost" onclick="location.hash='campaigns'" style="margin-right:var(--space-3)">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3L5 8l5 5"/></svg>
+              Back to Campaigns
+            </button>
+            <div class="cfull-title-area">
+              <h1 class="cfull-title">${c.name}</h1>
+              <div class="cfull-badges">
+                <span class="badge badge-${c.status === 'active' ? 'positive' : c.status === 'paused' ? 'warning' : c.status === 'requires_action' ? 'negative' : 'gray'}">${capitalize(c.status).replace('_', ' ')}</span>
+                <span class="badge badge-gray">${c.objective}</span>
+                <span class="bidding-state state-${c.biddingState}"><span class="bidding-dot ${c.biddingState}"></span> ${capitalize(c.biddingState)}</span>
+              </div>
+            </div>
+            <div class="cfull-actions">
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.toggleCampaignStatus('${c.id}')">${c.status === 'active' ? '⏸ Pause' : '▶ Resume'}</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.openModal('editCampaign','${c.id}')">✏️ Edit</button>
+              <button class="btn btn-xs btn-ghost" onclick="RoktAds.duplicateCampaign('${c.id}')">⧉ Duplicate</button>
+              <button class="btn btn-xs btn-ghost" style="color:var(--negative)" onclick="RoktAds.archiveCampaign('${c.id}')">Archive</button>
+            </div>
+          </div>
+          <!-- KPI Strip -->
+          <div class="cfull-kpi-strip">
+            ${[
+              { l: 'Spend', v: '$' + fmtNum(c.spend), sub: Math.round(c.spend/c.budget*100) + '% of $' + fmtNum(c.budget) },
+              { l: 'Conversions', v: fmtNum(c.conversions), sub: c.cvr + '% conversion rate' },
+              { l: 'CPA', v: '$' + c.cpa.toFixed(2), sub: c.cpaTarget ? 'Target: $' + c.cpaTarget.toFixed(2) : 'No target', warn: c.cpaTarget && c.cpa > c.cpaTarget },
+              { l: 'CoPI', v: c.copi + '%', sub: 'Cost of Positive Interaction', hero: true },
+              { l: 'ROAS', v: c.roas + 'x', sub: 'Return on ad spend' },
+              { l: 'Ref. Rate', v: c.ctr + '%', sub: fmtNum(c.impressions) + ' impressions' },
+              { l: 'Int. Health', v: c.integrationHealth + '/10', sub: c.integrationHealth >= 7 ? 'Good' : c.integrationHealth >= 5 ? 'Needs attention' : 'Critical', color: c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)' },
+              { l: 'AI Score', v: c.aiHealthScore + '/100', sub: c.aiHealthScore >= 80 ? 'Healthy' : c.aiHealthScore >= 60 ? 'Fair' : 'At risk', color: c.aiHealthScore >= 80 ? 'var(--positive)' : c.aiHealthScore >= 60 ? 'var(--warning)' : 'var(--negative)' },
+            ].map(m => `
+              <div class="cfull-kpi ${m.hero ? 'cfull-kpi--hero' : ''}">
+                <div class="cfull-kpi-label">${m.l}</div>
+                <div class="cfull-kpi-value mono" ${m.color ? `style="color:${m.color}"` : ''} ${m.warn ? 'style="color:var(--negative)"' : ''}>${m.v}</div>
+                <div class="cfull-kpi-sub">${m.sub}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="cfull-grid">
+          <!-- Left Column: Charts & Performance -->
+          <div class="cfull-main">
+            <!-- AI Analysis -->
+            <div class="card">
+              <div class="card-header" style="border-bottom:1px solid var(--border)">
+                <h3 class="card-title"><svg width="14" height="14" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg> AI Analysis</h3>
+              </div>
+              <div class="card-body">
+                <div style="font-size:13px;line-height:1.6;color:var(--text-secondary)">${aiAnalysis}</div>
+                <div style="display:flex;gap:8px;margin-top:var(--space-3)">
+                  <button class="btn btn-xs btn-primary btn-pill" onclick="RoktAds.toast('Generating optimization suggestions...','info')">Get Suggestions</button>
+                  <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Opening deep dive analysis...','info')">Deep Dive</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spend Chart -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Spend Performance</h3>
+                <div class="filter-pills">
+                  <button class="filter-pill active cfull-chart-range" data-range="7D">7D</button>
+                  <button class="filter-pill cfull-chart-range" data-range="30D">30D</button>
+                  <button class="filter-pill cfull-chart-range" data-range="MTD">MTD</button>
+                </div>
+              </div>
+              <div class="card-body" id="cfullSpendChart">
+                <svg width="100%" height="200" viewBox="0 0 700 200" preserveAspectRatio="none">
+                  <defs>
+                    <symbol id="rDotFull" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>
+                    <linearGradient id="fullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient>
+                  </defs>
+                  ${(() => {
+                    const d = c.dailySpend;
+                    const maxV = Math.max(...d);
+                    const w = 700, h = 180;
+                    const pts = d.map((v, i) => `${i * w / (d.length - 1)},${h - (v / maxV) * (h - 20)}`).join(' ');
+                    const fill = pts + ` ${w},${h} 0,${h}`;
+                    const dots = d.map((v, i) => `<use href="#rDotFull" x="${i * w / (d.length - 1) - 5}" y="${h - (v / maxV) * (h - 20) - 5}" width="10" height="10" color="var(--beetroot)"/>`).join('');
+                    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                    const labels = d.map((_, i) => `<text x="${i * w / (d.length - 1)}" y="198" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">${days[i] || ''}</text>`).join('');
+                    return `<polygon points="${fill}" fill="url(#fullGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>${dots}${labels}`;
+                  })()}
+                </svg>
+              </div>
+            </div>
+
+            <!-- Analytics Table -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Detailed Metrics</h3>
+              </div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead><tr><th>METRIC</th><th>VALUE</th><th>VS TARGET</th><th>7D TREND</th></tr></thead>
+                  <tbody>
+                    <tr><td>Spend</td><td class="mono">$${fmtNum(c.spend)}</td><td class="mono">$${fmtNum(c.budget)} budget</td><td>${Math.round(c.spend/c.budget*100)}% paced</td></tr>
+                    <tr><td>CPA</td><td class="mono">$${c.cpa.toFixed(2)}</td><td class="mono" style="color:${c.cpaTarget && c.cpa > c.cpaTarget ? 'var(--negative)' : 'var(--positive)'}">${c.cpaTarget ? '$' + c.cpaTarget.toFixed(2) : 'N/A'}</td><td>${c.trendDir === 'up' ? '<span class="trend-up">↑ Improving</span>' : c.trendDir === 'down' ? '<span class="trend-down">↓ Declining</span>' : '→ Stable'}</td></tr>
+                    <tr><td>CoPI</td><td class="mono">${c.copi}%</td><td>—</td><td>${c.trendDir === 'up' ? '<span class="trend-up">↑</span>' : c.trendDir === 'down' ? '<span class="trend-down">↓</span>' : '→'}</td></tr>
+                    <tr><td>ROAS</td><td class="mono">${c.roas}x</td><td>—</td><td>—</td></tr>
+                    <tr><td>Ref. Rate</td><td class="mono">${c.ctr}%</td><td>—</td><td>—</td></tr>
+                    <tr><td>CVR</td><td class="mono">${c.cvr}%</td><td>—</td><td>—</td></tr>
+                    <tr><td>Impressions</td><td class="mono">${fmtNum(c.impressions)}</td><td>—</td><td>—</td></tr>
+                    <tr><td>Clicks</td><td class="mono">${fmtNum(c.clicks)}</td><td>—</td><td>—</td></tr>
+                    <tr><td>Conversions</td><td class="mono">${fmtNum(c.conversions)}</td><td>—</td><td>—</td></tr>
+                    <tr><td>Integration Health</td><td class="mono" style="color:${c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${c.integrationHealth}/10</td><td>Threshold: 5.0</td><td>—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Sidebar Cards -->
+          <div class="cfull-sidebar">
+            <!-- Budget & Pacing -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Budget & Pacing</h3></div>
+              <div class="card-body">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                  <span style="font-size:12px;color:var(--text-tertiary)">Spend</span>
+                  <span class="mono" style="font-size:12px">$${fmtNum(c.spend)} / $${fmtNum(c.budget)}</span>
+                </div>
+                <div class="progress-bar"><div class="progress-bar-fill" style="width:${Math.round(c.spend/c.budget*100)}%;background:${c.spend/c.budget > 0.85 ? 'var(--warning)' : 'var(--beetroot)'}"></div></div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px">${Math.round(c.spend/c.budget*100)}% spent · Est. ${Math.round((c.budget - c.spend) / (c.spend / 20 || 1))} days remaining</div>
+              </div>
+            </div>
+
+            <!-- Smart Bidding -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Smart Bidding</h3></div>
+              <div class="card-body">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                  <span class="bidding-state state-${c.biddingState}"><span class="bidding-dot ${c.biddingState}"></span> ${capitalize(c.biddingState)}</span>
+                </div>
+                ${c.biddingState === 'learning' ? `
+                  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Learning phase — gathering data</div>
+                  <div class="progress-bar"><div class="progress-bar-fill" style="width:60%;background:var(--warning)"></div></div>
+                  <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">~45/50 conversions to exit learning</div>
+                ` : c.biddingState === 'optimizing' ? `
+                  <div style="font-size:12px;color:var(--text-secondary)">Fully optimized — auto-adjusting bids toward ${c.objective} target</div>
+                ` : c.biddingState === 'limited' ? `
+                  <div style="font-size:12px;color:var(--warning)">Budget or audience too narrow — consider expanding</div>
+                ` : `
+                  <div style="font-size:12px;color:var(--text-tertiary)">Campaign not yet active</div>
+                `}
+              </div>
+            </div>
+
+            <!-- Ad Sets -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Ad Sets (${c.adSets})</h3>
+                <button class="btn btn-xs btn-ghost" onclick="RoktAds.toast('Add Ad Set modal coming soon','info')">+ Add</button>
+              </div>
+              <div class="card-body" style="padding:0">
+                ${Array.from({length: Math.min(c.adSets, 3)}, (_, i) => `
+                  <div style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);font-size:12px">
+                    <div style="font-weight:600;margin-bottom:2px">${adSetNames[i] || 'Ad Set ' + (i+1)}</div>
+                    <div style="color:var(--text-tertiary)">Smart Bidding · ${Math.ceil(c.creatives / 2)} creatives</div>
+                  </div>
+                `).join('')}
+                ${c.adSets === 0 ? '<div style="padding:var(--space-4);text-align:center;color:var(--text-tertiary);font-size:12px">No ad sets yet</div>' : ''}
+              </div>
+            </div>
+
+            <!-- Creatives -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Creatives (${campaignCreatives.length})</h3>
+                <button class="btn btn-xs btn-ghost" onclick="location.hash='creatives'">View All</button>
+              </div>
+              <div class="card-body" style="padding:0">
+                ${campaignCreatives.slice(0, 3).map(cr => `
+                  <div style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border);font-size:12px;cursor:pointer" onclick="location.hash='creatives'">
+                    <div style="font-weight:600;margin-bottom:2px">${cr.name}</div>
+                    <div style="display:flex;gap:12px;color:var(--text-tertiary)">
+                      <span>${cr.format}</span>
+                      <span>Ref. Rate: ${cr.ctr}%</span>
+                      <span>CoPI: ${cr.copi}%</span>
+                    </div>
+                  </div>
+                `).join('')}
+                ${campaignCreatives.length === 0 ? '<div style="padding:var(--space-4);text-align:center;color:var(--text-tertiary);font-size:12px">No creatives linked</div>' : ''}
+              </div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><svg width="12" height="12" viewBox="0 0 22 22" fill="none" stroke="var(--beetroot)" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>Recommendations</h3>
+              </div>
+              <div class="card-body">
+                ${(() => {
+                  const recs = [];
+                  if (c.creatives <= 2) recs.push({ icon: '🎨', text: 'Add more creatives to improve optimization', action: 'Create' });
+                  if (c.cpaTarget && c.cpa > c.cpaTarget) recs.push({ icon: '💰', text: 'CPA above target — consider expanding audience', action: 'Expand' });
+                  if (c.spend / c.budget > 0.8) recs.push({ icon: '📈', text: 'High pacing — increase budget to avoid early cap', action: 'Adjust' });
+                  if (c.integrationHealth < 7) recs.push({ icon: '🔗', text: 'Improve Integration Health for better matching', action: 'Fix' });
+                  if (c.biddingState === 'learning') recs.push({ icon: '🧠', text: 'Avoid major changes during learning phase', action: '' });
+                  if (recs.length === 0) recs.push({ icon: '✅', text: 'Campaign is performing well — no action needed', action: '' });
+                  return recs.map(r => `
+                    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:var(--space-3);font-size:12px">
+                      <span>${r.icon}</span>
+                      <div style="flex:1">
+                        <div style="color:var(--text-secondary)">${r.text}</div>
+                        ${r.action ? `<button class="btn btn-xs btn-primary btn-pill" style="margin-top:4px" onclick="RoktAds.toast('${r.action} action applied','success')">${r.action}</button>` : ''}
+                      </div>
+                    </div>
+                  `).join('');
+                })()}
+              </div>
+            </div>
+
+            <!-- Nurture Preview -->
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">Nurture Journey</h3></div>
+              <div class="card-body" style="text-align:center">
+                <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;font-size:11px">
+                  <div style="padding:6px 12px;border-radius:var(--radius-md);background:var(--surface-dark-hover);border:1px solid var(--border)">Welcome Email</div>
+                  <div style="color:var(--text-tertiary)">↓ 3 days</div>
+                  <div style="padding:6px 12px;border-radius:var(--radius-md);background:var(--surface-dark-hover);border:1px solid var(--border)">Reminder Email</div>
+                  <div style="color:var(--text-tertiary)">↓ 7 days</div>
+                  <div style="padding:6px 12px;border-radius:var(--radius-md);background:rgba(194,0,117,0.08);border:1px solid var(--beetroot);color:var(--beetroot)">Final Offer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wire chart range pills
+    content.querySelectorAll('.cfull-chart-range').forEach(pill => {
+      pill.addEventListener('click', () => {
+        content.querySelectorAll('.cfull-chart-range').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        // Simulate different data for different ranges
+        const range = pill.dataset.range;
+        const chartContainer = document.getElementById('cfullSpendChart');
+        if (!chartContainer) return;
+        let data;
+        if (range === '30D') {
+          data = [];
+          for (let i = 0; i < 30; i++) data.push(Math.round(c.dailySpend[i % 7] * (0.85 + Math.random() * 0.3)));
+        } else if (range === 'MTD') {
+          data = [];
+          for (let i = 0; i < 20; i++) data.push(Math.round(c.dailySpend[i % 7] * (0.9 + Math.random() * 0.2)));
+        } else {
+          data = c.dailySpend;
+        }
+        const maxV = Math.max(...data);
+        const w = 700, h = 180, n = data.length;
+        const pts = data.map((v, i) => `${i * w / (n - 1)},${h - (v / maxV) * (h - 20)}`).join(' ');
+        const fill = pts + ` ${w},${h} 0,${h}`;
+        const dots = data.map((v, i) => `<use href="#rDotFull" x="${i * w / (n - 1) - 5}" y="${h - (v / maxV) * (h - 20) - 5}" width="10" height="10" color="var(--beetroot)"/>`).join('');
+        const svg = chartContainer.querySelector('svg');
+        if (svg) svg.innerHTML = `<defs><symbol id="rDotFull" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol><linearGradient id="fullGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--beetroot)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--beetroot)" stop-opacity="0"/></linearGradient></defs><polygon points="${fill}" fill="url(#fullGrad)"/><polyline points="${pts}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>${dots}`;
+      });
+    });
+
+    // Update status bar
+    updateStatusBar();
+    initCardGlow();
   }
 
   function openCampaignDetail(id) {
@@ -993,7 +1283,7 @@ const RoktAds = (() => {
       { l: 'CPA', v: '$' + c.cpa.toFixed(2) },
       { l: 'ROAS', v: c.roas + 'x' },
       { l: 'Conversions', v: fmtNum(c.conversions) },
-      { l: 'CTR', v: c.ctr + '%' },
+      { l: 'Ref. Rate', v: c.ctr + '%' },
       { l: 'CoPI', v: c.copi + '%', hero: true },
       { l: 'Int. Health', v: c.integrationHealth, color: c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)' },
     ].map(m => `
@@ -1153,7 +1443,7 @@ const RoktAds = (() => {
               <div class="creative-mini-name">${cr.name}</div>
               <span class="badge badge-gray" style="margin-bottom:8px">${cr.format}</span>
               <div class="creative-mini-metrics">
-                <span>CTR: ${cr.ctr}%</span>
+                <span>Ref. Rate: ${cr.ctr}%</span>
                 <span>CVR: ${cr.cvr}%</span>
                 <span>CoPI: ${cr.copi}%</span>
               </div>
@@ -1172,7 +1462,7 @@ const RoktAds = (() => {
             <tr><td>CPA</td><td class="mono">$${c.cpa.toFixed(2)}</td><td class="mono" style="color:${c.cpaTarget && c.cpa > c.cpaTarget ? 'var(--negative)' : 'var(--positive)'}">Target: ${c.cpaTarget ? '$'+c.cpaTarget.toFixed(2) : 'N/A'}</td><td>${c.trendDir === 'up' ? '↑ Improving' : c.trendDir === 'down' ? '↓ Declining' : '→ Stable'}</td></tr>
             <tr><td>CoPI</td><td class="mono">${c.copi}%</td><td>—</td><td>${c.trendDir === 'up' ? '↑' : c.trendDir === 'down' ? '↓' : '→'}</td></tr>
             <tr><td>ROAS</td><td class="mono">${c.roas}x</td><td>—</td><td>—</td></tr>
-            <tr><td>CTR</td><td class="mono">${c.ctr}%</td><td>—</td><td>—</td></tr>
+            <tr><td>Ref. Rate</td><td class="mono">${c.ctr}%</td><td>—</td><td>—</td></tr>
             <tr><td>CVR</td><td class="mono">${c.cvr}%</td><td>—</td><td>—</td></tr>
             <tr><td>Integration Health</td><td class="mono" style="color:${c.integrationHealth >= 7 ? 'var(--positive)' : c.integrationHealth >= 5 ? 'var(--warning)' : 'var(--negative)'}">${c.integrationHealth}/10</td><td>—</td><td>—</td></tr>
           </tbody>
@@ -2016,9 +2306,9 @@ const RoktAds = (() => {
             </div>
           </div>
 
-          <button class="ai-generate-btn-large" onclick="RoktAds.toast('Generating 4 AI creative variations...','info')">
+          <button class="ai-generate-btn-large" onclick="RoktAds.toast('ACE generating 4 creative variations...','info')">
             <svg width="16" height="16" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2L13.5 8.5L20 11L13.5 13.5L11 20L8.5 13.5L2 11L8.5 8.5L11 2Z"/></svg>
-            AI Generate 4 Variations
+            ACE Generate 4 Variations
           </button>
 
           ${renderAdStrengthGauge()}
@@ -2858,7 +3148,7 @@ const RoktAds = (() => {
     const tbody = document.getElementById('reportTableBody');
     if (!thead || !tbody) return;
 
-    const cols = ['Campaign', 'Impressions', 'Clicks', 'CTR', 'Conversions', 'CPA', 'ROAS', 'CoPI', 'Spend'];
+    const cols = ['Campaign', 'Impressions', 'Clicks', 'Ref. Rate', 'Conversions', 'CPA', 'ROAS', 'CoPI', 'Spend'];
     thead.innerHTML = `<tr>${cols.map(c => `<th class="sortable" onclick="RoktAds.sortReport('${c}')">${c} <span class="sort-arrow">${reportSort.col === c ? (reportSort.dir === 'asc' ? '↑' : '↓') : '↕'}</span></th>`).join('')}</tr>`;
 
     let data = campaigns.filter(c => c.status !== 'draft');
@@ -3522,7 +3812,7 @@ const RoktAds = (() => {
             </div>
             <div class="form-group">
               <label class="form-label">Success Metric</label>
-              <select class="form-select"><option>CoPI</option><option>CPA</option><option>ROAS</option><option>CTR</option><option>CVR</option></select>
+              <select class="form-select"><option>CoPI</option><option>CPA</option><option>ROAS</option><option>Ref. Rate</option><option>CVR</option></select>
             </div>
           </div>
           <div class="modal-footer">
@@ -4472,6 +4762,11 @@ const RoktAds = (() => {
     // Router: hash-based navigation
     function handleRoute() {
       const hash = location.hash.slice(1) || 'dashboard';
+      if (hash.startsWith('campaign/')) {
+        const cId = hash.split('/')[1];
+        renderCampaignFullView(cId);
+        return;
+      }
       navigate(hash);
     }
     window.addEventListener('hashchange', handleRoute);
@@ -5130,6 +5425,7 @@ const RoktAds = (() => {
     switchAdvertiser,
     showAdvertiserPicker,
     toggleFavorite,
+    renderCampaignFullView,
     // Entity CRUD & utilities
     createAudience,
     createLookalike,
