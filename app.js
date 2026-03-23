@@ -1479,8 +1479,24 @@ const RoktAds = (() => {
           </div>
           <div class="detail-stat-card">
             <div class="detail-stat-label">Smart Bidding</div>
-            <div class="detail-stat-value"><span class="bidding-state state-${c.biddingState}"><span class="bidding-dot ${c.biddingState}"></span> ${capitalize(c.biddingState)}</span></div>
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">${c.biddingState === 'learning' ? '~45 conversions to Optimizing' : c.biddingState === 'limited' ? 'Budget or audience too narrow' : 'Fully optimized'}</div>
+            <div class="detail-stat-value" style="margin-bottom:6px">
+              <span class="bidding-state state-${c.biddingState}">
+                <span class="bidding-dot ${c.biddingState}"></span> ${capitalize(c.biddingState)}
+              </span>
+            </div>
+            ${c.biddingState === 'learning' ? `
+              <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">
+                ${Math.min(c.conversions, 45)}/50 conversions to exit learning
+              </div>
+              <div class="progress-bar" style="margin-bottom:6px">
+                <div class="progress-bar-fill" style="width:${Math.min(100, Math.round(c.conversions/50*100))}%;background:var(--warning);transition:width 0.8s ease"></div>
+              </div>
+              <div style="font-size:10px;color:var(--warning)">⚠ Avoid major changes during learning</div>
+            ` : c.biddingState === 'limited' ? `
+              <div style="font-size:10px;color:var(--warning);margin-top:4px">Budget or audience too narrow — expand to unlock full optimization</div>
+            ` : `
+              <div style="font-size:10px;color:var(--positive);margin-top:4px">✓ Fully optimized — 500+ conversions in signal window</div>
+            `}
           </div>
           <div class="detail-stat-card">
             <div class="detail-stat-label">Impressions</div>
@@ -3032,6 +3048,8 @@ const RoktAds = (() => {
     // Search
     const search = document.getElementById('audienceSearch');
     if (search) search.addEventListener('input', () => renderAudienceGrid('all', search.value));
+
+    renderAIAudienceSuggestions();
   }
 
   function renderAudienceGrid(type = 'all', search = '') {
@@ -3072,6 +3090,49 @@ const RoktAds = (() => {
       </div>
     `).join('');
     initCardGlow();
+  }
+
+  function renderAIAudienceSuggestions() {
+    const container = document.getElementById('aiAudienceSuggestions');
+    if (!container) return;
+
+    const suggestions = [
+      { name: 'High-Intent Streamers LAL', type: 'LAL', size: '~8.2M', matchRate: '74%', reason: 'Lookalike of top-converting Women 25-45 segment — est. +35% conversion lift' },
+      { name: 'Disney+ Reactivation Segment', type: 'Custom', size: '~1.4M', matchRate: '91%', reason: 'Former subscribers who lapsed 60-180 days ago — high re-engagement potential' },
+      { name: 'Premium Household Behavioral', type: 'Behavioral', size: '~12.1M', matchRate: '68%', reason: 'Households spending 2x+ on streaming — strong expansion opportunity' },
+    ];
+
+    const cardsHTML = suggestions.map((s, i) => `
+      <div class="ai-audience-suggestion-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-2)">
+          <span style="font-size:11px;color:var(--beetroot);font-weight:600">✦ Suggested for you</span>
+          <span class="badge" style="background:color-mix(in srgb,var(--beetroot) 15%,transparent);color:var(--beetroot);font-size:10px;padding:2px 6px">AI</span>
+        </div>
+        <div class="ai-audience-suggestion-name">${s.name}</div>
+        <div style="margin-bottom:var(--space-2)"><span class="badge badge-gray">${s.type}</span></div>
+        <div class="ai-audience-suggestion-stats">
+          <span>${s.size} users</span>
+          <span>${s.matchRate} predicted</span>
+        </div>
+        <div class="ai-audience-suggestion-reason">${s.reason}</div>
+        <div class="ai-audience-suggestion-actions">
+          <button class="btn btn-primary btn-sm" onclick="(function(btn){toast('Creating audience...','info');setTimeout(()=>toast('Audience created!','success'),1000)})(this)">Create Audience</button>
+          <button class="btn btn-ghost btn-sm" onclick="location.hash='audience/a1'">Preview</button>
+        </div>
+      </div>
+    `).join('');
+
+    container.innerHTML = `
+      <div class="ai-audience-suggestions-section">
+        <div class="ai-audience-suggestions-header">
+          <span>✦ AI Recommended Audiences</span>
+          <span style="font-size:11px;color:var(--text-tertiary)">Based on your active campaigns</span>
+        </div>
+        <div class="ai-audience-suggestions-grid">
+          ${cardsHTML}
+        </div>
+      </div>
+    `;
   }
 
   // ── Audience Full View ─────────────────────────────────────
@@ -4023,6 +4084,79 @@ const RoktAds = (() => {
     }
   }
 
+  function scoreCreative(title, body, cta) {
+    let score = 5.0;
+    if (title && title.length >= 10 && title.length <= 40) score += 1.2;
+    if (body && body.length >= 30 && body.length <= 120) score += 1.0;
+    if (cta && cta.length >= 5 && cta.length <= 20) score += 0.8;
+    if (title && (title.includes('!') || title.includes('%') || title.includes('$'))) score += 0.3;
+    if (body && body.split(' ').length > 8) score += 0.4;
+    score = Math.min(9.9, Math.max(3.0, score));
+    return Math.round(score * 10) / 10;
+  }
+
+  function updateCreativeAIScore() {
+    const title = document.getElementById('creativeTitle')?.value || '';
+    const body = document.getElementById('creativeBody')?.value || '';
+    const cta = document.getElementById('creativeCta')?.value || '';
+    const score = scoreCreative(title, body, cta);
+    const scoreEl = document.getElementById('creativeScoreValue');
+    const arcEl = document.getElementById('creativeScoreArc');
+    const breakdownEl = document.getElementById('creativeScoreBreakdown');
+    if (scoreEl) scoreEl.textContent = score.toFixed(1);
+    if (arcEl) {
+      const pct = (score / 10) * 113;
+      arcEl.setAttribute('stroke-dasharray', `${pct} ${113 - pct}`);
+      arcEl.style.stroke = score >= 8 ? 'var(--positive)' : score >= 6 ? 'var(--beetroot)' : 'var(--warning)';
+    }
+    if (breakdownEl) {
+      const dims = [];
+      if (title.length >= 10) dims.push('<span class="score-dim good">✓ Title length</span>');
+      else dims.push('<span class="score-dim warn">⚠ Short title</span>');
+      if (cta.length >= 5) dims.push('<span class="score-dim good">✓ CTA strength</span>');
+      else dims.push('<span class="score-dim bad">✗ Weak CTA</span>');
+      if (body.split(' ').length >= 10) dims.push('<span class="score-dim good">✓ Body detail</span>');
+      else dims.push('<span class="score-dim warn">⚠ Body specificity</span>');
+      breakdownEl.innerHTML = dims.join('');
+    }
+  }
+
+  function enhanceCreative() {
+    const titleEl = document.getElementById('creativeTitle');
+    if (!titleEl) return;
+    const original = titleEl.value;
+    if (!original.includes('!')) titleEl.value = original + '!';
+    toast('Creative enhanced by ACE — score improved', 'success');
+    titleEl.dispatchEvent(new Event('input'));
+    updateCreativeAIScore();
+  }
+
+  function generateVariants() {
+    const panel = document.getElementById('creativeVariantsPanel');
+    if (!panel) return;
+    const baseTitle = document.getElementById('creativeTitle')?.value || 'Stream for Less';
+    const base = baseTitle.replace(/!$/, '');
+    const variants = [
+      { title: base + ' — Limited Offer!', score: 8.4, angle: 'Urgency' },
+      { title: 'Why Millions Love ' + (base.split(' ').pop() || 'It'), score: 7.9, angle: 'Social Proof' },
+      { title: 'Get Started Today — ' + base, score: 7.2, angle: 'Action-First' },
+    ];
+    panel.style.display = 'block';
+    panel.innerHTML = `
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px;color:var(--text-secondary)">A/B VARIANT SUGGESTIONS</div>
+      ${variants.map(v => `
+        <div class="creative-variant-card">
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:600">${v.title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">${v.angle} · Score: <span style="color:var(--positive);font-family:var(--font-mono)">${v.score}</span></div>
+          </div>
+          <button class="btn btn-xs btn-ghost" onclick="(function(){var t=document.getElementById('creativeTitle');if(t){t.value=${JSON.stringify(v.title)};t.dispatchEvent(new Event('input'));}RoktAds.updateCreativeAIScore();RoktAds.toast('Variant applied','success');})()">Use</button>
+        </div>
+      `).join('')}
+    `;
+    toast('Generated 3 A/B variants', 'success');
+  }
+
   function updateCreativePreviewFormat(format) {
     const card = document.getElementById('creativePreviewCard'); if (!card) return;
     const body = document.getElementById('previewBody');
@@ -4092,6 +4226,13 @@ const RoktAds = (() => {
         if (card) card.style.maxWidth = btn.dataset.device === 'mobile' ? '260px' : '300px';
       });
     });
+
+    // AI score live updates
+    ['creativeTitle', 'creativeBody', 'creativeCta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', updateCreativeAIScore);
+    });
+    updateCreativeAIScore();
   }
 
   function insertAttr(attr) {
@@ -6643,6 +6784,10 @@ const RoktAds = (() => {
     applyFilter,
     insertAttr,
     selectCreative,
+    scoreCreative,
+    updateCreativeAIScore,
+    enhanceCreative,
+    generateVariants,
     sortReport,
     // Phase 1: Campaign builder
     persistField,
@@ -6701,5 +6846,6 @@ const RoktAds = (() => {
     filterPartners,
     updatePacingChart,
     renderPortfolioDashboard,
+    renderAIAudienceSuggestions,
   };
 })();

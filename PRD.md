@@ -2,49 +2,82 @@
 
 ## Product Requirements Document (PRD)
 
-**Version:** 4.0
-**Date:** March 20, 2026
+**Version:** 5.0
+**Date:** March 23, 2026
 **Author:** Max Dowaliby + Claude (AI-assisted design)
-**Status:** Prototype Complete — fully interactive SPA with 18 views, AI-native features, advertiser-scoped data model, and comprehensive entity management
+**Status:** Prototype Complete — fully interactive SPA with 18+ views, AI-native features, advertiser-scoped data model, and comprehensive entity management
 
 ---
 
-## 1. Executive Summary
+## 1. Overview
 
-Rokt Ads is a next-generation media buying platform prototype, designed to showcase what an AI-native advertising platform looks like when built from scratch rather than bolted onto legacy infrastructure. The prototype is a fully interactive, zero-dependency HTML/CSS/JS single-page application — no frameworks, no build tools, no npm. Open `index.html` in any browser.
+Rokt Ads is a next-generation media buying platform prototype designed to demonstrate what an AI-native advertising platform looks like when built from scratch rather than bolted onto legacy infrastructure. The prototype is a fully interactive, zero-dependency HTML/CSS/JS single-page application — no frameworks, no build tools, no npm. Open `index.html` in any browser.
 
 ### Platform at a Glance
 
 | Dimension | Detail |
 |---|---|
-| **Views** | 18 interconnected views with hash-based routing and sub-routes |
+| **Views** | 18+ interconnected views with hash-based routing and sub-routes |
 | **Architecture** | Vanilla HTML/CSS/JS SPA, IIFE module pattern, `RoktAds` global namespace |
-| **Theming** | Dark/light mode with Rokt Beetroot (#C20075) brand accent |
-| **Navigation** | Hash-based routing with sub-routes (#campaign/{id}, #audience/{id}, #creative/{id}) |
+| **Theming** | Dark/light mode with Rokt Beetroot (`#C20075`) brand accent |
+| **Navigation** | Hash-based routing with sub-routes (`#campaign/{id}`, `#audience/{id}`, `#creative/{id}`) |
 | **Data Model** | Advertiser-scoped — all views filter to selected advertiser context |
-| **AI Integration** | AI Hero prompt, ACE creative engine, Copilot drawer, optimization scoring, recommendations throughout |
-| **Keyboard** | 15+ shortcuts with visual chord feedback, command palette (Cmd+K) |
-| **Accessibility** | Responsive layout, keyboard-navigable, semantic HTML |
-| **Source Files** | index.html (~910 lines), styles.css (~6,380 lines), app.js (~6,550 lines) |
+| **AI Integration** | AI Hero prompt, ACE creative scoring engine, Copilot drawer, optimization scoring, recommendations throughout |
+| **Keyboard** | 15+ shortcuts with visual chord feedback and nav overlay badges; command palette (Cmd+K) |
+| **Source Files** | `index.html` (~960 lines), `styles.css` (~6,600 lines), `app.js` (~6,900 lines) |
 | **Dependencies** | Zero. No frameworks, no build tools, no node_modules |
 
 ---
 
-## 2. Design System
+## 2. Architecture
 
-### 2.1 Color Palette
+### 2.1 Module Pattern
 
-**Dark Mode (Default)**
+All logic lives in a single IIFE (`const RoktAds = (() => { ... })()`), exporting a public API on `window.RoktAds`. This gives a clean global namespace without a build step.
+
+### 2.2 Hash-Based Router
+
+`window.addEventListener('hashchange', handleRoute)` intercepts all navigation. Sub-routes (`campaign/c1`, `audience/a1`, `creative/cr1`) are parsed from `location.hash` to render full-screen entity detail views. All other routes call `navigate(view)` which clones an `<template id="tmpl-{view}">` into `#content` and runs the view's init function.
+
+View transitions: exit animation (150ms fade) → clone template → enter animation. Each init function fires inside `requestAnimationFrame` for smooth rendering.
+
+### 2.3 Dark/Light Theming
+
+`data-theme` attribute on `<html>` switches between dark and light token sets. All colors are CSS custom properties (`--beetroot`, `--surface-dark`, `--text-primary`, etc.). Toggle via `Cmd+D` or the theme button in the sidebar footer.
+
+### 2.4 Advertiser Scoping
+
+All data accessors (`getFilteredCampaigns()`, `getFilteredAudiences()`, `getFilteredCreatives()`, `getFilteredOffers()`) check `selectedAdvertiser` and return the matching subset. Picker selection sets `selectedAdvertiser` and all views re-render from that scope. Portfolio mode (`selectedAdvertiser === 'all'`) aggregates across all advertisers.
+
+### 2.5 File Structure
+
+```
+rokt-ads-prototype/
+├── index.html      # ~960 lines — SPA shell, <template> blocks for each view
+├── styles.css      # ~6,600 lines — Design tokens, components, animations, themes
+├── app.js          # ~6,900 lines — IIFE module, router, data, interactions
+└── PRD.md          # This document
+```
+
+---
+
+## 3. Design System
+
+### 3.1 Brand Color
+
+**Beetroot: `#C20075`** — primary CTA, active states, chart fills, AI indicators, campaign status bars.
+
+### 3.2 Color Tokens
+
+**Dark Mode (default)**
 
 | Token | Value | Usage |
 |---|---|---|
-| `--wine` | `#C43B52` | Primary brand accent, CTAs, active states |
-| `--wine-light` | `#D4556A` | Hover states, gradient endpoints |
-| `--wine-subtle` | `rgba(196,59,82,0.08)` | Subtle backgrounds, selected rows |
-| `--brand-blue` | `#4D65FF` | Focus outlines, secondary accent, links |
+| `--beetroot` | `#C20075` | Brand accent, CTAs, active states |
 | `--surface-dark` | `#0B0F1A` | Sidebar background |
 | `--surface-white` | `#161D2E` | Main content background |
 | `--surface-light` | `#1C2438` | Cards, elevated surfaces |
+| `--brand-blue` | `#4D65FF` | Focus outlines, secondary accent, links |
 | `--border` | `rgba(255,255,255,0.06)` | Default borders |
 | `--text-primary` | `#F0F2F5` | Body text |
 | `--text-secondary` | `#8B95A8` | Labels, metadata |
@@ -52,864 +85,1089 @@ Rokt Ads is a next-generation media buying platform prototype, designed to showc
 | `--warning` | `#F59E0B` | Attention needed, above target |
 | `--negative` | `#EF4444` | Errors, declining, critical |
 
-**Light Mode** — Toggled via theme button or `Cmd+D`. Uses warm-tinted surfaces (not cold pure-white) with 9 overlay opacity tokens that automatically flip between dark and light mode. All components verified in both themes.
+**Light Mode** — warm-tinted surfaces (not cold pure-white). All 9 overlay opacity tokens flip automatically. All components verified in both themes.
 
-### 2.2 Typography
+### 3.3 Typography
 
 | Element | Font | Weight | Size |
 |---|---|---|---|
-| UI text | Inter | 400/500/600/700 | 11-16px |
-| Data/metrics | JetBrains Mono | 500/600 | 11-32px |
-| KPI hero values | JetBrains Mono | 700 | 32px |
-| KPI labels | Inter | 600 | 10px uppercase |
-| Table headers | Inter | 600 | 11px uppercase |
-| Badges | Inter | 600 | 11px |
+| UI text | Archivo | 400/500/600/700 | 11–16px |
+| Data / metrics | Roboto Mono | 400/500 | 11–32px |
+| KPI hero values | Roboto Mono | 700 | 32px |
+| KPI labels | Archivo | 600 | 10px uppercase |
+| Table headers | Archivo | 600 | 11px uppercase |
+| Badges | Archivo | 600 | 11px |
 
-### 2.3 Spacing, Radius & Shadows
-
-- **Spacing:** 4px grid base (`--space-1` through `--space-8`)
-- **Radius:** Cards 12px, Inputs 8px, Badges/Pills 9999px, Modals 16px
-- **Shadows:** 4-tier system — subtle (sm), elevated (md), floating (lg), ultra (xl)
-
-### 2.4 Animations
+### 3.4 Animations
 
 | Animation | Duration | Purpose |
 |---|---|---|
 | `fadeSlideIn` | 200ms | Page transitions, view entry |
 | `modalIn` | 200ms | Modal open (spring feel) |
-| `pulse` | 2-2.5s | Active campaign dots, bidding states |
+| `pulse` | 2–2.5s | Active campaign status dots, bidding states |
 | `breathe` | 3s | AI Copilot FAB glow |
-| `confettiFall` | 1.5s | Campaign launch celebration |
+| `confettiFall` | 1.5s | Campaign launch celebration (60 particles) |
 | `shimmer` | 1.5s | Loading skeleton states, progress bars |
-| `drawLine` | 600ms | Chart line animation |
-| Counter roll-up | 800ms | KPI number animation |
-| Staggered entrance | 60ms delay per card | Card cascade effect |
-| Mouse-tracking glow | Real-time | Card hover radial gradient |
+| `drawLine` | 600ms | SVG chart line animation |
+| Counter roll-up | 800ms | KPI number animation (cubic ease-out) |
+| Staggered entrance | 60ms delay per card | Card cascade on view load |
+| Mouse-tracking glow | Real-time | Card hover radial gradient via `--mouse-x/y` CSS vars |
 | Gradient mesh | Continuous | Dashboard background drift |
+| AI sparkles | 500ms per spark | Cursor sparkles on hover over AI elements |
+
+### 3.5 Components
+
+- **Cards** — 12px radius, `--surface-light` background, `--border` outline, mouse-tracking glow effect
+- **Badges** — pill-shaped, semantic color variants: `positive`, `negative`, `warning`, `wine`, `blue`, `gray`
+- **Buttons** — Primary (beetroot), Ghost (transparent), small `btn-xs` and pill `btn-pill` modifiers
+- **Inputs** — 8px radius, `--border` outline, focus ring with `--brand-blue`
+- **Progress bars** — shimmer animation, color changes to `--warning` when >85% paced
+- **Filter pills** — Active state with beetroot background; used for view tabs, date ranges, type filters
 
 ---
 
-## 3. Global Shell
+## 4. Global Shell
 
-### 3.1 Sidebar Navigation
+### 4.1 Sidebar Navigation
 
-Fixed left panel, 240px wide. Collapses to 60px icon-only mode via always-visible toggle button.
+Fixed left panel, 240px wide. Collapses to 60px icon-only mode via always-visible toggle button (`.sidebar-toggle-btn`). Active item shows beetroot left accent bar and tinted background.
 
-**Grouped Navigation Sections:**
-- **Workspace** — Dashboard, Portfolio
-- **Build** — Campaigns, Audiences, Creatives, Catalog (Offers)
+**Navigation sections:**
+- **Workspace** — Command Center (Dashboard)
+- **Campaigns** — Campaigns (with badge count for `requires_action` items)
+- **Build** — Audiences, Creative Studio, Offers
 - **Analyze** — Intelligence, Measurement
 - **Settings** — Account
 
-**Visual indicators:**
-- Active item: Beetroot left accent bar + wine background tint
-- Badge counts on items needing attention
-- Sidebar footer: Keyboard shortcuts button, theme toggle
-- "Switch Advertiser" button always visible
+**Sidebar footer:** Keyboard shortcuts button, theme toggle (sun/moon icons), "Switch Advertiser" button.
 
-### 3.2 Top Bar
+### 4.2 Top Bar
 
-- **Left:** Account switcher dropdown (current advertiser name + chevron, quick-switch for recent/favorites, "View All Advertisers" link)
-- **Center:** Search trigger pill ("Cmd+K") — contextual placeholder text cycles based on current view
-- **Right:** Notification bell (badge count, dropdown with 4 notifications by type), keyboard shortcuts button, user avatar with online status dot
+- **Left:** Account switcher dropdown — shows current advertiser avatar + name + chevron. Dropdown lists recent/favorites with quick switch, "View All Advertisers" link returns to picker.
+- **Center:** Search trigger pill showing "Cmd+K" — clicking opens command palette. Placeholder text is contextual: "Search campaigns...", "Find audiences...", etc., based on current view. Placeholder also cycles through phrases every 3s with fade transition.
+- **Right:** Notification bell (badge count, dropdown with 4 notifications by type), keyboard shortcuts button, user avatar with online status dot.
 
-### 3.3 Context Alert Bar
+### 4.3 Context Alert Bar
 
-View-specific warnings below topbar with "Fix Now" action button:
-- Dashboard: EMQ degradation alerts
-- Campaigns: CPA above target warnings
-- Measurement: Missing identifier alerts
-- Creative Studio: Creative refresh overdue warnings
+View-specific warning bar below the top bar with a "Fix Now" action button. Alerts:
+- **Dashboard / Campaigns:** "Integration Health dropped below 5.0 on True Classic — conversion tracking may be degraded"
+- **Measurement:** "Phone identifier is missing from CAPI integration — estimated +1.5 Integration Health impact"
+- **Creative Studio:** "Creative refresh overdue on 2 campaigns — last updated 47 days ago"
 
-### 3.4 Status Bar
+Hidden on views with no alert.
 
-Fixed bottom bar: `Active Campaigns | Today's Spend | System Health | Smart Bidding Status`
+### 4.4 Status Bar
 
-### 3.5 Toast Notifications
+Fixed bottom bar displaying real-time aggregate stats: Active Campaigns | Today's Spend | System Health | Smart Bidding Status. Updates on every navigation event via `updateStatusBar()`.
 
-Top-right position. Types: Success (green), Error (red), Info (blue), Warning (amber). Auto-dismiss with progress indicator bar. Slide-in animation.
+### 4.5 Toast Notifications
+
+Top-right position. Types: Success (green), Error (red), Info (blue), Warning (amber). Auto-dismiss with animated progress bar indicator. Slide-in from right. Accessible via `RoktAds.toast(message, type)`.
 
 ---
 
-## 4. Views & Features
+## 5. Views & Routes
 
-### 4.1 Advertiser Picker (Entry Gate)
+### Route Table
 
-**Route:** App load (before any view is accessible)
+| Route | View | Notes |
+|---|---|---|
+| `#dashboard` | Command Center | Default after advertiser selection |
+| `#campaigns` | Campaign list + detail sidebar | |
+| `#campaign/{id}` | Campaign full view | Sub-route, rendered directly |
+| `#builder` | Campaign builder wizard | |
+| `#audiences` | Audience library | |
+| `#audience/{id}` | Audience detail view | Sub-route |
+| `#creatives` | Creative Studio | 3-panel layout |
+| `#creative/{id}` | Creative detail view | Sub-route |
+| `#offers` | Offers + product catalog | |
+| `#intelligence` | Reports + Experiments tabs | |
+| `#network-analyzer` | Network Analyzer & Forecaster | |
+| `#measurement` | Measurement / Attribution | |
+| `#advertiser-profile` | Advertiser Profile | |
+| `#account` | Account / Settings | |
 
-Full-page advertiser selection screen. Users must select an advertiser before accessing the platform.
+---
+
+## 6. Advertiser Picker (Entry Gate)
+
+**Trigger:** App load before any view is accessible. Full-page overlay blocks access until an advertiser is selected.
 
 **Sections:**
-- **Favorites** — Starred advertisers for quick access
-- **Recents** — Recently accessed accounts
-- **All Advertisers** — Complete list with search
-- **Portfolio Dashboard** — Cross-advertiser aggregate view option
+- **Favorites** — Star-favorited advertisers. Each card shows avatar (colored initials), name, active campaign count, total spend. Favoriting toggleable via star button.
+- **Recents** — Recently accessed accounts ordered by `lastAccessed` date.
+- **All Advertisers** — Complete list with search filter (`#pickerSearch` input).
 
-Once selected, all views are scoped to that advertiser. The topbar account switcher provides quick switching without returning to the full picker.
+**Picker card:** Advertiser avatar (branded color background), name, last accessed date, active campaigns, spend. Click navigates into the app scoped to that advertiser.
 
-### 4.2 Command Center (Dashboard)
+**Portfolio option:** Selecting "Portfolio Dashboard" sets `selectedAdvertiser = 'all'` and renders the cross-advertiser portfolio view.
 
-**Route:** `#dashboard` (default after advertiser selection)
+**6 mock advertisers:** Disney+ (adv1), Capital One (adv2), Hulu (adv3), True Classic (adv4), PayPal (adv5), Audible (adv6) — each with distinct brand colors, campaign subsets, and spend totals.
 
-**Layout:** KPI strip → two-column grid (main content + 340px sidebar)
+---
 
-**Dynamic KPI Strip (6 cards):**
-| Metric | Example | Notes |
-|---|---|---|
-| Total Spend | $123,350 | Sum of active campaigns, ↑/↓ trend |
-| Conversions | 16,235 | Sum of active campaigns |
-| Avg CPA | $8.38 | Amber when above target |
-| CoPI | 3.25% | North Star badge |
-| ROAS | 4.2x | Return on ad spend |
-| Active Campaigns | 4 | Count of running campaigns |
+## 7. Command Center (Dashboard)
 
-Each card: sparkline SVG, trend indicator, period comparison, counter roll-up animation, mouse-tracking glow on hover.
+**Route:** `#dashboard`
 
-**Spend Pacing Chart:**
-- SVG area chart with wine gradient fill
-- Range switcher: 7D / 30D / MTD / QTD
-- Dashed projected line + dotted budget ceiling
-- Rokt connector-shaped data point markers
+**Layout:** KPI strip → two-column grid (main content left, 340px sidebar right).
 
-**Campaign Health Cards:**
-- Auto-fill grid of active campaigns
-- Each card: name, animated status dot, bidding state pill, CoPI, CPA, Spend, Pacing progress bar, mini sparkline
-- Click navigates to campaign detail
+### 7.1 KPI Strip (5 cards)
 
-**Optimization Score:**
-- Semi-circle AI health gauge (0-100)
-- Color-coded: green (80+), yellow (60-79), red (<60)
-- Shows improvement potential: "+N pts available from N recommendations"
+| Metric | Notes |
+|---|---|
+| Total Spend | Sum of non-draft campaigns; counter roll-up animation |
+| Conversions | Sum across active campaigns |
+| Avg CoPI | Average Conversions per Impression; "North Star" badge |
+| Avg CPA | Weighted average cost per acquisition |
+| Avg ROAS | Average return on ad spend |
 
-**AI Recommendations Feed:**
-- Prioritized cards with estimated impact (High/Medium/Low)
-- Each has Apply / Dismiss actions
-- Examples: "Add 2 more creatives -> Est. +15% CoPI", "Increase budget -> hitting daily cap before noon"
+Each card: sparkline SVG trend, trend indicator (up/down arrow with color), period label, counter roll-up on load, mouse-tracking glow on hover.
 
-**Dynamic Insights:**
-- AI-generated insight cards based on campaign data
-- Contextual suggestions with actionable links
+### 7.2 Spend Pacing Chart
 
-### 4.3 Campaigns
+SVG area chart with beetroot gradient fill. Range switcher pills: **7D / 30D / MTD / QTD** — actively changes chart data and labels on click. Features:
+- Solid line: actual spend to date
+- Dashed line: projected spend continuation
+- Dotted horizontal line: budget ceiling with label
+- Rokt connector-shaped SVG symbols as data point markers
+
+### 7.3 Campaign Health Cards
+
+Auto-fill grid of all non-draft campaigns scoped to advertiser. Each card:
+- Campaign name with animated status dot (pulsing for active)
+- Bidding state pill (Optimizing / Learning / Limited / Draft)
+- Metric quartet: CoPI, CPA/ROAS, Spend, Pacing %
+- Budget pacing progress bar (turns amber when >85%)
+- Click navigates to `#campaign/{id}`
+
+### 7.4 Optimization Score
+
+Semi-circle gauge SVG (0–100). Color-coded: green (80+), yellow (60–79), red (<60). Current score: 78. Shows "+6 pts available from 3 recommendations" below. Animated fill on load.
+
+### 7.5 AI Recommendations Feed
+
+Dynamically generated from advertiser-scoped campaign data. Each recommendation card:
+- Icon, priority level (high/medium/low with color coding)
+- Recommendation text with bolded entity name
+- Estimated impact ("+15% CoPI", "+$2.4K conv.")
+- **Apply** button (shows toast) + **Dismiss** button (hides card)
+
+Example recommendations auto-generated:
+- Low creative count on active campaigns → "Add more creatives to [Campaign]"
+- High budget pacing (>70%) → "Increase budget on [Campaign]"
+- Multiple active campaigns → "Refresh audiences across N active campaigns"
+- Low Integration Health → "Consider pausing [Campaign] — Integration Health below threshold"
+
+### 7.6 Dynamic Insights Panel
+
+AI-generated insight items based on real campaign data:
+- CPA above/below target → named campaign with % deviation
+- Integration Health issues → specific campaign callout
+- Best performer highlight → top CoPI campaign with budget expansion suggestion
+- Audience refresh nudge if 2+ active campaigns
+
+### 7.7 Activity Feed (Timeline)
+
+Chronological list of recent platform events: budget changes, new creatives, experiment significance milestones, campaign pauses, report generation. Static mock entries with relative timestamps.
+
+### 7.8 Portfolio Dashboard (Cross-Advertiser Mode)
+
+When `selectedAdvertiser === 'all'`: replaces the standard dashboard with a cross-advertiser view. KPI strip shows aggregated Total Spend, Active Campaigns, Total Conversions, Blended CPA, Advertiser Count. Below: grid of advertiser health cards showing per-advertiser spend/active/conversion/health status with "Click to manage" navigation.
+
+---
+
+## 8. Campaigns
 
 **Route:** `#campaigns`
 
-**Layout:** Flex row — list panel (flexible) + detail sidebar (520px, slides in on selection)
+**Layout:** Flex row — campaign list (flexible width) + detail sidebar (520px, slides in on row selection).
 
-**Toolbar:** Title + count badge, search input, "New Campaign" button (navigates to `#builder`)
+### 8.1 Campaign List
 
-**Filter Pills:** All | Active | Requires Action | Paused | Draft | Pending Review | Archived
+**Toolbar:** "Campaigns" title with count badge, search input (filters rows live), "+ New Campaign" button (navigates to `#builder`).
 
-**Table Columns:**
-- Checkbox, Status dot (animated pulse for active), Campaign name, Objective badge, Spend/Budget with progress bar, CPA (amber if above target), CoPI, ROAS, Trend sparkline, Bidding state pill (Optimizing/Learning/Limited/Draft)
+**Filter pills:** All | Active | Requires Action | Paused | Draft | Pending Review | Archived. Each pill shows dynamic count in parentheses.
 
-**Row Interactions:**
-- Click opens detail sidebar
-- Hover reveals action buttons: Pause/Resume, Edit, Duplicate, Archive (slide-in animation)
-- Selected row: wine-subtle background + left border
-- J/K keyboard navigation
+**Table columns:** Checkbox | Status dot (animated pulse for active/requires-action) | Campaign name | Objective badge | Spend/Budget with inline progress bar | CPA (amber text when above `cpaTarget`) | CoPI % | ROAS | 8-point sparkline trend | Bidding state pill.
 
-**Campaign Detail Sidebar (520px):**
-- Header: name, status badges, back arrow
-- Metric ribbon: horizontal scrollable chips (Spend, Budget Left, CPA, ROAS, Conversions, CTR)
-- **Tabs:** Overview | Ad Sets | Creatives | Analytics | Nurture
-  - Overview: Daily Spend chart, Budget Pacing, Smart Bidding status, Impressions, CVR
-  - Ad Sets: List with audience, bid strategy, linked creatives
-  - Creatives: Grid with format badge, CTR/CVR/CoPI
-  - Analytics: Inline pivot table
-  - Nurture: Nurture journey visualization
-- Expand to full-screen campaign view
+**Row interactions:**
+- Click row → opens detail sidebar (selected row gets beetroot left border + tinted background)
+- Hover → reveals inline action buttons: Pause/Resume, Edit, Duplicate, Archive (slide-in animation)
+- J/K keyboard navigation between rows
+- Search filters rows by campaign name
 
-### 4.4 Campaign Full View
+### 8.2 Campaign Detail Sidebar (520px)
+
+Slides in from right when a row is selected. Header contains campaign name, status badges (status + statusDetail + objective), contextual quick actions:
+- Active: Pause, Edit, Archive
+- Paused: Resume, Edit, Archive
+- Draft: Publish, Edit, Delete
+- Requires Action: Resolve, Pause, Archive
+
+**Metric ribbon:** Horizontally scrollable chips — Spend, Budget Left, CPA, ROAS, Conversions, Ref. Rate, CoPI (hero highlighted), Integration Health (color-coded by score).
+
+**Tabs:** Overview | Ad Sets | Creatives | Analytics | Nurture
+
+- **Overview tab:** Daily Spend SVG chart (7D/30D/MTD range switcher), Budget Pacing card, Smart Bidding status visualization, AI Analysis & Suggestions card
+- **Ad Sets tab:** List of ad sets with audience name, bid strategy, linked creative count
+- **Creatives tab:** Grid of creatives with format badge, CTR/CVR/CoPI metrics
+- **Analytics tab:** Inline pivot table with performance breakdown
+- **Nurture tab:** Nurture journey visualization
+
+Expand button navigates to full-screen campaign view (`#campaign/{id}`). Close button (or Esc) closes the sidebar.
+
+---
+
+## 9. Campaign Full View
 
 **Route:** `#campaign/{id}`
 
 Full-page dashboard for a single campaign.
 
-**8 KPI Cards:** Spend, Budget Left, CPA, CoPI, ROAS, Conversions, Impressions, CTR — each with trend and sparkline.
+**Header:** Back button → `#campaigns`, campaign name, status + objective badges.
 
-**AI Analysis & Suggestions:**
-- AI-generated performance analysis
-- Actionable buttons: Scale Up, Expand Audience, Refresh Creatives, etc.
+**8 KPI Cards:** Spend, Budget Left, CPA, CoPI, ROAS, Conversions, Impressions, Ref. Rate — each with sparkline and trend badge.
 
-**Deep Dive Modal:**
-- Performance breakdown by dimension
-- Optimization opportunities with impact estimates
-- 7-day trend visualization
+**Two-column grid (main + sidebar):**
 
-**Spend Performance Chart:**
-- SVG line chart with gradient fill
-- Range switcher: 7D / 30D / MTD / QTD
-- Rokt connector data points
+**Main column:**
+- **AI Analysis & Suggestions card** — generated from campaign data; shows 1–6 actionable suggestion items with impact estimates and action buttons (Create Creative, Expand Audience, Increase Budget, View Details, Scale Up). "Deep Dive Analysis" button opens modal.
+- **Spend Performance Chart** — SVG line chart with gradient fill, range switcher (7D / 30D / MTD), animated line draw, data point markers.
+- **Performance Metrics Table** — Impressions, Clicks, Ref. Rate, CVR, Conversions, CPA, ROAS columns.
 
-**Detailed Metrics Table:** Full performance data with sorting.
+**Sidebar column:**
+- Budget & Pacing card with progress bar
+- Smart Bidding visualization (learning progress bar with conversion count, optimizing state, limited state)
+- Ad Sets list (clickable → navigates to audience detail)
+- Creatives list (clickable → navigates to creative detail)
+- AI Recommendations mini-feed
+- Nurture Journey card
 
-**Sidebar Sections:**
-- Budget & Pacing with progress visualization
-- Smart Bidding status and state
-- Ad Sets (clickable — opens audience detail)
-- Creatives (clickable — opens creative detail)
-- AI Recommendations
-- Nurture Journey
+**Deep Dive Modal** (triggered from AI Analysis card): Campaign Health Summary narrative, 7-day trend visualization, optimization opportunities with estimated impact, action buttons.
 
-### 4.5 Campaign Builder
+**Smart Bidding State Visualization:**
+- **Learning** — progress bar showing conversions to date vs. 30-conversion threshold to exit learning
+- **Optimizing** — pulsing green dot with "ML model actively optimizing bids"
+- **Limited** — amber indicator with "budget-limited" explanation
+
+---
+
+## 10. Campaign Builder
 
 **Route:** `#builder`
 
-Full-screen wizard with step progress bar and Back/Next navigation.
+Full-screen wizard. Step progress bar across top with Back/Next navigation. Builder state persists in `builderData` object throughout the session.
 
-**AI Hero Prompt (Step 1 top):**
-- Prominent input with animated gradient border (wine to blue cycling)
-- Cycling placeholder text demonstrating use cases
-- "Generate Campaign" button — auto-fills all builder fields with realistic data, jumps to Step 5
+### 10.1 AI Hero Prompt
 
-**Mode Toggle:** Autopilot vs Advisor (Advanced)
+Top of builder, always visible. Prominent text input with animated gradient border (cycling beetroot → blue). Cycling placeholder text: "Create a Disney+ acquisition campaign targeting women 25-45...", "Launch a PayPal cashback offer for high-value shoppers...", etc.
 
-**Autopilot Mode (3 steps: Goal -> Assets -> Launch):**
-- AI handles targeting, bidding, optimization
-- Step 2: Consolidated asset group — budget, creative assets (3 headlines, 2 descriptions, CTA, image), audience signals (hints, not hard targeting)
-- AI Managed Card: visual indicator of AI-controlled levers
+"Generate Campaign" button — calls `generateAICampaign()`, which fills all `builderData` fields with a realistic AI-generated campaign (Disney+ Q2 Acquisition with 2 ad sets, smart bidding, full creative), jumps to Step 5, and shows toast "AI configured your campaign — review below".
 
-**Advisor/Advanced Mode (5 steps: Objective -> Details -> Targeting -> Creative -> Review):**
+### 10.2 Mode Toggle
 
-**Step 1 — Objective:**
-- 6 objective cards in grid: Customer Acquisition, Revenue Growth, App Installs, Product Sales (DPA), Email Leads, Embedded Actions
-- Auto-advance on selection (400ms pulse animation)
+**Autopilot** (3 steps: Goal → Assets → Launch) — AI handles targeting, bidding, optimization. Simpler UX.
 
-**Step 2 — Details:**
-- Campaign Name (with recommended format hint)
-- Company Name + Brand URL
-- Measurement Group dropdown (with "Create New" option)
-- Referral Exclusion Period (1d/7d/14d/30d/90d)
-- Schedule: Start Date + optional End Date
-- Budget: Daily Cap + Monthly Cap + Lifetime Cap with visual budget bar
-- Policy Links: collapsible Terms & Conditions, Privacy Policy, Disclaimer sections
+**Advanced / Advisor** (5 steps: Objective → Details → Targeting → Creative → Review) — Full control.
 
-**Step 3 — Targeting:**
-- 3 bid strategy cards (mutually exclusive): Smart Bidding (Target CPA, requires 30+ conversions), Budget Optimization (auto-adjusts on predicted volume), Manual Bidding (static price)
-- Ad Set management:
-  - Audience dropdown
-  - Targeting panel: Geography (Country/State/City/ZIP), Device (Desktop/Mobile/Tablet), Demographics (Age/Gender)
-  - Suppress Existing Customers toggle
-  - Budget Override
-  - "+ Add Ad Set" / Remove (minimum 1)
+### 10.3 Advanced Mode — Step 1: Objective
 
-**Step 4 — Creative:**
-- **Offer section:** Type (Discount/Trial/Cashback/Shipping/Product), Value, Cost, Landing Page URL (required), Coupon Code, Validity dates
-- **Creative section:** Title (175 combined char limit), Body, CTA (20 char max), character counters
-- Callout Tags: Promotion / Social Proof / Guarantee
-- Image Upload zone (simulated)
-- ACE (Adaptive Content Engine) AI generation button
-- **Live Preview panel** (sticky right column): phone frame mockup with partner bar, sponsored label, callout pills, title, body, CTA button, decline link, disclaimer — updates in real-time
+6 objective cards in a grid:
+- Customer Acquisition (CPA)
+- Revenue Growth (ROAS)
+- App Installs
+- Product Sales (DPA)
+- Email Subscription
+- Embedded Actions
 
-**Step 5 — Review & Launch:**
-- Approval banner: "Campaign will be reviewed by Rokt. Typically 1-2 business days."
-- Campaign tree visualization (full hierarchy)
-- Dynamic validation checklist (objective, name, budget, audience, creative, landing page URL)
-- Amber recommendation for missing best practices
-- "Launch Campaign" button with confetti celebration (60 particles, wine/gold/white, 1.5s)
+**Auto-advance behavior:** Selecting an objective triggers a 400ms pulse animation on the card, then automatically advances to Step 2. No manual "Next" required.
 
-**Campaign Projections Panel (Steps 2-5):**
-- AI Readiness score
-- Estimated Reach, CPA, Conversions, Duration
-- Contextual tips that update per step
+### 10.4 Advanced Mode — Step 2: Details
 
-### 4.6 Audiences
+| Field | Notes |
+|---|---|
+| Campaign Name | Text input with "recommended format" hint below |
+| Company Name | Text input |
+| Brand URL | URL input |
+| Measurement Group | Dropdown of existing groups + "Create New" option |
+| Referral Exclusion Period | Select: 1d / 7d / 14d / 30d / 90d |
+| Start Date | Date input |
+| End Date | Date input (optional) |
+| Daily Cap | Number input with `$` prefix |
+| Monthly Cap | Number input with `$` prefix |
+| Lifetime Cap | Number input with `$` prefix |
+| Budget visualization | Progress bar showing daily × 30 vs. lifetime ratio |
+| Policy Links | Collapsible sections for Terms & Conditions, Privacy Policy, Disclaimer — toggle enables text input |
+
+### 10.5 Advanced Mode — Step 3: Targeting
+
+**Bid Strategy cards (mutually exclusive):**
+- **Smart Bidding** — Target CPA input, requires 30+ historical conversions to exit learning phase
+- **Budget Optimization** — Auto-adjusts bids based on predicted volume; no manual CPA input
+- **Manual Bidding** — Static price per conversion; manual bid input
+
+**Ad Sets management:**
+Each ad set card contains:
+- Audience dropdown (filtered to advertiser's audiences)
+- Collapsible targeting panel (toggle via "Targeting" button):
+  - Geography: Country / State / City / ZIP inputs
+  - Device: Desktop / Mobile / Tablet checkboxes
+  - Demographics: Age range slider (min/max), Gender select (All/Male/Female)
+- Suppress Existing Customers toggle
+- Budget Override (optional per-set override)
+
+"+ Add Ad Set" button (no limit). Remove button on each set (minimum 1 required — shows toast warning if attempted).
+
+### 10.6 Advanced Mode — Step 4: Creative
+
+**Two-column layout:** form fields (left) + sticky live preview (right).
+
+**Offer section:**
+| Field | Notes |
+|---|---|
+| Offer Type | Select: Discount / Free Trial / Cashback / Free Shipping / Product |
+| Offer Value | Text: "30% off first month", "$50 credit", etc. |
+| Cost to Advertiser | Monetary input |
+| Landing Page URL | Required, HTTPS only, must match offer |
+| Coupon Code | Optional |
+| Validity dates | Start + End date inputs |
+
+**Creative section:**
+| Field | Notes |
+|---|---|
+| Title | Text input, contributes to 175-char combined limit |
+| Body Copy | Textarea, contributes to 175-char combined limit |
+| CTA (Positive) | Text input, 20-char max with live counter |
+| Negative CTA | "No thanks" — disabled, not customizable (policy note) |
+| Callout Tags | Three separate inputs: Promotion, Social Proof, Guarantee |
+| Disclaimer | Textarea for legal text displayed below offer |
+| Image | Upload zone (simulated) — click shows "brand-logo.png · 1080×565px" success state |
+
+**ACE Generate 4 Variations button** — triggers toast "ACE generating 4 creative variations..." (simulated).
+
+**Ad Strength Gauge** (same as Autopilot) — live-scoring ring that updates as fields are filled.
+
+**Live Preview panel (sticky right column):**
+- Phone frame mockup
+- "Partner checkout page" bar
+- "SPONSORED" tag
+- Callout pill (Promotion tag, if set)
+- Title, Body text (update in real-time on input)
+- Social proof line (if Callout Social set)
+- CTA button (beetroot)
+- "No thanks" decline link
+- Disclaimer text (if set)
+
+### 10.7 Advanced Mode — Step 5: Review & Launch
+
+**Approval banner:** "Campaign will be reviewed by Rokt. Typically 1-2 business days."
+
+**Campaign tree visualization:** Full hierarchy diagram showing Campaign → Ad Sets → Creatives.
+
+**Validation checklist:** Dynamic items — each shows checkmark (green) or X (red):
+- Objective selected
+- Campaign name set (non-default, >3 chars)
+- Budget configured
+- Audience assigned
+- Creative content added (title + body)
+- Landing page URL set (non-example)
+
+**Amber recommendations:** Best-practice warnings for items not strictly required but recommended (e.g., missing measurement group).
+
+**"Launch Campaign" button:** On click, triggers 60-particle confetti explosion (wine/gold/white particles, 1.5s fall animation) and toast "Campaign launched!".
+
+### 10.8 Autopilot Mode — Step 2: Asset Group
+
+Consolidated single step replacing Steps 2–4 of Advanced mode:
+- Budget & Goal section: Daily Budget, Lifetime Budget, Conversion Goal dropdown
+- Creative Assets: 3 headline inputs (30-char max each), 2 description textareas (90-char max each), CTA input, Image upload zone
+- Audience Signals: interest keywords input (hints, not hard targeting)
+- Ad Strength Gauge with live score
+
+**AI Managed Card:** Visual card showing "AI is managing: Targeting, Bidding, Audience Expansion, Budget Allocation" — indicates what AI handles automatically.
+
+### 10.9 Autopilot Mode — Step 3: Review
+
+Simplified review showing budget/goal summary + launch button with confetti.
+
+### 10.10 Campaign Projections Panel (Steps 2–5, both modes)
+
+Sticky right column showing live-calculated projections:
+
+**AI Readiness ring** — circular SVG gauge (0–100) colored green/amber/red. Score is computed from builder completeness: +15 pts for objective, +10 for name, +15 for budget, +10 per ad set (up to 2), +10 for bid strategy, +5 for offer type, +5 for creative content, +5 for non-example landing page URL. Starting base: 20 pts.
+
+**Projection metrics:**
+- Est. Reach — based on audience selection + ad set count
+- Est. CPA — from `targetCpa` or objective-specific multiplier
+- Est. Conversions — `lifetimeCap / estCPA`
+- Est. Duration — `lifetimeCap / dailyCap` in days
+
+**Contextual tips** — 2–3 tips per step, updating based on current step and field state:
+- Step 2: Budget efficiency advice, name format hint, daily cap pacing warning
+- Step 3: Smart Bidding advantage reminder, multi-ad-set recommendation, manual bid warning
+- Step 4: 3+ creatives CoPI impact stat, 175-char limit reminder
+- Step 5: Readiness assessment, projected conversion estimate
+
+---
+
+## 11. Audiences
 
 **Route:** `#audiences`
 
-**Toolbar:** Title + count badge, search input, Build Audience / Upload List / Create Lookalike buttons
+**Toolbar:** "Audiences" title with count badge, search input, three action buttons: Build Audience / Upload List / Create Lookalike.
 
-**Type Filter Pills:** All | Custom | Lookalike (LAL) | Behavioral | Demographic | Starter | Experian
+**AI Recommended Audiences section** — 3 AI-suggested cards above the main grid:
+- "LAL from your top converters" — Lookalike, AI-generated based on best-performing audience
+- "Reactivation: lapsed users 60-90 days" — Reactivation segment suggestion
+- "Behavioral: in-market for [vertical]" — Intent-based behavioral segment
 
-**Audience Cards Grid:** Responsive grid of cards, each showing:
-- Type icon + name + type label
-- Size (e.g., "14.2M"), linked campaigns, match rate
-- Freshness indicator (green "Fresh" or amber "Stale")
-- Click opens full-screen audience detail view
+Each AI card has a beetroot sparkle icon and "+ Create" button.
 
-**Build Audience Modal:**
-- Rule builder with AND/OR toggle, category/attribute/operator/value selects
-- "+ Add Rule" button, per-rule remove
+**Type filter pills:** All | Custom | Lookalike (LAL) | Behavioral | Demographic | Starter | Experian.
+
+**Audience Cards Grid:** Responsive auto-fill grid. Each card:
+- Type icon + audience name + type badge
+- Size (e.g., "14.2M"), campaigns linked count, match rate
+- Freshness indicator (green "Fresh" dot or amber "Stale" dot)
+- Hover: edit pencil icon appears
+- Click: navigates to `#audience/{id}`
+
+### 11.1 Build Audience Modal
+
+Two-column layout: rule builder (left) + Reach Estimator (right, 240px).
+
+**Rule builder:**
+- Audience Name input
+- Industry Verticals checkboxes (12 verticals: Entertainment, Finance, Retail, Travel, etc.)
+- Placement Type radio (Inline / Engagement / Pre-ticked / Survey)
+- Rules section with AND/OR toggle, rows of Category/Attribute/Operator/Value selects
+- "+ Add Rule" button
 - Suppress Existing Customers checkbox
-- Reach Estimator sidebar: estimated reach number, % of Rokt network, Smart Bidding sufficiency indicator
 
-**Create Lookalike Modal:**
+**Reach Estimator sidebar:**
+- Estimated reach number
+- Percentage of Rokt network
+- Smart Bidding sufficiency indicator (green checkmark if reach sufficient for learning)
+
+### 11.2 Create Lookalike Modal
+
 - Seed audience dropdown
-- Tier visualization: 3 concentric circles (Default ~10M, Broad ~20M, Broader ~30M)
+- **3-tier visualization:** concentric circles labeled Default (~10M), Broad (~20M), Broader (~30M). Click a circle to select tier.
+- Create button calls `createLookalike()` — adds LAL to audiences array with appropriate size.
 
-**Upload List Modal:**
-- Drag-and-drop zone (CSV), list name, identifier type selector, match rate preview
+### 11.3 Upload List Modal
 
-### 4.7 Audience Detail View
+- Drag-and-drop CSV zone
+- List name input
+- Identifier type selector (Email, Phone, etc.)
+- Match rate preview
+
+---
+
+## 12. Audience Detail View
 
 **Route:** `#audience/{id}`
 
-Full-screen audience profile.
+Full-screen audience profile. Header with back button → `#audiences`, audience name, type badge.
 
-**KPI Strip (6 cards):** Size, Match Rate, Linked Campaigns, Avg CPA, Total Conversions, Total Spend
+**6 KPI cards:** Size, Match Rate, Linked Campaigns, Avg CPA, Total Conversions, Total Spend.
 
-**AI Audience Insights:** Contextual AI suggestions for audience optimization.
+**Two-column grid (main + sidebar):**
 
-**Audience Composition:**
-- Age distribution bars (horizontal bar chart)
-- Gender breakdown (percentage split)
+**Main column:**
 
-**Device & Geography:**
-- Device type cards (Desktop, Mobile, Tablet with percentages)
-- Top regions table
+**AI Audience Insights card:** 4 insight items:
+- Match rate quality assessment + identifier advice
+- Campaign usage warning (frequency cap if used in 2+ campaigns) or expansion opportunity
+- Top-performing age cohort recommendation (25–34 focus segment)
+- Mobile-first recommendation (64% mobile composition)
 
-**Performance by Campaign:** Table showing how this audience performs across linked campaigns.
+**Audience Composition card (2-column layout):**
+- Age Distribution: horizontal bar chart for 18–24, 25–34, 35–44, 45–54, 55+ age bands
+- Gender: Female / Male / Non-binary percentage bars (beetroot / blue / amber fill)
 
-**Sidebar:**
-- Details: type, created date, freshness, last refreshed
-- Interest Signals: tag cloud of audience interests
-- Expansion Options: Create LAL, Broaden Audience, Overlap Analysis buttons
+**Device & Geography card (2-column layout):**
+- Device cards with icon: Desktop, Mobile, Tablet with percentages and mini progress bars
+- Top Regions table: region name + percentage
 
-### 4.8 Creative Studio
+**Performance by Campaign table:** Linked campaigns with Status, Spend, CPA, Conversions, Ref. Rate, CVR. Clickable rows → `#campaign/{id}`.
+
+**Sidebar column:**
+- **Details card:** Type badge, Size, Match Rate (color-coded), Freshness, Created date, Last Updated
+- **Interest Signals card:** Tag cloud of interest badges (varies by audience type)
+- **Expansion Options card:** Create Lookalike, Broaden Targeting, Overlap Analysis buttons
+
+---
+
+## 13. Creative Studio
 
 **Route:** `#creatives`
 
-**Layout:** 3-panel grid — Library (220px) | Editor (flex) | Preview (320px)
+**3-panel layout:** Library (220px fixed) | Editor (flexible) | Preview (320px fixed).
 
-**Library Panel:**
-- Search input + format selector dropdown
-- Scrollable list of creatives with format badge, name, CTR/CoPI stats
-- Active item: wine left border highlight
-- Click to expand to full-screen creative detail
+### 13.1 Library Panel
 
-**Editor Panel:**
-- Format tabs: Text | Benefits | Savings | Hero Image | Carousel
-- Title input with character counter
-- Body textarea
-- CTA input with character counter
-- Linked Offer dropdown
-- Dynamic Attributes: clickable chips (`{customer.firstname}`, `{partner.name}`, `{rokt.customeraction}`) — inserts into focused field
-- ACE (Adaptive Content Engine) AI generation button
-- Policy compliance checker: "Passes policy check" (green) or violations listed
+- Search input (filters list in real-time)
+- Format selector dropdown
+- Scrollable list of advertiser-scoped creatives
+- Each item: creative name, format · CoPI% metadata
+- Active item: beetroot left border highlight
+- Expand icon (⛶) on each item → navigates to `#creative/{id}`
 
-**Preview Panel:**
-- Device toggle: Desktop | Mobile
-- Live preview card updating in real-time as editor fields change
-- Partner context: Ticketmaster | Fanatics | Booking.com tabs
-- Shows: partner context label, "SPONSORED" tag, title, body, offer value pill, CTA button, "No thanks" link
+### 13.2 Editor Panel
 
-### 4.9 Creative Detail View
+**Format tabs:** Text | Benefits | Savings | Hero Image | Carousel — each tab changes the preview rendering format.
+
+**Fields:**
+- Title (40-char max with live counter; warns at 35)
+- Body (textarea with live updates)
+- CTA (25-char max with live counter)
+- Linked Offer dropdown (filtered to advertiser's offers)
+- Dynamic Attributes chips: `{customer.firstname}`, `{partner.name}`, `{rokt.customeraction}` — clicking a chip inserts the attribute at the cursor position in the focused field
+
+**ACE Performance Score (ring gauge):**
+- Circular SVG arc 0–10 scale
+- Score computed live: base 5.0, +1.2 for title 10–40 chars, +1.0 for body 30–120 chars, +0.8 for CTA 5–20 chars, +0.3 for urgency signals (!, %, $), +0.4 for 8+ word body. Max 9.9, min 3.0.
+- Arc color: green (≥8), beetroot (≥6), amber (<6)
+- Score dimension pills below ring: `✓ Title length` / `⚠ Short title` (good/warn/bad states)
+
+**Auto-Enhance button** — appends `!` to title if missing, fires `updateCreativeAIScore()`, shows success toast.
+
+**Generate A/B Variants button** — calls `generateVariants()`, shows panel with 3 angle-labeled variants:
+- Variant 1: "[base] — Limited Offer!" · Score 8.4 · Angle: Urgency
+- Variant 2: "Why Millions Love [brand]" · Score 7.9 · Angle: Social Proof
+- Variant 3: "Get Started Today — [base]" · Score 7.2 · Angle: Action-First
+- Each variant has "Use" button that applies title to editor and re-scores
+
+**Policy Check button** — 1.2s simulated check with "Checking..." state → "✓ Passes policy check" success state.
+
+**Dynamic attribute chips** — `{customer.firstname}`, `{partner.name}`, `{rokt.customeraction}` insert into the focused textarea at cursor position.
+
+### 13.3 Preview Panel
+
+- **Device toggle:** Desktop | Mobile (adjusts preview card max-width)
+- **Partner context tabs:** Ticketmaster | Fanatics | Booking.com — switching updates the partner context label in the preview card
+- **Live preview card:** "SPONSORED" tag, partner context label, title, body, offer value pill, CTA button (beetroot), "No thanks" decline link. Updates in real-time on every keystroke.
+
+---
+
+## 14. Creative Detail View
 
 **Route:** `#creative/{id}`
 
-Full-screen creative profile.
+Full-screen creative profile. Header with back button → `#creatives`, creative name, format badge.
 
-**KPI Strip (6 cards):** Referral Rate, CVR, CoPI, Impressions, Clicks, Conversions
+**6 KPI cards:** Referral Rate, CVR, CoPI, Impressions, Clicks, Conversions (aggregated from linked campaigns).
 
-**AI Creative Insights:**
-- Performance analysis (what's working, what's not)
-- Fatigue warning (if impressions high but engagement declining)
-- Audience recommendations (which audiences respond best)
+**Two-column grid (main + sidebar):**
 
-**Performance by Audience:** Breakdown table showing creative performance across different audience segments.
+**Main column:**
+- **AI Creative Insights card:** Performance narrative (strong/weak based on CTR), fatigue detection if high impressions + low engagement, best-performing audience segment identification, mobile optimization recommendation.
+- **Performance by Audience table:** 3 audience rows with Impressions, CTR, CVR, CoPI — computed as +/- multipliers from base creative stats.
+- **Linked Campaigns table:** Campaigns using this creative with status, spend, CPA.
 
-**Linked Campaigns:** Table of campaigns using this creative.
+**Sidebar column:**
+- Creative preview card (title/body/CTA rendered visually)
+- Details card (format, campaign, created/modified dates, status)
+- ACE Enhancement card: Generate Variants, Auto-Enhance, Predict Performance buttons
 
-**Creative Preview Card:** Visual preview of the creative.
+---
 
-**ACE Enhancement Actions:**
-- Generate Variants — create AI variations
-- Auto-Enhance — improve copy/layout
-- Predict Performance — estimate metrics for proposed changes
-
-### 4.10 Offers
+## 15. Offers
 
 **Route:** `#offers`
 
-**Grid of Offer Cards:** Each showing type icon, name, type label, value, cost, linked campaigns count, CoPI %, CVR %.
+Two sections: Offers grid (top) and Product Catalog (bottom).
 
-**Create Offer Modal:** Type selector (Discount/Trial/Cashback/Shipping/Product), value input, cost input, description, validity dates.
+**Offers grid:** Advertiser-scoped cards, each showing:
+- Type icon + offer name + type label
+- Value, cost, linked campaigns count, CoPI %, CVR %
+- Hover: edit pencil appears
+- Click: opens edit modal
 
-**Edit Offer:** Click card or hover edit icon to open edit modal with pre-populated fields.
+**Create Offer button** → modal with: Type pills (Discount/Trial/Cashback/Shipping/Product), Offer Value input, Cost input, Validity date range.
 
-### 4.11 Intelligence
+**Edit Offer modal:** Same fields pre-populated. Delete button (with confirmation dialog).
+
+**Product Catalog section** (below offers): Filter pills (All / Low Stock / In Stock). Product cards showing icon, name, price, stock status badge.
+
+---
+
+## 16. Intelligence
 
 **Route:** `#intelligence`
 
-**Layout:** Tab-based — Reports (default) | Experiments
+**Tab navigation:** Reports | Experiments (tab switch via `switchIntelTab()`).
 
-#### Reports Tab
+### 16.1 Reports Tab
 
-**AI Insight Banner:** Dismissable insight (e.g., "CPA improved 12% week-over-week")
+**AI Insight banner** — dismissable, shows data-driven insight (e.g., "CPA improved 12% week-over-week — primarily driven by Disney+ Spring optimization").
 
-**Date Range Bar:** Preset pills (7D / 14D / 30D / MTD) + attribution model dropdown + compare toggle
+**Report controls bar:**
+- Date range pills: **7D | 14D | 30D | MTD** — actively re-render chart and table on click
+- Attribution model dropdown: Last Click, First Click, Linear, Time Decay — triggers toast + re-render
+- Compare toggle: when enabled, overlays previous period as dashed lines on the chart
+- Group By dropdown: Campaign / Ad Set / Creative / Device / Geography / Day of Week
 
-**Report Chart:**
-- 3-line SVG chart: Spend (wine), Conversions (blue), CPA (green)
-- Date range pills actively filter data
-- Compare toggle: overlays previous period as dashed lines
-- Rokt connector-shaped data points
-
-**Group-By Dropdown:** Slice data by Campaign, Ad Set, Creative, Device, Geography, Day of Week
+**Report Chart:** 3-line SVG chart:
+- Spend line (beetroot)
+- Conversions line (brand-blue)
+- CPA line (positive green)
+- Rokt connector-shaped data point markers
 
 **Campaign Performance Table:**
-- Sortable columns: Campaign, Impressions, Clicks, CTR, Conversions, CPA, ROAS, CoPI, Spend
-- Click header to sort asc/desc with arrow indicator
-- CPA cells amber when above target
+- Columns: Campaign | Impressions | Clicks | Ref. Rate | Conversions | CPA | ROAS | CoPI | Spend
+- Sortable headers — click to sort asc/desc with ↑/↓/↕ indicator
+- CPA cells amber when above campaign's `cpaTarget`
+- Totals/averages row at bottom
 
-**Export:** CSV, PDF, Scheduled Email, API options
+**Export options:** CSV, PDF, Scheduled Email, API.
 
-#### Experiments Tab
+### 16.2 Experiments Tab
 
-**Filter Pills:** All | Running | Concluded | Draft
+**Filter pills:** All | Running | Concluded | Draft.
 
-**Experiment Cards:** Each showing:
+**Experiment cards:**
 - Type badge (A/B or MAB)
-- Campaign, status, days progress
-- Statistical significance bar
-- Leader and lift metric
-- "Apply Winner" button (concluded only)
+- Campaign name, status badge, days progress (e.g., "8/14")
+- Statistical significance progress bar (green at ≥95%, blue at ≥70%, gray below)
+- Leader + lift metric (e.g., "Variant B · +18% CoPI")
+- "Apply Winner" button on concluded experiments
 
-**New Experiment Modal:** Type selection (A/B vs MAB), campaign selector, control/variant builder, traffic allocation sliders, duration, success metric.
+**New Experiment button** → modal with: Experiment name, Type (A/B vs MAB pills), Campaign selector, Control/Variant builder, Traffic allocation, Duration (days), Success metric.
 
-### 4.12 Network Analyzer & Forecaster
+**4 mock experiments:** Disney+ Creative A/B (Concluded, 97% significance), Capital One Audience Split (Running, 72%), Hulu MAB Creative (Running, 58%), True Classic DPA vs Static (Draft).
+
+---
+
+## 17. Network Analyzer & Forecaster
 
 **Route:** `#network-analyzer`
 
-**8-Week Spend Forecast Chart:** Line chart with confidence bands (upper/lower bounds shaded).
+**Header:** Back button → `#intelligence`, "Network Analyzer & Forecaster" title, Refresh Forecast + Export buttons.
 
-**8-Week Conversion Forecast Chart:** Same format as spend forecast.
+**Forecast KPI strip (6 metrics):**
+| Metric | Notes |
+|---|---|
+| 8-Week Spend Forecast | Aggregated projected spend |
+| 8-Week Conversion Forecast | Projected conversions |
+| Predicted Avg. CPA | With trending direction |
+| Network Utilization % | Of available inventory |
+| Active Partners | Count vs. 12 available |
+| Confidence | Model confidence % (colored positive) |
 
-**Forecast KPIs:** Total predicted spend, total predicted conversions, predicted CPA, network utilization %, confidence score.
+**Spend Forecast Chart (left):** SVG line chart with beetroot fill, animated line, confidence band (upper/lower bounds as dashed lines ±10%), week labels.
+
+**Conversion Forecast Chart (right):** Same structure with blue/green fill.
 
 **Partner Network Quality Table:**
-- Partner name, match rate, CPA, quality score bars, trend indicators
-- Quality scoring per partner
+- 8 partners: Ticketmaster, Fanatics, Booking.com, StubHub, Grubhub, Shutterfly, Chewy, LiveNation
+- Columns: Name, Category, Transaction Volume, Match Rate %, Avg CPA, Quality score bar (60–100 range), Trend (↑/↓)
 
-**AI Network Recommendations:** Actionable cards (e.g., "Add Chewy to partner mix for +12% reach at similar CPA")
+**AI Network Recommendations:** Actionable cards (e.g., "Add Chewy to partner mix for +12% reach at similar CPA").
 
 **Scenario Planner:**
-- Budget change slider
+- Budget change input/slider
 - Audience expansion options
-- Partner addition/removal
-- "Run Scenario" button — recalculates forecast KPIs
+- Partner addition/removal toggles
+- "Run Scenario" button — recalculates and updates forecast KPIs (via toast in prototype)
 
-### 4.13 Measurement
+---
+
+## 18. Measurement
 
 **Route:** `#measurement`
 
-**Layout:** 3-column grid (Integration Health gauge | Identifier Coverage | Recommendations) + Measurement Groups table
+**Layout:** 3-column top section (gauge + identifiers + recommendations) + measurement groups table below.
 
-**Integration Health Gauge:**
-- Circular gauge showing score (e.g., 7.8/10)
-- Color zones: red (<5), amber (5-7), green (8+)
-- Trend: "+0.4 from last month"
+### 18.1 Integration Health Gauge
 
-**Identifier Coverage Grid:**
-| Identifier | Status | Contribution |
+Circular gauge 0–10. Score: 7.8. Color: amber (5–7) / green (8+) / red (<5). Trend: "+0.4 from last month". Context: True Classic at 4.8 triggers the context alert bar.
+
+### 18.2 Identifier Coverage Grid
+
+| Identifier | Status | Impact |
 |---|---|---|
-| Email (SHA-256) | Active | +2.1 |
-| Phone (SHA-256) | Missing | — |
-| Rokt Click ID | Active | +1.8 |
-| IP Address | Active | +1.2 |
-| User Agent | Active | +0.8 |
-| Transaction ID | Active | +1.5 |
+| Email (SHA-256) | Active ✓ | High |
+| Phone (SHA-256) | Missing ✗ | Medium |
+| Rokt Click ID | Active ✓ | High |
+| IP Address | Active ✓ | Low |
+| User Agent | Active ✓ | Low |
+| Transaction ID | Active ✓ | Medium |
 
-**Integration Health Recommendations:** Actionable improvement cards with "View Integration Guide" / "Configure SDK" buttons.
+Missing phone drives the context alert bar warning.
 
-**Measurement Groups Table:** Name, Linked Campaigns, Status, Optimization Event, Attribution Window, EMQ score.
+### 18.3 Integration Health Recommendations
 
-**Measurement Group Detail Modal (on row click):**
+Actionable improvement cards with estimated Health impact:
+- Add phone number to CAPI integration → +1.5 Health
+- Enable server-side Click ID passback → +0.5 Health
+- Increase email coverage from 78% to 90% → +0.3 Health
+
+Each card: icon, text, impact badge, "View Integration Guide" / "Configure SDK" buttons.
+
+### 18.4 Measurement Groups Table
+
+Columns: Name | Linked Campaigns | Status | Optimization Event | Attribution Window | Integration Health score (color-coded).
+
+4 mock groups: Disney+ Acquisition MG (7C+1V), Capital One Cards MG (30C+1V), Streaming Bundle MG (7C+1V), True Classic DPA MG (7C).
+
+**Row click → Measurement Group Detail Modal:**
 - Applied campaigns list
-- Conversion Events with toggles
+- Conversion Events with enable/disable toggles
 - Attribution Window configuration (click-through days slider, view-through toggle)
-- Identifier Coverage specific to this group
-- Recommendations
+- Identifier Coverage for this group
+- Group-specific recommendations
 
-### 4.14 Advertiser Profile
+---
+
+## 19. Advertiser Profile
 
 **Route:** `#advertiser-profile`
 
-**Header:** Advertiser avatar, name, industry, vertical badges.
+**Header:** Advertiser avatar (branded color + initials), name, industry tag, vertical badges.
 
-**KPI Strip (6 cards):** Total Spend, Active Campaigns, Conversions, Avg CPA, ROAS, Account Health score.
+**6 KPI cards:** Total Spend, Active Campaigns, Conversions, Avg CPA, ROAS, Account Health score.
 
-**Industry Benchmarks:** You vs Industry Average comparison for CPA, CVR, Referral Rate.
+**Industry Benchmarks:** Two-row comparison table (You vs. Industry Average) for CPA, CVR, Referral Rate. Visual bar showing relative position.
 
-**Campaign Performance Table:** Performance data for all campaigns under this advertiser.
+**Campaign Performance Table:** All campaigns for this advertiser with full performance metrics.
 
-**AI Advertiser Insights:** AI-generated observations about the advertiser's performance patterns and opportunities.
+**AI Advertiser Insights card (3 items):**
+- CPA vs. industry benchmark — outperforming/underperforming % with scaling or optimization recommendation
+- Campaign count vs. comparable advertisers — expansion or confirmation message
+- Top partner recommendations for advertiser's vertical
 
-**Sidebar:**
-- Profile Details: industry, vertical, tier, region, currency, timezone, onboarded date, account manager
-- Quick Actions: shortcuts to common tasks
-- Integration Status: connected systems overview
+**Sidebar (3 cards):**
 
-### 4.15 Account
+**Profile Details:**
+- Industry, Vertical, Account Tier (Enterprise), Region (North America), Currency, Timezone, Onboarded date, Account Manager (Sarah Chen)
+
+**Quick Actions:**
+- New Campaign, Network Analyzer, Intelligence, Account Report buttons
+
+**Integration Status:**
+- Web SDK, CAPI, CDP Integration, Product Feed — connected/not connected per advertiser
+
+---
+
+## 20. Account
 
 **Route:** `#account`
 
-**Team Management Table:**
-| Name | Email | Role | Last Active |
+### 20.1 Team Management
+
+Table: Name | Email | Role (Admin/Editor/Viewer badge) | Last Active.
+
+4 mock team members: Max Dowaliby (Admin), Sarah Chen (Editor), James Wilson (Editor), Emily Park (Viewer).
+
+"Invite User" button → modal with email input, role selector, optional message.
+
+### 20.2 Integrations
+
+Grid of integration cards:
+| Integration | Status |
+|---|---|
+| Web SDK (v4.2.1) | Connected |
+| Conversions API (CAPI) | Connected |
+| mParticle CDP | Connected |
+| Segment | Disconnected |
+| SFTP Data Feed | Connected |
+| Google Analytics | Disconnected |
+
+Each card: status dot, name, description, Configure / Connect button.
+
+### 20.3 MCP Connectors
+
+**Intro copy:** "Connect AI tools and external services via Model Context Protocol (MCP). MCP servers expose Rokt Ads capabilities as tools that AI assistants can use to manage your campaigns."
+
+7 connector cards in a grid:
+
+| Connector | Type | Status | Tools |
 |---|---|---|---|
-| Max Dowaliby | max.dowaliby@rokt.com | Admin | Just now |
-| Sarah Chen | sarah.chen@rokt.com | Editor | 2 hours ago |
-| James Wilson | james.wilson@rokt.com | Viewer | Yesterday |
+| Claude (Anthropic) | MCP Server | Connected | Campaign Management, Audience Builder, Creative Generator, Performance Analyzer, Bid Optimizer |
+| Reporting API | MCP Server | Connected | Query Metrics, Export Reports, Schedule Dashboards |
+| Offer Catalog API | MCP Server | Connected | Create Offers, Update Creatives, Manage Landing Pages |
+| Audience API | MCP Server | Connected | Build Audiences, Sync Segments, Lookalike Generation |
+| Experimentation API | MCP Server | Available | Create Experiments, Analyze Results, Apply Winners |
+| ChatGPT (OpenAI) | AI Provider | Available | Text Generation, Summarization |
+| Gemini (Google) | AI Provider | Available | Image Analysis, Performance Prediction |
 
-"Invite User" button with modal (email, role selector, invitation message).
+Claude card shows MCP Server Endpoint: `mcp://rokt-ads.mcp.rokt.com/v1` with "Copy Endpoint" button.
 
-**Integration Connections:**
-- Web SDK v4.2.1 (installed)
-- Conversions API (connected)
-- mParticle (not configured)
-- Segment (not configured)
-- SFTP (not configured)
-- Google Analytics (not configured)
+Available connectors have animated "Connect" button (1.2s connecting state → Connected badge).
 
-**MCP Connectors Section:**
-| Connector | Status | Details |
-|---|---|---|
-| Claude / Anthropic | Connected | Tool chips, MCP endpoint |
-| Reporting API | Connected | Tool chips, MCP endpoint |
-| Offer Catalog API | Connected | Tool chips, MCP endpoint |
-| Audience API | Available | Tool chips, MCP endpoint |
-| Experimentation API | Available | Tool chips, MCP endpoint |
-| ChatGPT | Available | Tool chips, MCP endpoint |
-| Gemini | Available | Tool chips, MCP endpoint |
+---
 
-### 4.16 AI Copilot
+## 21. AI Features
 
-**Trigger:** Floating action button (FAB) at bottom-right with breathing sparkle animation.
+AI is woven throughout the platform, not bolted on.
 
-**Visual:** Slide-out drawer from right, conversational chat interface.
+### 21.1 AI Hero Prompt (Builder)
 
-**Features:**
-- Introductory message listing capabilities
-- Proactive insight: "I noticed 3 campaigns are below target CPA. Want me to analyze them?"
-- Typing indicator (3 bouncing dots)
-- Context-aware mock responses based on message content:
-  - Campaign performance queries → portfolio summary with data
-  - "Pause campaigns" → affected campaign list with individual Apply buttons
-  - "Generate headlines" → 3 variations with predicted performance scores
-  - Budget/spend queries → budget analysis with recommendations
-- Natural language actions with Apply buttons
+Animated gradient border input at the top of the Campaign Builder. Accepts natural language campaign descriptions. "Generate Campaign" fills all builder fields with realistic data and jumps to the review step.
 
-### 4.17 Command Palette
+### 21.2 ACE Performance Score (Creative Studio)
 
-**Trigger:** `Cmd+K`, `/`, or click search bar
+Live-computed creative quality score (3.0–9.9) updating on every keystroke in the title, body, or CTA fields. Circular SVG ring gauge changes color from amber → beetroot → green as score improves. Score breakdown pills show pass/warn/fail states per dimension.
 
-**Visual:** Full-screen overlay with backdrop blur, centered panel (600px), scale-in animation.
+### 21.3 AI Recommendations Feed (Dashboard)
 
-**Sections:**
-- **Navigate:** All views with icons and keyboard shortcuts
-- **Campaigns:** All campaigns by name
-- **Audiences:** All audiences
-- **Creatives:** All creatives
-- **Actions:** New Campaign (N C), New Audience (N A)
+Dynamically generated from real campaign data: low creative count warnings, high pacing alerts, audience refresh nudges, integration health pausing suggestions. Each card has Apply + Dismiss actions.
 
-**Interaction:** Fuzzy text search, arrow key navigation, Enter to select, Esc to close.
+### 21.4 AI Analysis & Suggestions (Campaign Views)
 
-### 4.18 Keyboard Shortcuts
+Present in both the campaign detail sidebar (overview tab) and campaign full view. Generates 1–6 suggestions per campaign from a rule-based engine evaluating: CPA vs. target, creative count, budget pacing, integration health, bidding state, trend direction. Each suggestion has icon, text, estimated impact, and action button.
+
+### 21.5 Deep Dive Analysis Modal
+
+Triggered from campaign AI Analysis card. Shows full narrative health summary, 7-day trend, optimization opportunities with impact estimates, action buttons.
+
+### 21.6 Optimization Score Gauge (Dashboard)
+
+Semi-circle gauge showing account-level AI health. Score 78/100 with "+6 pts available from 3 recommendations" label. Color-coded green/yellow/red.
+
+### 21.7 AI Audience Insights (Audience Detail)
+
+4 contextual insights per audience: match rate quality, campaign usage frequency, top-performing age cohort, device mix recommendation.
+
+### 21.8 AI Creative Insights (Creative Detail)
+
+Performance narrative, fatigue detection, audience affinity analysis.
+
+### 21.9 AI Advertiser Insights (Advertiser Profile)
+
+3 insights: CPA vs. vertical benchmark, campaign count vs. comparable advertisers, top partner recommendations.
+
+### 21.10 AI Network Recommendations (Network Analyzer)
+
+Partner mix optimization suggestions with estimated reach impact.
+
+### 21.11 AI Recommended Audiences Section
+
+Top of Audiences view: 3 AI-suggested audience cards (LAL from top converters, Reactivation segment, Behavioral in-market segment) with sparkle icons and "+ Create" buttons.
+
+### 21.12 AI Copilot Drawer
+
+**Trigger:** Breathing sparkle FAB at bottom-right (`.ai-fab` with `breathe` animation).
+
+**Visual:** Right-side slide-out drawer, conversational chat interface with user/assistant message threading.
+
+**Intro message:** Lists capabilities with bullet points. Proactive insight: "I noticed 3 campaigns are below target CPA. Want me to analyze them?"
+
+**Typing indicator:** 3 bouncing dots while processing (1.2s delay).
+
+**Context-aware NLP responses based on message content:**
+- "pause" / "stop" → lists matching active campaigns with individual Apply buttons for each
+- "how" + "campaign" / "doing" / "performance" → portfolio summary with active count, avg CPA, total conversions, top performer, and warning callout
+- "creative" / "headline" / "generate" → 3 headline variants with ACE scores (8.7, 7.9, 7.2) and "Use" buttons
+- "budget" / "spend" → budget analysis (daily cap hitting, remaining budgets, paused unspent)
+- Other → generic recommendation response with Apply + More Details buttons
+
+### 21.13 AI Sparkle Effect
+
+On hover over AI-designated elements (`.ai-badge`, `.ai-rec-card`, `.ai-hero-section`, `.ai-analysis-card`), cursor sparkles spawn at mouse position with random offset, fade out in 500ms. Capped at 8 concurrent sparkles.
+
+---
+
+## 22. Keyboard Shortcuts
+
+### Navigation Shortcuts
 
 | Shortcut | Action |
 |---|---|
-| `Cmd+K` / `/` | Open command palette |
-| `?` | Show keyboard shortcuts overlay |
+| `Cmd+K` or `/` | Open command palette |
+| `?` | Toggle keyboard shortcuts overlay |
 | `Cmd+D` | Toggle dark/light mode |
-| `Esc` | Close modal/drawer/palette |
+| `Esc` | Close modal / drawer / palette / blur focused input |
 | `G → D` | Go to Dashboard |
 | `G → C` | Go to Campaigns |
 | `G → A` | Go to Audiences |
 | `G → R` | Go to Intelligence (Reports) |
 | `G → M` | Go to Measurement |
 | `G → O` | Go to Offers |
-| `G → E` | Go to Experiments |
+| `G → E` | Go to Creative Studio |
 | `G → S` | Go to Account (Settings) |
 | `N → C` | New Campaign (opens builder) |
-| `N → A` | New Audience (opens modal) |
-| `J` / `K` | Navigate down/up in tables |
+| `N → A` | New Audience (opens Build Audience modal) |
+| `J` / `K` | Navigate down/up in campaign table rows |
 
-**Visual Chord Indicator:** On first key press (G or N), a floating indicator appears showing available completions with styled kbd tags. Auto-dismisses after 500ms.
+### Two-Key Chord Indicator
 
-**Visual Overlay Badges:** When chord is active, navigation items show letter badges indicating the completion key.
+On first keypress of `G` or `N`: a floating `.key-chord-indicator` element appears showing:
+- The pressed key in a `<kbd>` tag
+- Label ("Go to..." or "New...")
+- Available completion keys with destination labels
+
+Auto-dismisses after 1.5s timeout (or immediately on completion or Esc).
+
+### Navigation Overlay Badges
+
+Simultaneously with the chord indicator, each matching sidebar nav item receives a `.shortcut-overlay-badge` overlay showing the completion key letter in a `<kbd>` tag. Removed on completion or timeout.
+
+### Command Palette
+
+**Trigger:** Cmd+K, `/`, or clicking the search bar.
+
+**Visual:** Full-screen overlay with backdrop blur, centered 600px panel, scale-in animation.
+
+**Sections:**
+- **Navigate** — all views with icons and keyboard shortcut hints
+- **Campaigns** — all campaign names (advertiser-scoped)
+- **Audiences** — all audience names
+- **Creatives** — all creative names
+- **Actions** — New Campaign (N C), New Audience (N A)
+
+**Interaction:** Live fuzzy text search filters all sections simultaneously. Arrow key navigation highlights items. Enter selects. Esc closes.
+
+### Shortcuts Overlay
+
+`?` toggles a full-screen overlay (`#shortcutsOverlay`) showing a formatted two-column table of all shortcuts with `<kbd>` styling.
 
 ---
 
-## 5. Cross-Cutting Features
+## 23. Data Model
 
-### 5.1 Advertiser-Scoped Data
+### Advertisers (6)
 
-All views filter to the selected advertiser. Dashboard KPIs, campaign lists, audience libraries, creative studios, intelligence reports, and measurement data are all contextual to the active advertiser.
+| ID | Name | Color | Campaigns | Spend |
+|---|---|---|---|---|
+| adv1 | Disney+ | #1A3B8F | c1, c7, c8 | $85,750 |
+| adv2 | Capital One | #C41230 | c2, c9, c10 | $50,700 |
+| adv3 | Hulu | #1CE783 | c3, c11 | $31,000 |
+| adv4 | True Classic | #2D3748 | c4, c12 | $39,200 |
+| adv5 | PayPal | #003087 | c5, c13 | $8,900 |
+| adv6 | Audible | #F7991C | c6 | $0 |
 
-### 5.2 Entity CRUD
+### Campaigns (13)
 
-| Entity | Create | View | Edit | Duplicate | Archive |
+| Campaign | Status | Bidding | CPA | CoPI | ROAS |
 |---|---|---|---|---|---|
-| Campaign | Builder wizard | List + detail + full view | Edit modal | "Copy of..." prefix | Confirmation dialog |
-| Audience | Build/LAL/Upload modals | Cards + detail view | Edit modal | — | — |
-| Creative | Studio editor | Library + detail view | Inline editor | — | — |
-| Offer | Create modal | Card grid | Edit modal | — | — |
-| Experiment | New Experiment modal | Cards | Edit modal | — | — |
-| Measurement Group | Create Group modal | Table + detail modal | Edit modal | — | — |
+| Disney+ Spring Acquisition | Active | Optimizing | $5.82 | 4.12% | 5.1x |
+| Capital One Card Acquisition | Active | Optimizing | $8.45 | 3.21% | 3.8x |
+| Hulu Streaming Signup | Active | Learning | $9.14 | 2.84% | 2.9x |
+| True Classic DPA | Requires Action | Limited | $12.30 | 2.15% | 4.8x |
+| PayPal Pay+ Activation | Paused | Optimizing | $6.20 | 3.95% | 4.2x |
+| Audible Free Trial | Draft | Draft | — | — | — |
+| Disney+ Bundle Upsell | Active | Optimizing | $6.10 | 3.85% | 4.6x |
+| Disney+ App Install | Active | Learning | $3.40 | 4.55% | 6.2x |
+| Capital One Venture Rewards | Active | Optimizing | $9.75 | 2.95% | 3.5x |
+| Capital One Travel Portal | Draft | Draft | — | — | — |
+| Hulu + Live TV Bundle | Paused | Optimizing | $11.20 | 2.10% | 2.3x |
+| True Classic Seasonal Sale | Active | Learning | $10.50 | 2.65% | 5.2x |
+| PayPal Business Solutions | Draft | Draft | — | — | — |
 
-All create/edit operations persist to mock data arrays and re-render the UI. Destructive actions show confirmation dialogs.
+**Campaign fields:** id, name, status, objective (CPA/ROAS), spend, budget, cpa, cpaTarget, copi, roas, conversions, impressions, clicks, ctr, cvr, integrationHealth (1–10), biddingState, adSets count, creatives count, trend array (8 points), trendDir (up/down/flat), dailySpend array (7 days), publishState, objectiveType, country, language, timezone, aiHealthScore.
 
-### 5.3 SVG Charts
+### Audiences (12)
 
-All charts are inline SVG with CSS custom property styling:
-- Rokt connector logo shape as data point markers (not standard circles)
-- Wine gradient fills for area charts
-- Animated line drawing (600ms)
-- Range switchers that actively filter displayed data
+Custom (3), Lookalike/LAL (3), Behavioral (3), Demographic (1), Starter (1), Experian (1). Sizes: 245K–31.2M. Match rates: 55%–94%.
 
-### 5.4 AI-Native Positioning
+### Creatives (8)
 
-AI is woven throughout the platform, not bolted on:
+Formats: Text (3), Benefits (1), Savings (2), Hero Image (1), Carousel (1). Each: id, name, format, campaign label, ctr, cvr, copi, plus detail object with title/body/cta/offer.
 
-| Feature | Location | Purpose |
-|---|---|---|
-| AI Hero Prompt | Campaign Builder Step 1 | NLP campaign creation from natural language |
-| ACE Engine | Creative Studio, Builder Step 4 | AI creative generation and enhancement |
-| AI Analysis | Campaign Full View | Performance insights with actionable suggestions |
-| Deep Dive Modal | Campaign Full View | Drill-down analysis with optimization opportunities |
-| AI Recommendations | Dashboard, Campaign sidebar | Prioritized suggestions with Apply/Dismiss |
-| Optimization Score | Dashboard | Account-level AI health gauge |
-| AI Copilot | Global drawer | Natural language commands and queries |
-| AI Readiness | Builder projections | Score indicating campaign setup quality |
-| Network Recommendations | Network Analyzer | AI-driven partner and budget suggestions |
-| Industry Benchmarks | Advertiser Profile | You vs industry comparison |
-| AI Audience Insights | Audience Detail | Audience optimization suggestions |
-| AI Creative Insights | Creative Detail | Performance analysis and fatigue detection |
-| AI Advertiser Insights | Advertiser Profile | Account-level pattern recognition |
+### Offers (6)
 
-### 5.5 Responsive Layout
+Types: Discount (2), Trial (1), Cashback (2), Free Shipping (1). Cost range: $0–$50.00.
 
-- Sidebar collapses at 1200px breakpoint (or manual toggle)
-- Content stacks at 900px
-- Mobile-friendly touch targets
-- Flexible grids with `auto-fill` and `minmax`
+### Experiments (4)
 
-### 5.6 Visual Polish
+Disney+ Creative A/B (Concluded, 97% sig), Capital One Audience Split (Running, 72%), Hulu MAB (Running, 58%), True Classic DPA vs Static (Draft).
 
-- Animated gradient mesh background on Dashboard
-- Mouse-tracking glow on cards
-- Staggered card entrance animations (60ms delay cascade)
-- Gradient text headings
-- Progress bar shimmer animation
-- Glassmorphism topbar (blur + saturate)
-- Builder dot grid pattern
-- Sparkline drop-shadow glow
-- Sidebar active glow effect
-- Confetti celebration on campaign launch
+### Measurement Groups (4)
+
+Disney+ Acquisition MG, Capital One Cards MG, Streaming Bundle MG, True Classic DPA MG — each with event type and attribution window.
+
+### Partners (8)
+
+Ticketmaster, Fanatics, Booking.com, StubHub, Grubhub, Shutterfly, Chewy, LiveNation — with category and monthly transaction volume.
+
+### Rokt-Specific Metrics
+
+| Metric | Definition |
+|---|---|
+| **CoPI** | Conversions per Impression — Rokt's North Star; combines CTR × CVR |
+| **CPA** | Cost per Acquisition — primary advertiser success metric |
+| **ROAS** | Return on Ad Spend — for revenue-objective campaigns |
+| **Integration Health / EMQ** | Event Match Quality — 1–10 score indicating signal coverage |
+| **Smart Bidding State** | Learning / Optimizing / Limited — ML model status |
+| **CVR** | Conversion Rate — post-click conversion rate |
+| **Ref. Rate (CTR)** | Referral Rate — click-through rate in the Transaction Moment |
 
 ---
 
-## 6. Mock Data
+## 24. CRUD Operations
 
-### 6.1 Campaigns (6)
+All create/edit operations mutate the in-memory data arrays and re-render the relevant view. Destructive operations require confirmation dialogs.
 
-| Campaign | Status | Objective | Spend | Budget | CPA | CoPI | ROAS | Bidding |
-|---|---|---|---|---|---|---|---|---|
-| Disney+ Spring Acquisition | Active | CPA | $42,150 | $75,000 | $5.82 | 4.12% | 5.1x | Optimizing |
-| Capital One Card Acquisition | Active | CPA | $31,200 | $50,000 | $8.45 | 3.21% | 3.8x | Optimizing |
-| Hulu Streaming Signup | Active | CPA | $18,700 | $25,000 | $9.14 | 2.84% | 2.9x | Learning |
-| True Classic DPA | Active | ROAS | $22,400 | $40,000 | $12.30 | 2.15% | 4.8x | Limited |
-| PayPal Pay+ Activation | Paused | CPA | $8,900 | $20,000 | $6.20 | 3.95% | 4.2x | Optimizing |
-| Audible Free Trial | Draft | CPA | $0 | $30,000 | — | — | — | Draft |
-
-### 6.2 Audiences (12)
-
-Custom (3), Lookalike (3), Behavioral (3), Demographic (1), Starter (1), Experian (1). Sizes range from 245K to 31.2M. Match rates from 55% to 94%.
-
-### 6.3 Creatives (8)
-
-Formats: Text, Benefits, Savings, Hero Image, Carousel. Linked to campaigns with CTR/CVR/CoPI performance data.
-
-### 6.4 Offers (6)
-
-Types: Discount (2), Trial (1), Cashback (2), Shipping (1). Costs from $0 to $50.
-
-### 6.5 Experiments (4)
-
-Disney+ Creative A/B (Concluded, 97% significance), Capital One Audience Split (Running), Hulu MAB Creative (Running), True Classic DPA vs Static (Draft).
-
-### 6.6 Partners (8)
-
-Ticketmaster, Fanatics, Booking.com, StubHub, Grubhub, Shutterfly, Chewy, LiveNation.
-
-### 6.7 Rokt-Specific Metrics
-
-| Metric | Definition | Tier |
-|---|---|---|
-| **CoPI** | Conversions per Impression — Rokt's North Star combining CTR x CVR | Hero |
-| **CPA** | Cost per Acquisition — primary advertiser success metric | Hero |
-| **ROAS** | Return on Ad Spend — for revenue-focused campaigns | Hero |
-| **EMQ** | Event Match Quality — integration health score 1-10 | Hero |
-| **Smart Bidding State** | Learning / Optimizing / Limited — ML model status | Diagnostic |
-| **CVR** | Conversion Rate — post-click conversion rate | Diagnostic |
-| **CTR** | Click-through Rate — engagement in Transaction Moment | Diagnostic |
+| Entity | Create | Edit | Delete / Archive | Duplicate |
+|---|---|---|---|---|
+| Campaign | Builder wizard (AI or manual) | Edit modal (name, budget, CPA target, status, objective, bid strategy) | Archive → status: 'archived' with confirmation | "Copy of..." prefix, resets to draft |
+| Audience | Build/LAL/Upload modals | Edit modal with rule builder + reach estimator | Delete with confirmation | Duplicate button in edit modal |
+| Creative | Builder Step 4 or Studio editor | Inline editor in Creative Studio | — | — |
+| Offer | Create Offer modal | Edit Offer modal | Delete with confirmation | — |
+| Experiment | New Experiment modal | Edit modal (draft only; view-only if running/concluded) | Delete with confirmation | — |
+| Measurement Group | Create Group modal | Detail modal config | — | — |
 
 ---
 
-## 7. Technical Architecture
+## 25. SVG Charts
 
-### 7.1 File Structure
+All charts are inline SVG with no external chart library:
+
+- **Spend Pacing (Dashboard):** Area chart with wine gradient fill, dashed projection line, dotted budget ceiling, Rokt connector symbol data points, live range switching.
+- **Campaign Spend (Detail):** Line chart with gradient fill, range switching, connector markers.
+- **Report Chart (Intelligence):** 3-line chart (spend/conversions/CPA) with compare mode overlay.
+- **Network Forecast (Network Analyzer):** 2 forecast charts with confidence bands (dashed ±10% bounds).
+- **Audience Composition:** Horizontal bar chart (age), segmented bar (gender), progress bars (device), table (geography).
+- **Optimization Score:** Semi-circle SVG gauge with animated stroke-dasharray on load.
+- **AI Readiness (Builder):** Circular ring gauge, animated via CSS transition.
+- **ACE Score (Creative Studio):** Circular arc gauge with live animation on keystroke.
+- **Bidding State (Campaign):** Learning phase progress bar + conversion counter.
+
+Chart line animation: `stroke-dasharray` drawn via CSS class `.chart-line-animate` with 600ms transition.
+
+---
+
+## 26. Public API (`RoktAds.*`)
+
+The IIFE returns a public object used by inline `onclick` handlers throughout `index.html` templates:
 
 ```
-rokt-ads-prototype/
-├── index.html       # ~910 lines — SPA shell, templates, view structure
-├── styles.css       # ~6,380 lines — Design tokens, components, animations, themes
-├── app.js           # ~6,550 lines — IIFE module, router, data, interactions
-├── PRD.md           # This document
-├── OP-COMPARISON.md # Competitive feature comparison
-├── PLAN.md          # Original design plan
-├── USER-FLOWS.md    # User flow specifications
-└── README.md        # Setup instructions
+RoktAds.navigate(view)          — Navigate to a view
+RoktAds.openModal(type, id)     — Open a modal
+RoktAds.closeModal()            — Close modal overlay
+RoktAds.toast(message, type)    — Show toast notification
+RoktAds.toggleTheme()           — Toggle dark/light mode
+RoktAds.toggleAIDrawer()        — Open/close AI Copilot drawer
+RoktAds.openCommandPalette()    — Open command palette
+RoktAds.switchAdvertiser(id)    — Switch to advertiser
+RoktAds.toggleFavorite(id)      — Toggle advertiser favorite
+RoktAds.toggleCampaignStatus(id) — Pause/resume campaign
+RoktAds.archiveCampaign(id)     — Archive with confirmation
+RoktAds.duplicateCampaign(id)   — Clone campaign as draft
+RoktAds.openDeepDive(id)        — Open Deep Dive modal
+RoktAds.selectCreative(id)      — Select creative in Studio
+RoktAds.updateCreativeAIScore() — Recompute ACE score
+RoktAds.generateVariants()      — Generate A/B creative variants
+RoktAds.enhanceCreative()       — Auto-enhance creative title
+RoktAds.insertAttr(attr)        — Insert dynamic attribute in editor
+RoktAds.sortReport(col)         — Sort report table by column
+RoktAds.switchIntelTab(tab)     — Switch Intelligence tab
+RoktAds.persistField(key, val)  — Update builderData field
+RoktAds.updateBuilderPreview()  — Re-render Step 4 live preview
+RoktAds.generateAICampaign()    — Fill builder from AI prompt
+RoktAds.nextBuilderStep()       — Advance builder step
+RoktAds.prevBuilderStep()       — Go back a builder step
+RoktAds.addAdSet()              — Add ad set to builder
+RoktAds.removeAdSet(idx)        — Remove ad set from builder
+RoktAds.selectBidStrategy(str)  — Set bid strategy in builder
+RoktAds.simulateImageUpload()   — Simulate image upload state
+RoktAds.createAudience()        — Save new audience from modal
+RoktAds.createLookalike()       — Save new LAL audience from modal
+RoktAds.createOffer()           — Save new offer from modal
+RoktAds.createExperiment()      — Save new experiment from modal
+RoktAds.confirmDelete(type, id) — Show delete confirmation
 ```
-
-### 7.2 Architecture Decisions
-
-| Decision | Rationale |
-|---|---|
-| **Zero dependencies** | Opens in any browser, no build step, no node_modules |
-| **IIFE module pattern** | Single `RoktAds` global namespace, clean public API |
-| **Hash-based routing** | SPA navigation without server config, supports sub-routes |
-| **CSS custom properties** | Enables dark/light mode toggle, themeable components |
-| **Vanilla JS** | Full control, no framework overhead, rapid prototyping |
-| **SVG charts** | Inline, no chart library dependency, styled with CSS vars |
-| **Mock data arrays** | CRUD operations mutate arrays and re-render, simulating persistence |
-
-### 7.3 Routing
-
-| Route | View |
-|---|---|
-| `#dashboard` | Command Center |
-| `#campaigns` | Campaign list + detail sidebar |
-| `#campaign/{id}` | Campaign full view |
-| `#builder` | Campaign builder wizard |
-| `#audiences` | Audience library |
-| `#audience/{id}` | Audience detail view |
-| `#creatives` | Creative Studio |
-| `#creative/{id}` | Creative detail view |
-| `#offers` | Offer catalog |
-| `#intelligence` | Reports + Experiments |
-| `#network-analyzer` | Network Analyzer & Forecaster |
-| `#measurement` | Measurement / Attribution |
-| `#advertiser-profile` | Advertiser Profile |
-| `#account` | Account / Settings |
-
-### 7.4 Public API (`RoktAds.*`)
-
-**Navigation:**
-- `navigate(view)` — Route to a view
-- `selectAdvertiser(id)` — Select advertiser and scope data
-- `switchAdvertiser()` — Return to advertiser picker
-
-**Campaigns:**
-- `openCampaignDetail(id)` — Open detail panel
-- `closeCampaignDetail()` — Close detail panel
-- `toggleCampaignStatus(id)` — Pause/resume
-- `duplicateCampaign(id)` — Duplicate with data mutation
-- `archiveCampaign(id)` — Archive with confirmation
-
-**Builder:**
-- `selectObjective(id)` — Select builder objective
-- `persistField(field, value)` — Write to builderData (dot notation)
-- `generateAICampaign()` — AI auto-fill all fields
-- `setBuilderMode(mode)` — 'autopilot' or 'advanced'
-- `selectBidStrategy(strategy)` — Set bid strategy
-- `addAdSet()` / `removeAdSet(idx)` — Manage ad sets
-- `updateBuilderPreview()` — Live-update preview panel
-
-**Entities:**
-- `editAudience(id)` / `editOffer(id)` / `editExperiment(id)` / `editMeasurementGroup(name)`
-- `selectCreative(id)` — Select in library
-- `insertAttr(attr)` — Insert dynamic attribute in creative editor
-
-**Intelligence:**
-- `switchIntelTab(tab)` — 'reports' or 'experiments'
-- `sortReport(col)` — Sort report table
-- `toggleCompare()` — Period-over-period comparison
-- `setGroupBy(dimension)` — Set reporting dimension
-
-**UI:**
-- `toast(msg, type)` — Show toast notification
-- `openModal(type, id?)` / `closeModal()` — Modal management
-- `toggleFilter(type, value)` / `applyFilter(type, value)` — Filter management
-- `confirmAction(action, callback)` — Confirmation dialog
-
----
-
-## 8. What Works vs. What's Mock
-
-### Interactive & Functional
-
-| Feature | Notes |
-|---|---|
-| All 18 views with routing | Hash-based, sub-routes for entities |
-| Advertiser picker + scoping | Full gate, favorites, recents, switcher |
-| Campaign CRUD (create/edit/pause/duplicate/archive) | Data mutations persist in session |
-| Campaign builder (both modes) | Full 5-step or 3-step flow |
-| Audience library with filtering | Type filters, search, all cards |
-| Build/LAL/Upload audience modals | Rule builder, reach estimator |
-| Creative Studio 3-panel editor | Live preview, format switching, attribute insertion |
-| Intelligence reports with sorting | Sortable columns, date range filtering |
-| Experiment management | Create, edit, apply winner |
-| Measurement EMQ dashboard | Gauge, identifiers, improvement cards |
-| Command palette (Cmd+K) | Fuzzy search across all entities |
-| 15+ keyboard shortcuts | Two-key combos with visual feedback |
-| AI Copilot chat | Context-aware mock responses |
-| Dark/light mode | Full CSS token swap, all components verified |
-| Toast notifications | Auto-dismiss with progress bar |
-| Responsive layout | Sidebar collapse, content stacking |
-| Entity detail views | Campaign, Audience, Creative full pages |
-| Notification dropdown | 4 items with navigation |
-
-### Mock / Not Implemented
-
-| Feature | Status |
-|---|---|
-| Backend persistence | Changes lost on page refresh |
-| Real data fetching / APIs | All data is hardcoded JavaScript objects |
-| Real AI responses | Copilot returns template responses |
-| Authentication / login | No auth flow |
-| File upload | Visual drop zone only |
-| API export / download | Modal opens but no actual export |
-| Real-time updates | Status bar numbers are static |
-| Collaborative features | No multi-user, no comments |
-| Permission system | All users see all data |
-| Undo/redo | No action history |
-| Drag-and-drop | No reordering support |
-| Full accessibility (a11y) | Semantic HTML and keyboard nav, but no ARIA roles or screen reader support |
-
----
-
-## 9. Design Rationale
-
-**Why dark mode default?** Rokt's brand is dark-first. Media buyers work long hours — dark mode reduces eye strain. Light mode available as override.
-
-**Why advertiser picker gate?** Ensures data context is always explicit. Prevents confusion about which advertiser's data is being viewed. Mirrors real multi-tenant ad platform patterns.
-
-**Why AI Hero prompt in builder?** Natural language campaign creation is the fastest path from intent to launch. The prompt demonstrates NLP-first design rather than form-first.
-
-**Why dual-mode builder?** Autopilot serves speed-oriented users and AI-managed campaigns (like Google PMax). Advanced mode serves power users who need full control. Both audiences are served without compromise.
-
-**Why master-detail for campaigns?** Reduces context switching. Media buyers compare campaigns while viewing details. The sliding panel keeps the list visible.
-
-**Why CoPI as North Star?** CoPI (Conversions per Impression) is unique to Rokt and combines engagement (CTR) and conversion (CVR) into a single metric. It deserves hero treatment throughout the UI.
-
-**Why a dedicated Measurement view?** EMQ is Rokt-unique and critical to campaign success. A dedicated view with gauge, identifier breakdown, and recommendations makes attribution health a first-class concern.
-
-**Why Rokt connector data points?** Brand reinforcement in every chart. The distinctive Rokt connector shape replaces generic circles, making every visualization unmistakably Rokt.
-
----
-
-## 10. Running the Prototype
-
-```bash
-cd rokt-ads-prototype/
-python3 -m http.server 8800
-# Open http://localhost:8800 in any browser
-```
-
-No build step. No dependencies. No configuration.
-
----
-
-*This PRD documents the complete state of the Rokt Ads prototype as of March 20, 2026. All features described above have been implemented and are interactive in the browser. The prototype serves as a design reference and vision artifact for Rokt's next-generation media buying platform.*
