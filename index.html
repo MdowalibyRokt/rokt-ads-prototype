@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
   <!-- ========== ADVERTISER PICKER GATE ========== -->
@@ -318,7 +318,7 @@
   <template id="tmpl-dashboard">
     <div class="view view-dashboard" style="padding:var(--space-5) var(--space-6)">
       <div class="kpi-strip">
-        <div class="kpi-card">
+        <div class="kpi-card" data-metric="spend" onclick="RoktAds.selectDashboardMetric('spend')">
           <div class="kpi-label">TOTAL SPEND</div>
           <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="123350">0</span></div>
           <div class="kpi-meta">
@@ -327,7 +327,7 @@
             <span class="kpi-period">vs last 7d</span>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" data-metric="conversions" onclick="RoktAds.selectDashboardMetric('conversions')">
           <div class="kpi-label">CONVERSIONS</div>
           <div class="kpi-value"><span class="kpi-number" data-target="16235">0</span></div>
           <div class="kpi-meta">
@@ -336,7 +336,7 @@
             <span class="kpi-period">vs last 7d</span>
           </div>
         </div>
-        <div class="kpi-card kpi-card--hero">
+        <div class="kpi-card kpi-card--hero" data-metric="copi" onclick="RoktAds.selectDashboardMetric('copi')">
           <div class="kpi-label">AVG CoPI <span class="kpi-badge">North Star</span></div>
           <div class="kpi-value"><span class="kpi-number" data-target="3.25">0</span><span class="kpi-suffix">%</span></div>
           <div class="kpi-meta">
@@ -345,7 +345,7 @@
             <span class="kpi-period">vs last 7d</span>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" data-metric="cpa" onclick="RoktAds.selectDashboardMetric('cpa')">
           <div class="kpi-label">AVG CPA</div>
           <div class="kpi-value"><span class="kpi-prefix">$</span><span class="kpi-number" data-target="8.38">0</span></div>
           <div class="kpi-meta">
@@ -354,7 +354,7 @@
             <span style="color:var(--warning)">↑ Above target</span>
           </div>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card" data-metric="roas" onclick="RoktAds.selectDashboardMetric('roas')">
           <div class="kpi-label">AVG ROAS</div>
           <div class="kpi-value"><span class="kpi-number" data-target="4.2">0</span><span class="kpi-suffix">x</span></div>
           <div class="kpi-meta">
@@ -370,7 +370,7 @@
           <!-- Spend Pacing -->
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Spend Pacing</h3>
+              <h3 class="card-title" id="pacingChartTitle">Spend Pacing</h3>
               <div class="filter-pills">
                 <button class="filter-pill active">7D</button>
                 <button class="filter-pill">30D</button>
@@ -937,6 +937,6 @@
     </div>
   </template>
 
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

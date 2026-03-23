@@ -495,6 +495,8 @@ const RoktAds = (() => {
     renderAIRecommendations();
     initCardGlow();
     initPacingTimeHorizon();
+    // Mark default selected KPI card
+    setTimeout(() => selectDashboardMetric(selectedDashboardMetric), 50);
   }
 
   function renderPortfolioDashboard() {
@@ -658,6 +660,99 @@ const RoktAds = (() => {
       <polyline points="${projStr}" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
       <polygon points="${fillStr}" fill="url(#spendGrad)"/>
       <polyline points="${actualStr}" fill="none" stroke="var(--beetroot)" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
+      ${dotSvg}
+      ${labelSvg}
+    `;
+  }
+
+  let selectedDashboardMetric = 'spend';
+
+  function selectDashboardMetric(metric) {
+    selectedDashboardMetric = metric;
+
+    // Update selected state on KPI cards
+    document.querySelectorAll('.kpi-card[data-metric]').forEach(card => {
+      card.classList.toggle('kpi-card--selected', card.dataset.metric === metric);
+    });
+
+    // Update chart title
+    const titleEl = document.getElementById('pacingChartTitle');
+    const titles = { spend: 'Spend Pacing', conversions: 'Conversions Trend', copi: 'CoPI Trend', cpa: 'CPA Trend', roas: 'ROAS Trend' };
+    if (titleEl) titleEl.textContent = titles[metric] || 'Trend';
+
+    // Per-metric chart configs
+    const configs = {
+      spend: {
+        color: 'var(--beetroot)',
+        gradId: 'metricGrad',
+        '7D':  { points: [[0,180],[100,160],[200,138],[300,118],[400,90]], proj: [[0,180],[100,155],[200,130],[300,108],[400,85],[500,62],[600,40],[700,18]], labels: ['Mon','Tue','Wed','Thu','Today','Sat','Sun'], topLabel: '$25K', budgetY: 20 },
+        '30D': { points: [[0,170],[175,140],[350,105],[525,72]], proj: [[0,170],[175,140],[350,105],[525,72],[700,30]], labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], topLabel: '$100K', budgetY: 15 },
+        'MTD': { points: [[0,175],[50,168],[100,160],[150,152],[200,142],[250,132],[300,120],[350,108],[400,96],[450,84],[500,72],[550,60],[600,50],[650,40],[700,30]], proj: null, labels: ['Mar 1','Mar 5','Mar 10','Mar 15','Mar 20'], topLabel: '$25K', budgetY: 15 },
+        'QTD': { points: [[0,175],[233,120],[466,65]], proj: [[0,175],[233,120],[466,65],[700,20]], labels: ['Jan','Feb','Mar','Apr (Proj)'], topLabel: '$300K', budgetY: 10 },
+      },
+      conversions: {
+        color: 'var(--positive)',
+        gradId: 'metricGrad',
+        '7D':  { points: [[0,175],[100,158],[200,140],[300,112],[400,85]], proj: [[0,175],[100,158],[200,140],[300,112],[400,85],[500,60],[600,38],[700,20]], labels: ['Mon','Tue','Wed','Thu','Today','Sat','Sun'], topLabel: '3K/day', budgetY: 18 },
+        '30D': { points: [[0,172],[175,135],[350,98],[525,65]], proj: [[0,172],[175,135],[350,98],[525,65],[700,28]], labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], topLabel: '20K', budgetY: 15 },
+        'MTD': { points: [[0,178],[100,165],[200,148],[300,125],[400,100],[500,78],[600,55],[700,35]], proj: null, labels: ['Mar 1','Mar 5','Mar 10','Mar 15','Mar 20'], topLabel: '16K', budgetY: 18 },
+        'QTD': { points: [[0,178],[233,118],[466,60]], proj: [[0,178],[233,118],[466,60],[700,18]], labels: ['Jan','Feb','Mar','Apr (Proj)'], topLabel: '50K', budgetY: 12 },
+      },
+      copi: {
+        color: 'var(--beetroot)',
+        gradId: 'metricGrad',
+        '7D':  { points: [[0,140],[100,132],[200,128],[300,118],[400,105]], proj: [[0,140],[100,132],[200,128],[300,118],[400,105],[500,92],[600,80],[700,68]], labels: ['Mon','Tue','Wed','Thu','Today','Sat','Sun'], topLabel: '4.5%', budgetY: 60 },
+        '30D': { points: [[0,155],[175,135],[350,115],[525,98]], proj: [[0,155],[175,135],[350,115],[525,98],[700,78]], labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], topLabel: '4.5%', budgetY: 55 },
+        'MTD': { points: [[0,148],[100,140],[200,132],[300,122],[400,112],[500,104],[600,96],[700,88]], proj: null, labels: ['Mar 1','Mar 5','Mar 10','Mar 15','Mar 20'], topLabel: '4.5%', budgetY: 58 },
+        'QTD': { points: [[0,160],[233,128],[466,98]], proj: [[0,160],[233,128],[466,98],[700,72]], labels: ['Jan','Feb','Mar','Apr (Proj)'], topLabel: '4.5%', budgetY: 55 },
+      },
+      cpa: {
+        color: 'var(--warning)',
+        gradId: 'metricGrad',
+        '7D':  { points: [[0,80],[100,85],[200,82],[300,90],[400,95]], proj: [[0,80],[100,85],[200,82],[300,90],[400,95],[500,98],[600,96],[700,92]], labels: ['Mon','Tue','Wed','Thu','Today','Sat','Sun'], topLabel: '$12', budgetY: 115 },
+        '30D': { points: [[0,75],[175,82],[350,90],[525,95]], proj: [[0,75],[175,82],[350,90],[525,95],[700,90]], labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], topLabel: '$12', budgetY: 115 },
+        'MTD': { points: [[0,78],[100,80],[200,84],[300,88],[400,92],[500,95],[600,92],[700,90]], proj: null, labels: ['Mar 1','Mar 5','Mar 10','Mar 15','Mar 20'], topLabel: '$12', budgetY: 115 },
+        'QTD': { points: [[0,72],[233,82],[466,92]], proj: [[0,72],[233,82],[466,92],[700,88]], labels: ['Jan','Feb','Mar','Apr (Proj)'], topLabel: '$12', budgetY: 115 },
+      },
+      roas: {
+        color: 'var(--positive)',
+        gradId: 'metricGrad',
+        '7D':  { points: [[0,130],[100,120],[200,115],[300,105],[400,90]], proj: [[0,130],[100,120],[200,115],[300,105],[400,90],[500,75],[600,62],[700,52]], labels: ['Mon','Tue','Wed','Thu','Today','Sat','Sun'], topLabel: '6x', budgetY: 45 },
+        '30D': { points: [[0,138],[175,120],[350,102],[525,88]], proj: [[0,138],[175,120],[350,102],[525,88],[700,70]], labels: ['Wk 1','Wk 2','Wk 3','Wk 4','Wk 5'], topLabel: '6x', budgetY: 45 },
+        'MTD': { points: [[0,132],[100,125],[200,118],[300,110],[400,102],[500,95],[600,88],[700,82]], proj: null, labels: ['Mar 1','Mar 5','Mar 10','Mar 15','Mar 20'], topLabel: '6x', budgetY: 45 },
+        'QTD': { points: [[0,140],[233,115],[466,90]], proj: [[0,140],[233,115],[466,90],[700,72]], labels: ['Jan','Feb','Mar','Apr (Proj)'], topLabel: '6x', budgetY: 45 },
+      },
+    };
+
+    const cfg = configs[metric] || configs.spend;
+    const range = pacingTimeRange;
+    const d = cfg[range] || cfg['7D'];
+    const color = cfg.color;
+
+    const svg = document.getElementById('pacingChartSvg');
+    if (!svg) return;
+
+    const actualStr = d.points.map(p => p.join(',')).join(' ');
+    const lastPoint = d.points[d.points.length - 1];
+    const fillStr = actualStr + ` ${lastPoint[0]},200 0,200`;
+    const projPoints = d.proj || d.points;
+    const projStr = projPoints.map(p => p.join(',')).join(' ');
+
+    // Place labels at equal intervals across 700px
+    const labelXs = [0, 100, 200, 300, 400, 500, 600].slice(0, d.labels.length);
+    const labelSvg = d.labels.map((l, i) => `<text x="${labelXs[i]||i*100}" y="196" fill="var(--text-tertiary)" font-size="9" font-family="var(--font-mono)">${l}</text>`).join('');
+    const dotSvg = d.points.map(p => `<use href="#roktDot" x="${p[0]-6}" y="${p[1]-6}" width="12" height="12" color="${color}"/>`).join('');
+
+    svg.innerHTML = `
+      <defs>
+        <symbol id="roktDot" viewBox="0 0 12 12"><path d="M0 10 L2.5 0 L5 10 L7.5 0 L10 10 L8.5 10 L7.5 3 L5 10 L2.5 3 L1.5 10 Z" fill="currentColor"/></symbol>
+        <linearGradient id="metricGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.25"/><stop offset="100%" stop-color="${color}" stop-opacity="0.02"/></linearGradient>
+      </defs>
+      <line x1="0" y1="${d.budgetY}" x2="700" y2="${d.budgetY}" stroke="var(--border)" stroke-width="1" stroke-dasharray="6,4"/>
+      <text x="705" y="${d.budgetY+4}" fill="var(--text-tertiary)" font-size="10" font-family="var(--font-mono)">${d.topLabel}</text>
+      <polyline points="${projStr}" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.4"/>
+      <polygon points="${fillStr}" fill="url(#metricGrad)"/>
+      <polyline points="${actualStr}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" class="chart-line-animate"/>
       ${dotSvg}
       ${labelSvg}
     `;
@@ -6845,6 +6940,7 @@ const RoktAds = (() => {
     deselectAllPartners,
     filterPartners,
     updatePacingChart,
+    selectDashboardMetric,
     renderPortfolioDashboard,
     renderAIAudienceSuggestions,
   };
